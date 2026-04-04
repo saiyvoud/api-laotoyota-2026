@@ -140,6 +140,7 @@ CREATE TABLE `Car` (
 CREATE TABLE `TimeFix` (
     `timefix_id` VARCHAR(36) NOT NULL,
     `timeId` VARCHAR(36) NOT NULL,
+    `branchId` VARCHAR(36) NULL,
     `zoneId` VARCHAR(36) NOT NULL,
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updatedAt` DATETIME(3) NOT NULL,
@@ -151,14 +152,12 @@ CREATE TABLE `TimeFix` (
 CREATE TABLE `Time` (
     `time_id` VARCHAR(36) NOT NULL,
     `time` VARCHAR(191) NOT NULL,
-    `date` VARCHAR(191) NOT NULL,
+    `date` VARCHAR(191) NULL,
     `timeStatus` BOOLEAN NOT NULL DEFAULT true,
-    `qty` INTEGER NOT NULL,
+    `qty` INTEGER NOT NULL DEFAULT 0,
     `createBy` VARCHAR(36) NULL,
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updatedAt` DATETIME(3) NOT NULL,
-    `branchBranch_id` VARCHAR(36) NULL,
-    `zoneZone_id` VARCHAR(36) NULL,
 
     PRIMARY KEY (`time_id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
@@ -167,9 +166,8 @@ CREATE TABLE `Time` (
 CREATE TABLE `Zone` (
     `zone_id` VARCHAR(36) NOT NULL,
     `zoneName` VARCHAR(191) NOT NULL,
-    `timeFix` VARCHAR(191) NOT NULL,
+    `timeFix` VARCHAR(191) NULL,
     `zoneStatus` BOOLEAN NOT NULL,
-    `branchId` VARCHAR(36) NULL,
     `createBy` VARCHAR(36) NULL,
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updatedAt` DATETIME(3) NOT NULL,
@@ -182,7 +180,8 @@ CREATE TABLE `Booking` (
     `booking_id` VARCHAR(36) NOT NULL,
     `userId` VARCHAR(36) NOT NULL,
     `carId` VARCHAR(36) NOT NULL,
-    `timefix_Id` VARCHAR(36) NOT NULL,
+    `timeId` VARCHAR(36) NOT NULL,
+    `day` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `remark` VARCHAR(191) NOT NULL,
     `code` VARCHAR(191) NULL,
     `bookingStatus` VARCHAR(191) NOT NULL DEFAULT 'await',
@@ -190,6 +189,7 @@ CREATE TABLE `Booking` (
     `createBy` VARCHAR(36) NULL,
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updatedAt` DATETIME(3) NOT NULL,
+    `timeFixTimefix_id` VARCHAR(36) NULL,
 
     PRIMARY KEY (`booking_id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
@@ -246,16 +246,10 @@ ALTER TABLE `Car` ADD CONSTRAINT `Car_userId_fkey` FOREIGN KEY (`userId`) REFERE
 ALTER TABLE `TimeFix` ADD CONSTRAINT `TimeFix_timeId_fkey` FOREIGN KEY (`timeId`) REFERENCES `Time`(`time_id`) ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
+ALTER TABLE `TimeFix` ADD CONSTRAINT `TimeFix_branchId_fkey` FOREIGN KEY (`branchId`) REFERENCES `Branch`(`branch_id`) ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
 ALTER TABLE `TimeFix` ADD CONSTRAINT `TimeFix_zoneId_fkey` FOREIGN KEY (`zoneId`) REFERENCES `Zone`(`zone_id`) ON DELETE RESTRICT ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE `Time` ADD CONSTRAINT `Time_branchBranch_id_fkey` FOREIGN KEY (`branchBranch_id`) REFERENCES `Branch`(`branch_id`) ON DELETE SET NULL ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE `Time` ADD CONSTRAINT `Time_zoneZone_id_fkey` FOREIGN KEY (`zoneZone_id`) REFERENCES `Zone`(`zone_id`) ON DELETE SET NULL ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE `Zone` ADD CONSTRAINT `Zone_branchId_fkey` FOREIGN KEY (`branchId`) REFERENCES `Branch`(`branch_id`) ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE `Booking` ADD CONSTRAINT `Booking_userId_fkey` FOREIGN KEY (`userId`) REFERENCES `User`(`user_id`) ON DELETE RESTRICT ON UPDATE CASCADE;
@@ -264,10 +258,13 @@ ALTER TABLE `Booking` ADD CONSTRAINT `Booking_userId_fkey` FOREIGN KEY (`userId`
 ALTER TABLE `Booking` ADD CONSTRAINT `Booking_carId_fkey` FOREIGN KEY (`carId`) REFERENCES `Car`(`car_id`) ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE `Booking` ADD CONSTRAINT `Booking_timefix_Id_fkey` FOREIGN KEY (`timefix_Id`) REFERENCES `TimeFix`(`timefix_id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE `Booking` ADD CONSTRAINT `Booking_timeId_fkey` FOREIGN KEY (`timeId`) REFERENCES `Time`(`time_id`) ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE `Booking` ADD CONSTRAINT `Booking_branchId_fkey` FOREIGN KEY (`branchId`) REFERENCES `Branch`(`branch_id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `Booking` ADD CONSTRAINT `Booking_timeFixTimefix_id_fkey` FOREIGN KEY (`timeFixTimefix_id`) REFERENCES `TimeFix`(`timefix_id`) ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE `BookingDetail` ADD CONSTRAINT `BookingDetail_bookingId_fkey` FOREIGN KEY (`bookingId`) REFERENCES `Booking`(`booking_id`) ON DELETE RESTRICT ON UPDATE CASCADE;

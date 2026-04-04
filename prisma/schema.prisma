@@ -154,31 +154,28 @@ model TimeFix {
 }
 
 model Time {
-  time_id         String    @id @default(uuid()) @db.VarChar(36)
-  time            String
-  date            String?
-  timeStatus      Boolean   @default(true)
-  qty             Int       @default(0)
-  createBy        String?   @db.VarChar(36)
-  createdAt       DateTime  @default(now())
-  updatedAt       DateTime  @updatedAt
-  timeFixes       TimeFix[]
-  bookings        Booking[]
-  zone            Zone?     @relation(fields: [zoneId], references: [zone_id])
-  zoneId     String?   @db.VarChar(36)
+  time_id     String    @id @default(uuid()) @db.VarChar(36)
+  time        String
+  date        String?
+  timeStatus  Boolean   @default(true)
+  qty         Int       @default(0)
+  createBy    String?   @db.VarChar(36)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  timeFixes   TimeFix[]
+  bookings    Booking[]
 }
 
 model Zone {
-  zone_id         String    @id @default(uuid()) @db.VarChar(36)
-  zoneName        String
-  timeFix         String?
-  zoneStatus      Boolean
-  createBy        String?   @db.VarChar(36)
-  createdAt       DateTime  @default(now())
-  updatedAt       DateTime  @updatedAt
-  Fix             Fix[]
-  Time            Time[]
-  timeFixes       TimeFix[]
+  zone_id    String    @id @default(uuid()) @db.VarChar(36)
+  zoneName   String
+  timeFix    String?
+  zoneStatus Boolean
+  createBy   String?   @db.VarChar(36)
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+  Fix        Fix[]
+  timeFixes  TimeFix[]
 }
 
 model Booking {
