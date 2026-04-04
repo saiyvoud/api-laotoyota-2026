@@ -15,11 +15,7 @@ export default class PromotionController {
                 search,
             } = req.query;
             const query = {};
-            // if (search)
-            //     query['OR'] = getSearchQuery(
-            //         ['title', 'detail'],
-            //         search
-            //     );
+        
             if (search)
                 query['OR'] = [
                     { title: { contains: search } },
