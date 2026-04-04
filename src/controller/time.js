@@ -133,7 +133,7 @@ export default class TimeController {
     }
     static async Insert(req, res) {
         try {
-            const { time, qty, } = req.body;
+            const { time, qty,date } = req.body;
             const validate = await ValidateData({ time, qty });
             if (validate.length > 0) {
                 return SendError(res, 400, EMessage.BadRequest, validate.join(','));
@@ -141,7 +141,7 @@ export default class TimeController {
 
             const data = await prisma.time.create({
                 data: {
-                    time, qty, createBy: req.user
+                    time, date, qty: parseInt(qty), createBy: req.user
                 }
             })
             return SendCreate(res, SMessage.Insert, data);
@@ -186,7 +186,7 @@ export default class TimeController {
 
             const data = await prisma.time.update({
                 data: {
-                    time, qty, createBy: req.employee
+                    time, qty,  createBy: req.employee
                 },
                 where: {
                     time_id: time_id
