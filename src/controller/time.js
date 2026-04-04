@@ -54,10 +54,7 @@ export default class TimeController {
                 },
                 skip: (parseInt(page) - 1) * parseInt(limit),
                 take: parseInt(limit),
-                include: {
-                    zone: true,
-                    // branch: true 
-                }
+               
             });
             if (!time) return SendError(res, 404, EMessage.NotFound);
             const count = await prisma.time.count({ where: query });
@@ -71,10 +68,7 @@ export default class TimeController {
         try {
             const data = await prisma.time.findMany({
                 where: { timeStatus: true },
-                include: {
-                    zone: true,
-                    // branch: true
-                }
+              
             });
             if (!data) return SendError(res, 404, EMessage.NotFound);
             return SendSuccess(res, SMessage.SelectAll, data);
@@ -88,10 +82,7 @@ export default class TimeController {
 
             const data = await prisma.time.findFirst({
                 where: { time_id: time_id },
-                include: {
-                    zone: true,
-                    // branch: true
-                }
+                
             });
             if (!data) return SendError(res, 404, EMessage.NotFound);
             return SendSuccess(res, SMessage.SelectOne, data)
@@ -120,8 +111,6 @@ export default class TimeController {
             const data = await prisma.timeFix.findMany({   // change time to timeFix
                 where: { branchId: branchId },
                 include: {
-                    zone: true,
-                    branch: true,
                     time: true            // new
                 }
             },);
