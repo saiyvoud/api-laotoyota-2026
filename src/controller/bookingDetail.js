@@ -1,6 +1,7 @@
 import { PrismaClient } from "@prisma/client";
 import { EMessage, SMessage } from "../service/message.js";
 import { SendError, SendSuccess } from "../service/response.js";
+import prisma from "../config/prima.js";
 
 export default class BookingDetailController {
     static async getAll(req, res) {

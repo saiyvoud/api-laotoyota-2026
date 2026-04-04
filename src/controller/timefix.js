@@ -1,6 +1,7 @@
 import { EMessage, SMessage } from "../service/message.js";
 import { SendCreate, SendError, SendSuccess } from "../service/response.js";
 import { ValidateData } from "../service/validate.js"
+import prisma from "../config/prima.js";
 export default class TimeFixController {
   static async SearchBy(req, res) {
     try {
