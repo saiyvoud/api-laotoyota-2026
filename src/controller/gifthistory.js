@@ -95,8 +95,8 @@ export default class GiftHistoryController {
             if (validate.length > 0) {
                 return SendError(res, 400, EMessage.BadRequest, validate.join(','));
             }
-            const user = await FindOneUser(userId); // ສ້າງຢູ່ໃນ service
-            const giftcardData = await FindOneGiftCard(giftcardId); // ສ້າງຢູ່ໃນ service
+            const user = await FindOneUser(userId);
+            const giftcardData = await FindOneGiftCard(giftcardId); 
             // ຕັດສະ stock
             const pointTotal = giftcardData.point * parseInt(amount)
             if (user.point < pointTotal) {
@@ -178,7 +178,23 @@ export default class GiftHistoryController {
     static async DeleteGifthistory(req, res) {
         try {
             const gifthistory_id = req.params.gifthistory_id;
+            const history = await prisma.giftHistory.findMany({ where: { gifthistory_id: gifthistory_id } })
+            const user = await prisma.user.findMany({
+                where: {
+                    user_id: history.userId
+                }
+            });
 
+            const check = await prisma.user.update({
+                data: {
+                    point:  user.point + history.total
+                }, where: {
+                    user_id: history.userId
+                }
+            })
+            if (!check) {
+                return SendError(res, 400, EMessage.NotFound);
+            }
             const data = await prisma.giftHistory.delete({ where: { gifthistory_id: gifthistory_id } })
             if (!data) return SendError(res, 404, EMessage.EDelete);
             return SendSuccess(res, SMessage.Delete, data)

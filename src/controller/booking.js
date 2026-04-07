@@ -243,8 +243,8 @@ export default class BookingController {
 
     static async Insert(req, res) {
         try {
-            const { userId, timeId, day, carId, remark, branchId } = req.body;
-            const validate = await ValidateData({ userId, day, timeId, carId, remark, branchId });
+            const { userId, timeId, day, carId, remark, branchId, totalPoint } = req.body;
+            const validate = await ValidateData({ userId, day, timeId, carId, remark, branchId, totalPoint });
             if (validate.length > 0) {
                 return SendError(res, 400, EMessage.BadRequest, validate.join(','));
             }
@@ -272,6 +272,7 @@ export default class BookingController {
                     carId: carId,
                     userId: userId,
                     branchId: branchId,
+                    totalPoint: parseInt(totalPoint),
                     day: new Date(day),
                 },
                 include: {
@@ -283,14 +284,27 @@ export default class BookingController {
             })
             const qtyData = await prisma.time.findUnique({ where: { time_id: timeId } })
             if (qtyData.qty > 0) {
-                await prisma.time.update({
-                    data: {
-                        qty: qtyData.qty - 1
-                    },
-                    where: {
-                        time_id: timeId
-                    }
-                })
+                if (qtyData.qty === 1) {
+                    await prisma.time.update({
+                        data: {
+                            qty: qtyData.qty - 1,
+                            timeStatus: false
+                        },
+                        where: {
+                            time_id: timeId
+                        }
+                    })
+                } else {
+                    await prisma.time.update({
+                        data: {
+                            qty: qtyData.qty - 1
+                        },
+                        where: {
+                            time_id: timeId
+                        }
+                    })
+                }
+
             } else {
                 await prisma.time.update({
                     data: {
@@ -337,6 +351,7 @@ export default class BookingController {
             return SendError(res, 500, EMessage.ServerInternal, error)
         }
     }
+
     static async UpdateBookingStatus(req, res) {
         try {
             const booking_id = req.params.booking_id;

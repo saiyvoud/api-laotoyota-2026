@@ -143,7 +143,7 @@ export const FindOneTime = async (timeId) => {
     return new Promise(async (resolve, reject) => {
         try {
 
-            const data = await prisma.time.findFirst({ where: { time_id: timeId } });
+            const data = await prisma.time.findFirst({ where: { time_id: timeId ,timeStatus: true } });
             if (!data) {
                 return reject(EMessage.NotFound);
             }

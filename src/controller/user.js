@@ -25,7 +25,54 @@ export default class UserController {
             return SendError(res, 500, EMessage.ServerInternal, error);
         }
     }
+    static async getAllUserGeneral(req, res) {
+        try {
+            const {
+                page = 1,
+                limit = 10,
+                search,
+                startDate,
+                endDate,
+                status
+            } = req.query;
+            const query = {};
+            
+            if (search) {
+                query.OR = [
+                    { username: { contains: search } },
+                    ...(!isNaN(search)
+                        ? [{ phoneNumber: Number(search) }]
+                        : [])
+                ];
+            }
 
+            if (startDate || endDate) {
+                query['createdAt'] = {};
+                if (startDate) query['createdAt']['gte'] = new Date(startDate);
+                if (endDate) query['createdAt']['lt'] = new Date(endDate);
+            }
+
+            if (status) {
+                query.role = status;
+            }
+
+            const user = await prisma.user.findMany({
+                where: query,
+                orderBy: {
+                    createdAt: 'desc',
+                    role: Role.general,
+                },
+                skip: (parseInt(page) - 1) * parseInt(limit),
+                take: parseInt(limit),
+            });
+            if (!user) return SendError(res, 404, EMessage.NotFound);
+            const count = await prisma.user.count({ where: query });
+            const totalPage = Math.ceil(count / parseInt(limit));
+            return SendSuccess(res, SMessage.SelectAll, { data: user, totalPage })
+        } catch (error) {
+            return SendError(res, 500, EMessage.ServerInternal, error);
+        }
+    }
     static async getAllUser(req, res) {
         try {
             const {

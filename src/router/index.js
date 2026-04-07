@@ -58,7 +58,7 @@ router.put("/promotion/update/:promotion_id", auth, PromotionController.UpdatePr
 router.delete("/promotion/delete/:promotion_id", auth, PromotionController.DeletePromotion);
 //---- time ----
 router.get("/time/selAll", auth, TimeController.SelectAll);
-// router.get("/time/search", auth, TimeController.SearchTime);
+router.get("/time/all", auth, TimeController.SelectAlls);
 router.get("/time/selBy/:branchId", auth, TimeController.SelectByBranch);
 router.get("/time/selOne/:time_id", auth, TimeController.SelectOne);
 router.get("/time/getAll", auth, TimeController.GetAllTime);

@@ -2,7 +2,7 @@ import { ValidateData } from "../service/validate.js"
 import { EMessage, SMessage, FixStatus } from "../service/message.js"
 import { SendError, SendCreate, SendSuccess } from "../service/response.js"
 import prisma from "../config/prima.js";
-import { FindOneBooking, FindOneZone } from "../service/service.js";
+import { FindOneBooking, FindOneUser, FindOneZone } from "../service/service.js";
 import { ExcelBuilder, ReportColumns } from "../service/excelBuilder.js";
 export default class FixController {
     static async SearchFix(req, res) {
@@ -181,7 +181,7 @@ export default class FixController {
                 return SendError(res, 400, EMessage.BadRequest, validate.join(','));
             }
             await FindOneBooking(bookingId);
-            await FindOneZone(zoneId); // ສ້າງໃນ service
+            await FindOneZone(zoneId);
 
             const data = await prisma.fix.create({
                 data: {
@@ -197,14 +197,14 @@ export default class FixController {
     static async UpdateFixSuccess(req, res) {
         try {
             const fix_id = req.params.fix_id;
-
             const { bookingId, zoneId, detailFix, kmLast, kmNext, fixCarPrice, carPartPrice, totalPrice } = req.body; // ເພີ່ມ fixCarPrice, carPartPrice
             const validate = await ValidateData({ bookingId, zoneId, kmLast, kmNext, fixCarPrice, carPartPrice, totalPrice }); // ຕເພີ່ມ fixCarPrice, carPartPrice
             if (validate.length > 0) {
                 return SendError(res, 400, EMessage.BadRequest, validate.join(','));
             }
-            await FindOneBooking(bookingId); // ສ້າງໃນ service
-            await FindOneZone(zoneId); // ສ້າງໃນ service 
+            const booking = await FindOneBooking(bookingId);
+            await FindOneZone(zoneId);
+            const user = await FindOneUser(booking.userId)
             const data = await prisma.fix.update({
                 data: {
                     bookingId, zoneId, detailFix,
@@ -217,8 +217,17 @@ export default class FixController {
                 }
             });
             if (!data) return SendError(res, 404, EMessage.EUpdate);
+            const update = await prisma.user.update({
+                data: {
+                    point: user.point + booking.point,
+                }, where: { user_id: booking.userId }
+            })
+            if (!update) {
+                SendError(res, 400, EMessage.EUpdate);
+            }
             return SendSuccess(res, SMessage.Update, data)
         } catch (error) {
+            console.log(error);
             return SendError(res, 500, EMessage.ServerInternal, error)
         }
     }

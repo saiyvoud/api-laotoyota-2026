@@ -76,6 +76,15 @@ export default class TimeController {
             return SendError(res, 500, EMessage.ServerInternal, error);
         }
     }
+    static async SelectAlls(req, res) {
+        try {
+            const data = await prisma.time.findMany();
+            if (!data) return SendError(res, 404, EMessage.NotFound);
+            return SendSuccess(res, SMessage.SelectAll, data);
+        } catch (error) {
+            return SendError(res, 500, EMessage.ServerInternal, error);
+        }
+    }
     static async SelectOne(req, res) {
         try {
             const time_id = req.params.time_id;

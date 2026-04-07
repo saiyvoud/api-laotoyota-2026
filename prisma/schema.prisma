@@ -22,7 +22,7 @@ model User {
   password        String
   role            String
   profile         String?
-  point           Int
+  point           Int           @default(0)
   province        String
   district        String
   village         String
@@ -79,11 +79,13 @@ model Service {
   serviceName    String
   description    String
   image          String
+  point          Int?
   createBy       String?         @db.VarChar(36)
   createdAt      DateTime        @default(now())
   updatedAt      DateTime        @updatedAt
   bookingDetails BookingDetail[]
 }
+
 
 model GiftCard {
   giftcard_id String        @id @default(uuid()) @db.VarChar(36)
@@ -105,6 +107,7 @@ model GiftHistory {
   giftcardId     String   @db.VarChar(36)
   giftcard       GiftCard @relation(fields: [giftcardId], references: [giftcard_id])
   amount         Int
+  point          Int?
   status         Boolean  @default(true) // 1 ລາງວັນ 2 ສະຖານະ 3 ປະຫວັດ 
   createBy       String?  @db.VarChar(36)
   createdAt      DateTime @default(now())
@@ -150,7 +153,6 @@ model TimeFix {
   zone       Zone      @relation(fields: [zoneId], references: [zone_id])
   createdAt  DateTime  @default(now())
   updatedAt  DateTime  @updatedAt
-  bookings   Booking[]
 }
 
 model Time {
@@ -189,16 +191,14 @@ model Booking {
   day               DateTime        @default(now())
   remark            String
   code              String?
+  totalPoint        Int?
   bookingStatus     String          @default("await")
   branchId          String          @db.VarChar(36)
   branch            Branch          @relation(fields: [branchId], references: [branch_id])
-  createBy          String?         @db.VarChar(36)
   createdAt         DateTime        @default(now())
   updatedAt         DateTime        @updatedAt
   Fix               Fix[]
   bookingDetails    BookingDetail[]
-  timeFix           TimeFix?        @relation(fields: [timeFixTimefix_id], references: [timefix_id])
-  timeFixTimefix_id String?         @db.VarChar(36)
 }
 
 model BookingDetail {
