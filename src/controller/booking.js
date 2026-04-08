@@ -339,7 +339,7 @@ export default class BookingController {
             await FindOneCar(carId);
             const data = await prisma.booking.update({
                 data: {
-                    timeId: timeId, day: day, carId: carId, remark, branchId, createBy: employee,
+                    timeId: timeId, day: day, carId: carId, remark, branchId,
                 },
                 where: {
                     booking_id: booking_id
@@ -364,7 +364,7 @@ export default class BookingController {
 
             const data = await prisma.booking.update({
                 data: {
-                    bookingStatus: bookingStatus, createBy: employee
+                    bookingStatus: bookingStatus, 
                 },
                 where: {
                     booking_id: booking_id
@@ -387,7 +387,7 @@ export default class BookingController {
             const data = await prisma.booking.updateMany({
                 data: {
                     remark: remark,
-                    bookingStatus: BookingStatus.cancel, createBy: req.employee
+                    bookingStatus: BookingStatus.cancel, 
                 },
                 where: {
                     booking_id: booking_id
