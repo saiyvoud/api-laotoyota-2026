@@ -243,8 +243,8 @@ export default class BookingController {
 
     static async Insert(req, res) {
         try {
-            const { userId, timeId, day, carId, remark, branchId, totalPoint } = req.body;
-            const validate = await ValidateData({ userId, day, timeId, carId, remark, branchId, totalPoint });
+            const { userId, timeId, day, carId, remark, branchId, } = req.body;
+            const validate = await ValidateData({ userId, day, timeId, carId, remark, branchId,});
             if (validate.length > 0) {
                 return SendError(res, 400, EMessage.BadRequest, validate.join(','));
             }
@@ -272,7 +272,7 @@ export default class BookingController {
                     carId: carId,
                     userId: userId,
                     branchId: branchId,
-                    totalPoint: parseInt(totalPoint),
+                    
                     day: new Date(day),
                 },
                 include: {

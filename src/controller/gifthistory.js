@@ -118,6 +118,7 @@ export default class GiftHistoryController {
                 data: {
                     userId: userId, giftcardId: giftcardId,
                     amount: parseInt(amount),
+                    total: parseInt(pointTotal),
                 }
             })
             return SendCreate(res, SMessage.Insert, data);
@@ -129,7 +130,6 @@ export default class GiftHistoryController {
     static async UpdateGifthistory(req, res) {
         try {
             const gifthistory_id = req.params.gifthistory_id;
-
             const { giftcardId, amount, } = req.body;
             const validate = await ValidateData({ giftcardId, amount });
             if (validate.length > 0) {

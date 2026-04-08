@@ -79,7 +79,6 @@ model Service {
   serviceName    String
   description    String
   image          String
-  point          Int?
   createBy       String?         @db.VarChar(36)
   createdAt      DateTime        @default(now())
   updatedAt      DateTime        @updatedAt
@@ -107,7 +106,7 @@ model GiftHistory {
   giftcardId     String   @db.VarChar(36)
   giftcard       GiftCard @relation(fields: [giftcardId], references: [giftcard_id])
   amount         Int
-  point          Int?
+  total          Int?
   status         Boolean  @default(true) // 1 ລາງວັນ 2 ສະຖານະ 3 ປະຫວັດ 
   createBy       String?  @db.VarChar(36)
   createdAt      DateTime @default(now())
@@ -191,7 +190,6 @@ model Booking {
   day               DateTime        @default(now())
   remark            String
   code              String?
-  totalPoint        Int?
   bookingStatus     String          @default("await")
   branchId          String          @db.VarChar(36)
   branch            Branch          @relation(fields: [branchId], references: [branch_id])
@@ -223,6 +221,7 @@ model Fix {
   fixCarPrice  Int?
   carPartPrice Int?
   totalPrice   Int?
+  totalPoint   Int?
   fixStatus    String   @default("padding")
   createBy     String?  @db.VarChar(36)
   createdAt    DateTime @default(now())

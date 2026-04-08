@@ -39,7 +39,7 @@ export default class ServiceController {
                 skip: (parseInt(page) - 1) * parseInt(limit),
                 take: parseInt(limit),
             });
-            
+
             if (!service) return SendError(res, 404, EMessage.NotFound);
             const count = await prisma.service.count({ where: query });
             const totalPage = Math.ceil(count / parseInt(limit));
@@ -71,8 +71,8 @@ export default class ServiceController {
     }
     static async Insert(req, res) {
         try {
-            const { serviceName, description,point } = req.body;
-            const validate = await ValidateData({ serviceName, description,point});
+            const { serviceName, description, } = req.body;
+            const validate = await ValidateData({ serviceName, description, });
             if (validate.length > 0) {
                 return SendError(res, 400, EMessage.BadRequest, validate.join(','));
             }
@@ -87,8 +87,8 @@ export default class ServiceController {
 
             const data = await prisma.service.create({
                 data: {
-                    serviceName, description, 
-                    image: img_url, point: parseInt(point), createBy: req.user
+                    serviceName, description,
+                    image: img_url, createBy: req.user
                 }
             })
             return SendCreate(res, SMessage.Insert, data);
@@ -100,7 +100,7 @@ export default class ServiceController {
     static async Updateservice(req, res) {
         try {
             const service_id = req.params.service_id;
-            const { serviceName, description,point } = req.body;
+            const { serviceName, description, } = req.body;
 
             // validate
             const validate = await ValidateData({ serviceName, description });
@@ -125,7 +125,7 @@ export default class ServiceController {
                     createBy: req.employee,
                     serviceName,
                     description,
-                    point: parseInt(point),
+
                     ...(img_url && { image: img_url }), // ถ้ามีรูปใหม่ค่อยอัพเดต
                 },
             });
@@ -161,7 +161,7 @@ export default class ServiceController {
             const exportData = data.map(item => ({
                 ServiceName: item.serviceName,
                 Description: item.description,
-                Point: item.point
+
             }));
             // เรียกใช้ ExcelBuilder
             return await ExcelBuilder.export(res, {
