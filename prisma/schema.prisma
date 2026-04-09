@@ -226,6 +226,4 @@ model Fix {
   createBy     String?  @db.VarChar(36)
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
-  zone         Zone?    @relation(fields: [zoneZone_id], references: [zone_id])
-  zoneZone_id  String?  @db.VarChar(36)
 }
