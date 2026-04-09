@@ -174,7 +174,6 @@ model Zone {
   createBy   String?   @db.VarChar(36)
   createdAt  DateTime  @default(now())
   updatedAt  DateTime  @updatedAt
-  Fix        Fix[]
   timeFixes  TimeFix[]
   bookings   Booking[]
 }
@@ -191,8 +190,8 @@ model Booking {
   remark         String
   code           String?
   bookingStatus  String          @default("await")
-  zoneId         String?          @db.VarChar(36)
-  zone           Zone?            @relation(fields: [zoneId], references: [zone_id])
+  zoneId         String?         @db.VarChar(36)
+  zone           Zone?           @relation(fields: [zoneId], references: [zone_id])
   branchId       String          @db.VarChar(36)
   branch         Branch          @relation(fields: [branchId], references: [branch_id])
   createdAt      DateTime        @default(now())
@@ -226,4 +225,5 @@ model Fix {
   createBy     String?  @db.VarChar(36)
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
+
 }
