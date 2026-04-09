@@ -214,7 +214,7 @@ export default class UserController {
     static async Register(req, res) {
         try {
             const { username, phoneNumber, password, province, district, village, email } = req.body;
-            // console.log(req.body);
+           
             const validate = await ValidateData({
                 username, phoneNumber,
                 password, province, district, village
@@ -226,7 +226,7 @@ export default class UserController {
             const checkPhoneNumber = await CheckPhoneNumber(phoneNumber); // ສ້າງຢູ່ service
             if (!checkPhoneNumber) return SendError(res, 404, EMessage.NotFound)
             const generatePassword = await EncryptData(password)
-            const randow = "LTS" + `${Math.floor(Math.random() * (100 - 1 + 1)) + 1}`;
+            const randow = "LTS" + `${Math.floor(Math.random() * (1000000 - 1 + 1)) + 1}`;
             const data = await prisma.user.create({
                 data: {
                     username,

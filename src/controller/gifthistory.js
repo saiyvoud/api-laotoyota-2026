@@ -175,16 +175,15 @@ export default class GiftHistoryController {
         }
     }
 
-    static async DeleteGifthistory(req, res) {
+   static async DeleteGifthistory(req, res) {
         try {
             const gifthistory_id = req.params.gifthistory_id;
-            const history = await prisma.giftHistory.findMany({ where: { gifthistory_id: gifthistory_id } })
-            const user = await prisma.user.findMany({
+            const history = await prisma.giftHistory.findUnique({ where: { gifthistory_id: gifthistory_id } })
+            const user = await prisma.user.findUnique({
                 where: {
                     user_id: history.userId
                 }
-            });
-
+            }); 
             const check = await prisma.user.update({
                 data: {
                     point:  user.point + history.total

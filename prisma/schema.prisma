@@ -85,7 +85,6 @@ model Service {
   bookingDetails BookingDetail[]
 }
 
-
 model GiftCard {
   giftcard_id String        @id @default(uuid()) @db.VarChar(36)
   name        String
@@ -143,28 +142,28 @@ model Car {
 }
 
 model TimeFix {
-  timefix_id String    @id @default(uuid()) @db.VarChar(36)
-  timeId     String    @db.VarChar(36)
-  time       Time      @relation(fields: [timeId], references: [time_id])
-  branch     Branch?   @relation(fields: [branchId], references: [branch_id])
-  branchId   String?   @db.VarChar(36)
-  zoneId     String    @db.VarChar(36)
-  zone       Zone      @relation(fields: [zoneId], references: [zone_id])
-  createdAt  DateTime  @default(now())
-  updatedAt  DateTime  @updatedAt
+  timefix_id String   @id @default(uuid()) @db.VarChar(36)
+  timeId     String   @db.VarChar(36)
+  time       Time     @relation(fields: [timeId], references: [time_id])
+  branch     Branch?  @relation(fields: [branchId], references: [branch_id])
+  branchId   String?  @db.VarChar(36)
+  zoneId     String   @db.VarChar(36)
+  zone       Zone     @relation(fields: [zoneId], references: [zone_id])
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
 }
 
 model Time {
-  time_id     String    @id @default(uuid()) @db.VarChar(36)
-  time        String
-  date        String?
-  timeStatus  Boolean   @default(true)
-  qty         Int       @default(0)
-  createBy    String?   @db.VarChar(36)
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
-  timeFixes   TimeFix[]
-  bookings    Booking[]
+  time_id    String    @id @default(uuid()) @db.VarChar(36)
+  time       String
+  date       String?
+  timeStatus Boolean   @default(true)
+  qty        Int       @default(0)
+  createBy   String?   @db.VarChar(36)
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+  timeFixes  TimeFix[]
+  bookings   Booking[]
 }
 
 model Zone {
@@ -177,26 +176,29 @@ model Zone {
   updatedAt  DateTime  @updatedAt
   Fix        Fix[]
   timeFixes  TimeFix[]
+  bookings   Booking[]
 }
 
 model Booking {
-  booking_id        String          @id @default(uuid()) @db.VarChar(36)
-  userId            String          @db.VarChar(36)
-  user              User            @relation(fields: [userId], references: [user_id])
-  carId             String          @db.VarChar(36)
-  car               Car             @relation(fields: [carId], references: [car_id])
-  timeId            String          @db.VarChar(36)
-  time              Time            @relation(fields: [timeId], references: [time_id])
-  day               DateTime        @default(now())
-  remark            String
-  code              String?
-  bookingStatus     String          @default("await")
-  branchId          String          @db.VarChar(36)
-  branch            Branch          @relation(fields: [branchId], references: [branch_id])
-  createdAt         DateTime        @default(now())
-  updatedAt         DateTime        @updatedAt
-  Fix               Fix[]
-  bookingDetails    BookingDetail[]
+  booking_id     String          @id @default(uuid()) @db.VarChar(36)
+  userId         String          @db.VarChar(36)
+  user           User            @relation(fields: [userId], references: [user_id])
+  carId          String          @db.VarChar(36)
+  car            Car             @relation(fields: [carId], references: [car_id])
+  timeId         String          @db.VarChar(36)
+  time           Time            @relation(fields: [timeId], references: [time_id])
+  day            DateTime        @default(now())
+  remark         String
+  code           String?
+  bookingStatus  String          @default("await")
+  zoneId         String          @db.VarChar(36)
+  zone           Zone            @relation(fields: [zoneId], references: [zone_id])
+  branchId       String          @db.VarChar(36)
+  branch         Branch          @relation(fields: [branchId], references: [branch_id])
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  Fix            Fix[]
+  bookingDetails BookingDetail[]
 }
 
 model BookingDetail {
@@ -211,8 +213,6 @@ model BookingDetail {
 
 model Fix {
   fix_id       String   @id @default(uuid()) @db.VarChar(36)
-  zoneId       String   @db.VarChar(36)
-  zone         Zone     @relation(fields: [zoneId], references: [zone_id])
   bookingId    String   @db.VarChar(36)
   booking      Booking  @relation(fields: [bookingId], references: [booking_id])
   detailFix    String?
@@ -226,4 +226,6 @@ model Fix {
   createBy     String?  @db.VarChar(36)
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
+  zone         Zone?    @relation(fields: [zoneZone_id], references: [zone_id])
+  zoneZone_id  String?  @db.VarChar(36)
 }

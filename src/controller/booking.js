@@ -2,7 +2,7 @@ import { ValidateData } from "../service/validate.js"
 import { BookingStatus, EMessage, SMessage } from "../service/message.js"
 import { SendError, SendCreate, SendSuccess } from "../service/response.js"
 import prisma from "../config/prima.js";
-import { FindOneTime, FindOneUser, FindOneService, FindOneCar, FindOneBooking, FindOneBranch } from "../service/service.js";
+import { FindOneTime, FindOneUser, FindOneService, FindOneCar, FindOneBooking, FindOneBranch, FindOneZone } from "../service/service.js";
 import NotificationController from "./notification.js";
 import { ExcelBuilder, ReportColumns } from "../service/excelBuilder.js";
 import firebaseAdmin from "../config/firebaseAdmin.js";
@@ -244,7 +244,7 @@ export default class BookingController {
     static async Insert(req, res) {
         try {
             const { userId, timeId, day, carId, remark, branchId, } = req.body;
-            const validate = await ValidateData({ userId, day, timeId, carId, remark, branchId,});
+            const validate = await ValidateData({ userId, day, timeId, carId, remark, branchId, });
             if (validate.length > 0) {
                 return SendError(res, 400, EMessage.BadRequest, validate.join(','));
             }
@@ -272,7 +272,7 @@ export default class BookingController {
                     carId: carId,
                     userId: userId,
                     branchId: branchId,
-                    
+
                     day: new Date(day),
                 },
                 include: {
@@ -327,18 +327,20 @@ export default class BookingController {
             const employee = req.employee;
             await FindOneBooking(booking_id);
 
-            const { timeId, carId, remark, day, branchId } = req.body;
+            const { timeId, carId, remark, day, branchId, zoneId } = req.body;
             console.log("body of update booking:", req.body);
 
-            const validate = await ValidateData({ timeId, carId, remark, day, branchId });
+            const validate = await ValidateData({ timeId, carId, remark, day, branchId, zoneId });
             if (validate.length > 0) {
                 return SendError(res, 400, EMessage.BadRequest, validate.join(','));
             }
             await FindOneBranch(branchId);
             await FindOneTime(timeId);
             await FindOneCar(carId);
+            await FindOneZone(zoneId);
             const data = await prisma.booking.update({
                 data: {
+                    zoneId: zoneId,
                     timeId: timeId, day: day, carId: carId, remark, branchId,
                 },
                 where: {
@@ -357,14 +359,25 @@ export default class BookingController {
             const booking_id = req.params.booking_id;
             const employee = req.employee;
             const { bookingStatus } = req.body;
+            const result = await FindOneBooking(booking_id);
             const checkBookingStatus = Object.values(BookingStatus);
             if (!checkBookingStatus.includes(bookingStatus)) {
                 return SendError(res, 400, EMessage.BadRequest)
             }
-
+            if (bookingStatus === BookingStatus.success) {
+                const insert = await prisma.timeFix.create({
+                    data: {
+                        timeId: result.timeId,
+                        zoneId: result.zoneId,
+                        branchId: result.branchId
+                    }
+                })
+                if (!insert) return SendError(res, 400, EMessage.BadRequest)
+                    
+            }
             const data = await prisma.booking.update({
                 data: {
-                    bookingStatus: bookingStatus, 
+                    bookingStatus: bookingStatus,
                 },
                 where: {
                     booking_id: booking_id
@@ -387,7 +400,7 @@ export default class BookingController {
             const data = await prisma.booking.updateMany({
                 data: {
                     remark: remark,
-                    bookingStatus: BookingStatus.cancel, 
+                    bookingStatus: BookingStatus.cancel,
                 },
                 where: {
                     booking_id: booking_id
