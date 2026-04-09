@@ -16,6 +16,7 @@ export default class BookingController {
                     car: true,
                     user: true,
                     time: true,
+                    zone: true,
                     branch: true
 
                 },
@@ -86,8 +87,8 @@ export default class BookingController {
                     car: true,
                     time: true,
                     user: true,
+                    zone: true,
                     branch: true,
-                    timeFix: true,
                     Fix: status === "success"
                         ? {
                             where: {
