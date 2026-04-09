@@ -64,7 +64,7 @@ export default class FixController {
                             branch: true,
                         },
                     },
-                    zone: true,
+                   
                 },
             });
             if (!fix) return SendError(res, 404, EMessage.NotFound);
@@ -110,7 +110,7 @@ export default class FixController {
                             branch: true,
                         },
                     },
-                    zone: true,
+                   
                 },
             });
             if (!data) return SendError(res, 404, EMessage.NotFound);
@@ -129,7 +129,7 @@ export default class FixController {
                 {
                     include: {
                         booking: true,
-                        zone: true,
+                       
                     },
                 }
             );
@@ -147,7 +147,7 @@ export default class FixController {
                 where: { fix_id: fix_id },
                 include: {
                     booking: true,
-                    zone: true,
+                   
                 },
             });
             if (!data) return SendError(res, 404, EMessage.NotFound);
