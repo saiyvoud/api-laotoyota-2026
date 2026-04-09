@@ -272,7 +272,6 @@ export default class BookingController {
                     carId: carId,
                     userId: userId,
                     branchId: branchId,
-
                     day: new Date(day),
                 },
                 include: {
@@ -373,7 +372,7 @@ export default class BookingController {
                     }
                 })
                 if (!insert) return SendError(res, 400, EMessage.BadRequest)
-                    
+
             }
             const data = await prisma.booking.update({
                 data: {

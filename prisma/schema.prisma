@@ -191,8 +191,8 @@ model Booking {
   remark         String
   code           String?
   bookingStatus  String          @default("await")
-  zoneId         String          @db.VarChar(36)
-  zone           Zone            @relation(fields: [zoneId], references: [zone_id])
+  zoneId         String?          @db.VarChar(36)
+  zone           Zone?            @relation(fields: [zoneId], references: [zone_id])
   branchId       String          @db.VarChar(36)
   branch         Branch          @relation(fields: [branchId], references: [branch_id])
   createdAt      DateTime        @default(now())
