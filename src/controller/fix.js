@@ -175,17 +175,17 @@ export default class FixController {
 
     static async Insert(req, res) {
         try {
-            const { bookingId, zoneId } = req.body;
-            const validate = await ValidateData({ bookingId, zoneId });
+            const { bookingId } = req.body;
+            const validate = await ValidateData({ bookingId });
             if (validate.length > 0) {
                 return SendError(res, 400, EMessage.BadRequest, validate.join(','));
             }
             await FindOneBooking(bookingId);
-            await FindOneZone(zoneId);
+           
 
             const data = await prisma.fix.create({
                 data: {
-                    bookingId: bookingId, zoneId: zoneId, createBy: req.employee
+                    bookingId: bookingId, createBy: req.employee
                 }
             })
             return SendCreate(res, SMessage.Insert, data);
@@ -197,8 +197,8 @@ export default class FixController {
     static async UpdateFixSuccess(req, res) {
         try {
             const fix_id = req.params.fix_id;
-            const { bookingId, zoneId, detailFix, kmLast, kmNext, fixCarPrice, carPartPrice, totalPrice } = req.body; // ເພີ່ມ fixCarPrice, carPartPrice
-            const validate = await ValidateData({ bookingId, zoneId, kmLast, kmNext, fixCarPrice, carPartPrice, totalPrice }); // ຕເພີ່ມ fixCarPrice, carPartPrice
+            const { bookingId,  detailFix, kmLast, kmNext, fixCarPrice, carPartPrice, totalPrice } = req.body; // ເພີ່ມ fixCarPrice, carPartPrice
+            const validate = await ValidateData({ bookingId,  kmLast, kmNext, fixCarPrice, carPartPrice, totalPrice }); // ຕເພີ່ມ fixCarPrice, carPartPrice
             if (validate.length > 0) {
                 return SendError(res, 400, EMessage.BadRequest, validate.join(','));
             }
@@ -207,7 +207,7 @@ export default class FixController {
             const user = await FindOneUser(booking.userId)
             const data = await prisma.fix.update({
                 data: {
-                    bookingId, zoneId, detailFix,
+                    bookingId,  detailFix,
                     kmLast: parseInt(kmLast), kmNext: parseInt(kmNext), fixCarPrice: parseInt(fixCarPrice), carPartPrice: parseInt(carPartPrice), totalPrice: parseInt(totalPrice), // ເພີ່ມ fixCarPrice, carPartPrice
                     fixStatus: FixStatus.success,
                     createBy: req.employee
@@ -235,8 +235,8 @@ export default class FixController {
         try {
             const fix_id = req.params.fix_id;
 
-            const { bookingId, zoneId } = req.body;
-            const validate = await ValidateData({ bookingId, zoneId });
+            const { bookingId,  } = req.body;
+            const validate = await ValidateData({ bookingId, });
             if (validate.length > 0) {
                 return SendError(res, 400, EMessage.BadRequest, validate.join(","))
             }
@@ -244,7 +244,7 @@ export default class FixController {
             await FindOneZone(zoneId); // ສ້າງໃນ service
             const data = await prisma.fix.update({
                 data: {
-                    zoneId, bookingId, createBy: req.employee
+                     bookingId, createBy: req.employee
                 }, where: { fix_id: fix_id }
             })
             if (!data) return SendError(res, 404, EMessage.EUpdate);
@@ -284,7 +284,6 @@ export default class FixController {
                 CarEngineNumber: item.booking.car.engineNumber,
                 CarFrameNumber: item.booking.car.frameNumber,
                 BranchName: item.booking.branch.branch_name,
-                Zone: item.booking.zone.zoneName,
                 Time: item.booking.time.time,
                 Date: item.booking.time.date,
                 DetailFix: item.detailFix,
