@@ -2,7 +2,7 @@ import { ValidateData } from "../service/validate.js"
 import { EMessage, SMessage, FixStatus } from "../service/message.js"
 import { SendError, SendCreate, SendSuccess } from "../service/response.js"
 import prisma from "../config/prima.js";
-import { FindOneBooking, FindOneUser, FindOneZone } from "../service/service.js";
+import { FindOneBooking, FindOneUser } from "../service/service.js";
 import { ExcelBuilder, ReportColumns } from "../service/excelBuilder.js";
 export default class FixController {
     static async SearchFix(req, res) {
@@ -203,7 +203,7 @@ export default class FixController {
                 return SendError(res, 400, EMessage.BadRequest, validate.join(','));
             }
             const booking = await FindOneBooking(bookingId);
-            await FindOneZone(zoneId);
+        
             const user = await FindOneUser(booking.userId)
             const data = await prisma.fix.update({
                 data: {
@@ -241,7 +241,7 @@ export default class FixController {
                 return SendError(res, 400, EMessage.BadRequest, validate.join(","))
             }
             await FindOneBooking(bookingId); // ສ້າງໃນ service
-            await FindOneZone(zoneId); // ສ້າງໃນ service
+          
             const data = await prisma.fix.update({
                 data: {
                      bookingId, createBy: req.employee
