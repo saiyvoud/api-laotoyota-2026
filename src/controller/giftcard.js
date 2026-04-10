@@ -86,7 +86,8 @@ export default class GiftCardController {
 
             const data = await prisma.giftCard.create({
                 data: {
-                    name, point: parseInt(point), amount: parseInt(amount), image: img_url, createBy: req.employee
+                    name, point: parseInt(point), amount: parseInt(amount), 
+                    image: img_url, createBy: req.employee
                 }
             })
             return SendCreate(res, SMessage.Insert, data);

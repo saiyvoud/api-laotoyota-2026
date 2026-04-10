@@ -88,7 +88,7 @@ model Service {
 model GiftCard {
   giftcard_id String        @id @default(uuid()) @db.VarChar(36)
   name        String
-  amount      Int // add
+  amount      Int 
   point       Int
   image       String
   status      Boolean       @default(true)

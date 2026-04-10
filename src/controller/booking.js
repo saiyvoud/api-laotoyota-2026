@@ -474,12 +474,22 @@ export default class BookingController {
     }
     static async DeleteBooking(req, res) {
         try {
-            const booking_id = req.params.booking_id;
-
-            const data = await prisma.booking.delete({ where: { booking_id: booking_id } })
-            if (!data) return SendError(res, 404, EMessage.EDelete);
+           const { booking_id } = req.params;
+            await prisma.$transaction(async (tx) => {
+            // 2. ລຶບຂໍ້ມູນໃນ Table "ລູກ" ທີ່ອ້າງອີງຫາ booking_id ນີ້ກ່ອນ
+            // ປ່ຽນ 'bookingDetail' ເປັນຊື່ Table ທີ່ເຈົ້າມີໃນ Schema (ຖ້າມີຫຼາຍ Table ກໍຕ້ອງລຶບໃຫ້ໝົດ)
+            await tx.bookingDetail.deleteMany({
+                where: { bookingId: booking_id }
+            });
+            // 3. ຫຼັງຈາກລຶບ "ລູກ" ແລ້ວ ຈຶ່ງມາລຶບ "Booking" (ໂຕແມ່)
+            const deletedBooking = await tx.booking.delete({
+                where: { booking_id: booking_id }
+            });
+            return deletedBooking;
+        });
             return SendSuccess(res, SMessage.Delete, data)
         } catch (error) {
+            console.log(error);
             return SendError(res, 500, EMessage.ServerInternal, error)
         }
     }
