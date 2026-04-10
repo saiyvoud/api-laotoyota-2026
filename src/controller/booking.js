@@ -1,5 +1,5 @@
 import { ValidateData } from "../service/validate.js"
-import { BookingStatus, EMessage, SMessage } from "../service/message.js"
+import { BookingStatus, EMessage, FixStatus, SMessage } from "../service/message.js"
 import { SendError, SendCreate, SendSuccess } from "../service/response.js"
 import prisma from "../config/prima.js";
 import { FindOneTime, FindOneUser, FindOneService, FindOneCar, FindOneBooking, FindOneBranch, FindOneZone } from "../service/service.js";
@@ -50,36 +50,41 @@ export default class BookingController {
     static async getAllBooking(req, res) {
         try {
             const { page = 1, limit = 10, search, startDate, endDate, status } = req.query;
-             console.log("req.query:", req.query);
             const query = {};
-            if (search)
-                query['OR'] = [
-                    { car: { plateNumber: { contains: search } } },
-                    { car: { frameNumber: { contains: search } } },
-                ];
-                
 
+            // 1. Search Logic
+            if (search) {
+                query['OR'] = [
+                    { car: { plateNumber: { contains: search, mode: 'insensitive' } } },
+                    { car: { frameNumber: { contains: search, mode: 'insensitive' } } },
+                ];
+            }
+
+            // 2. Date Filter
             if (startDate || endDate) {
                 query['createdAt'] = {};
                 if (startDate) query['createdAt']['gte'] = new Date(startDate);
                 if (endDate) query['createdAt']['lt'] = new Date(endDate);
             }
+
+            // 3. Status Filter
             if (status) {
                 query['bookingStatus'] = status;
             }
-            if (status === BookingStatus.success) {
-                query['Fix'] = {
-                    some: {
-                        fixStatus: "padding"
-                    }
-                }
-            }
+
+            // 4. Special Case: Success (ກວດເຊັກຄ່າ enum ໃຫ້ດີ)
+            // ສົມມຸດວ່າ Fix status ທີ່ຖືກຕ້ອງແມ່ນ "pending"
+            // if (status === BookingStatus.success) {
+            //     query['Fix'] = {
+            //         some: {
+            //             fixStatus: FixStatus.padding  // ກວດຄືນວ່າ padding ຫຼື pending
+            //         }
+            //     };
+            // }
 
             const booking = await prisma.booking.findMany({
                 where: query,
-                orderBy: {
-                    createdAt: 'desc',
-                },
+                orderBy: { createdAt: 'desc' },
                 skip: (parseInt(page) - 1) * parseInt(limit),
                 take: parseInt(limit),
                 include: {
@@ -91,20 +96,80 @@ export default class BookingController {
                     Fix: status === BookingStatus.success
                         ? {
                             where: {
-                                fixStatus: "padding"
+                                fixStatus: FixStatus.padding
                             }
                         }
                         : true
                 },
             });
-            if (!booking) return SendError(res, 404, EMessage.NotFound);
+
             const count = await prisma.booking.count({ where: query });
             const totalPage = Math.ceil(count / parseInt(limit));
+
             return SendSuccess(res, SMessage.SelectAll, { data: booking, totalPage });
         } catch (error) {
-            return SendError(res, 500, EMessage.ServerInternal, error)
+            console.error("Error in getAllBooking:", error); // ສໍາຄັນຫຼາຍເພື່ອເບິ່ງ Error ແທ້ໆ
+            return SendError(res, 500, EMessage.ServerInternal, error.message);
         }
     }
+    // static async getAllBooking(req, res) {
+    //     try {
+    //         const { page = 1, limit = 10, search, startDate, endDate, status } = req.query;
+    //          console.log("req.query:", req.query);
+    //         const query = {};
+    //         if (search)
+    //             query['OR'] = [
+    //                 { car: { plateNumber: { contains: search } } },
+    //                 { car: { frameNumber: { contains: search } } },
+    //             ];
+
+
+    //         if (startDate || endDate) {
+    //             query['createdAt'] = {};
+    //             if (startDate) query['createdAt']['gte'] = new Date(startDate);
+    //             if (endDate) query['createdAt']['lt'] = new Date(endDate);
+    //         }
+    //         if (status) {
+    //             query['bookingStatus'] = status;
+    //         }
+    //         if (status === BookingStatus.success) {
+    //             query['Fix'] = {
+    //                 some: {
+    //                     fixStatus: "padding"
+    //                 }
+    //             }
+    //         }
+
+    //         const booking = await prisma.booking.findMany({
+    //             where: query,
+    //             orderBy: {
+    //                 createdAt: 'desc',
+    //             },
+    //             skip: (parseInt(page) - 1) * parseInt(limit),
+    //             take: parseInt(limit),
+    //             include: {
+    //                 car: true,
+    //                 time: true,
+    //                 user: true,
+    //                 zone: true,
+    //                 branch: true,
+    //                 // Fix: status === BookingStatus.success
+    //                 //     ? {
+    //                 //         where: {
+    //                 //             fixStatus: "padding"
+    //                 //         }
+    //                 //     }
+    //                 //     : true
+    //             },
+    //         });
+    //         if (!booking) return SendError(res, 404, EMessage.NotFound);
+    //         const count = await prisma.booking.count({ where: query });
+    //         const totalPage = Math.ceil(count / parseInt(limit));
+    //         return SendSuccess(res, SMessage.SelectAll, { data: booking, totalPage });
+    //     } catch (error) {
+    //         return SendError(res, 500, EMessage.ServerInternal, error)
+    //     }
+    // }
     static async getAllBookingByBranch(req, res) {
         try {
             const branchId = req.params.branch_id;
