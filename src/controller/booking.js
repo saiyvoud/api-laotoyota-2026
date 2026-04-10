@@ -50,15 +50,14 @@ export default class BookingController {
     static async getAllBooking(req, res) {
         try {
             const { page = 1, limit = 10, search, startDate, endDate, status } = req.query;
-            // console.log("req.query:", req.query);
+             console.log("req.query:", req.query);
             const query = {};
             if (search)
                 query['OR'] = [
                     { car: { plateNumber: { contains: search } } },
                     { car: { frameNumber: { contains: search } } },
-
                 ];
-
+                
 
             if (startDate || endDate) {
                 query['createdAt'] = {};
@@ -68,7 +67,7 @@ export default class BookingController {
             if (status) {
                 query['bookingStatus'] = status;
             }
-            if (status === "success") {
+            if (status === BookingStatus.success) {
                 query['Fix'] = {
                     some: {
                         fixStatus: "padding"
@@ -89,7 +88,7 @@ export default class BookingController {
                     user: true,
                     zone: true,
                     branch: true,
-                    Fix: status === "success"
+                    Fix: status === BookingStatus.success
                         ? {
                             where: {
                                 fixStatus: "padding"
