@@ -197,8 +197,8 @@ export default class FixController {
     static async UpdateFixSuccess(req, res) {
         try {
             const fix_id = req.params.fix_id;
-            const { bookingId,  detailFix, kmLast, kmNext, fixCarPrice, carPartPrice, totalPrice } = req.body; // ເພີ່ມ fixCarPrice, carPartPrice
-            const validate = await ValidateData({ bookingId,  kmLast, kmNext, fixCarPrice, carPartPrice, totalPrice }); // ຕເພີ່ມ fixCarPrice, carPartPrice
+            const { bookingId,  detailFix, kmLast, kmNext, fixCarPrice, carPartPrice, totalPrice,totalPoint } = req.body; // ເພີ່ມ fixCarPrice, carPartPrice
+            const validate = await ValidateData({ bookingId,  kmLast, kmNext, fixCarPrice, carPartPrice, totalPrice ,totalPoint }); // ຕເພີ່ມ fixCarPrice, carPartPrice
             if (validate.length > 0) {
                 return SendError(res, 400, EMessage.BadRequest, validate.join(','));
             }
@@ -210,6 +210,7 @@ export default class FixController {
                     bookingId,  detailFix,
                     kmLast: parseInt(kmLast), kmNext: parseInt(kmNext), fixCarPrice: parseInt(fixCarPrice), carPartPrice: parseInt(carPartPrice), totalPrice: parseInt(totalPrice), // ເພີ່ມ fixCarPrice, carPartPrice
                     fixStatus: FixStatus.success,
+                    totalPoint: parseInt(totalPoint),
                     createBy: req.employee
                 },
                 where: {
@@ -219,7 +220,7 @@ export default class FixController {
             if (!data) return SendError(res, 404, EMessage.EUpdate);
             const update = await prisma.user.update({
                 data: {
-                    point: user.point + booking.point,
+                    point: user.point + totalPoint,
                 }, where: { user_id: booking.userId }
             })
             if (!update) {
