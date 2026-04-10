@@ -6,8 +6,8 @@ export const Role = {
 }
 export const BookingStatus = {
   await: "await",
-  success: "success",
   fix: "fix",
+  success: "success",
   history: "history",
   cancel: "cancel",
 }

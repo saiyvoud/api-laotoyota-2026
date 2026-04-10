@@ -93,13 +93,7 @@ export default class BookingController {
                     user: true,
                     zone: true,
                     branch: true,
-                    Fix: status === BookingStatus.success
-                        ? {
-                            where: {
-                                fixStatus: FixStatus.padding
-                            }
-                        }
-                        : true
+                    Fix: true
                 },
             });
 
