@@ -234,6 +234,7 @@ export default class BookingController {
                     time: true,
                     user: true,
                     branch: true,
+                    zone: true,
                 }, where: { booking_id: booking_id }
             });
             if (!data) return SendError(res, 404, EMessage.NotFound);
@@ -252,6 +253,7 @@ export default class BookingController {
                     car: true,
                     time: true,
                     user: true,
+                    zone: true,
                     branch: true,
                 },
             });
