@@ -347,14 +347,13 @@ export default class UserController {
     static async UpdateUser(req, res) {
         try {
             const user_id = req.user; // ມາຈາກ token 
-            // console.log(req.body);
-            const { username, email, province, district, village, removeImage } = req.body;
+            const { username, email, province, district, village, } = req.body;
             const validate = await ValidateData({ username, province, district, village });
             if (validate.length > 0) {
                 return SendError(res, 400, EMessage.BadRequest, validate.join(","))
             }
             let img_url = null;
-            // check ຖ້າມີໄຟຣ
+    
             if (req.files && req.files.image) {
                 const image = req.files.image;
                 img_url = await UploadImageToCloud(image.data, image.mimetype);
@@ -371,7 +370,6 @@ export default class UserController {
                     district,
                     village,
                     ...(img_url && { profile: img_url }), // ຖ້າມີຮຼບຄ່ອຍອັບໂຫຼດໄຟຣ
-                    ...(removeImage && { profile: null }), // ຖ້າລົບຮູບ
                 },
                 where: {
                     user_id: user_id

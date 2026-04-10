@@ -22,7 +22,6 @@ router.post("/user/register", UserController.Register);
 router.post("/user/registerAdmin", auth, UserController.RegisterAdmin);
 router.post("/user/login", UserController.Login);
 router.post("/user/loginAdmin", UserController.LoginAdmin);
-
 router.get("/user/selAll", auth, UserController.SelectAll);
 router.get("/user/selOne/:user_id", auth, UserController.SelectOne);
 router.get("/user/search", auth, UserController.SearchUser);
