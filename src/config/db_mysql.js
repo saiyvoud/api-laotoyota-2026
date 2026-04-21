@@ -7,7 +7,7 @@ import mysql from "mysql";
 // });
 
 const connected = mysql.createConnection({
-  host: "46.137.225.18",
+  host: "54.255.223.5",
   port: 3306,
   user: "mysql",
   password: "Laotoyota123454321",
