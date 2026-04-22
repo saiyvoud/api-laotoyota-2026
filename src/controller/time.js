@@ -175,7 +175,6 @@ export default class TimeController {
     static async UpdateTime(req, res) {
         try {
             const time_id = req.params.time_id;
-
             const { time, qty } = req.body;
             const validate = await ValidateData({ time, qty });
             if (validate.length > 0) {
@@ -184,7 +183,7 @@ export default class TimeController {
 
             const data = await prisma.time.update({
                 data: {
-                    time, qty,  createBy: req.employee
+                    time, qty: parseInt(qty),  createBy: req.employee
                 },
                 where: {
                     time_id: time_id
