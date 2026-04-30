@@ -44,12 +44,12 @@ export const ReportColumns = {
         { header: "Location", key: "Location", width: 36 },
     ],
     car: [
-        { header: "frameNumber", key: "frameNumber", width: 36 },
-        { header: "plateNumber", key: "plateNumber", width: 36 },
-        { header: "model", key: "model", width: 36 },
-        { header: "engineNumber", key: "engineNumber", width: 36 },
-        { header: "province", key: "province", width: 36 },
-        { header: "color", key: "color", width: 36 },
+        { header: "FrameNumber", key: "FrameNumber", width: 36 },
+        { header: "PlateNumber", key: "PlateNumber", width: 36 },
+        { header: "Model", key: "Model", width: 36 },
+        { header: "EngineNumber", key: "EngineNumber", width: 36 },
+        { header: "Province", key: "Province", width: 36 },
+        { header: "Color", key: "Color", width: 36 },
     ],
     employee: [
         { header: "EmployeeCode", key: "EmployeeCode", width: 36 },

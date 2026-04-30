@@ -36,7 +36,7 @@ export default class UserController {
                 status
             } = req.query;
             const query = {};
-            
+
             if (search) {
                 query.OR = [
                     { username: { contains: search } },
@@ -214,7 +214,7 @@ export default class UserController {
     static async Register(req, res) {
         try {
             const { username, phoneNumber, password, province, district, village, email } = req.body;
-           
+
             const validate = await ValidateData({
                 username, phoneNumber,
                 password, province, district, village
@@ -353,7 +353,7 @@ export default class UserController {
                 return SendError(res, 400, EMessage.BadRequest, validate.join(","))
             }
             let img_url = null;
-    
+
             if (req.files && req.files.image) {
                 const image = req.files.image;
                 img_url = await UploadImageToCloud(image.data, image.mimetype);
@@ -386,8 +386,8 @@ export default class UserController {
         try {
             const user_id = req.user;
             if (!req.files || !req.files.image) {
-            return SendError(res, 400, EMessage.BadRequest, "Image file is required");
-        }
+                return SendError(res, 400, EMessage.BadRequest, "Image file is required");
+            }
             const image = req.files.image;
             const img_url = await UploadImageToCloud(image.data, image.mimetype);
             if (!img_url) {
@@ -618,6 +618,34 @@ export default class UserController {
         } catch (error) {
             return SendError(res, 500, EMessage.ServerInternal, error);
         }
+    }
+
+
+    static async ChangeCustomerPassword(req, res) {
+        try {
+            const user_id = req.params.customer_id;
+            const {  newPassword } = req.body;
+            const validate = await ValidateData({ newPassword });
+            if (validate.length > 0) {
+                return SendError(res, 400, EMessage.BadRequest, validate.join(","))
+            }
+            const user = await FindOneUser(user_id); // ສ້າງຢູ່ Serivce
+            const generatePassword = await EncryptData(newPassword);
+            const data = await prisma.user.update({
+                data: {
+                    password: generatePassword,
+                },
+                where: {
+                    user_id: user_id
+                }
+            });
+            if (!data) return SendError(res, 404, EMessage.EUpdate);
+            return SendSuccess(res, SMessage.Update)
+        } catch (error) {
+            console.log(error);
+            return SendError(res, 500, EMessage.ServerInternal, error)
+        }
+
     }
 
 

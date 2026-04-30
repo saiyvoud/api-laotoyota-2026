@@ -82,7 +82,7 @@ export default class CarController {
         try {
             const car_id = req.params.car_id;
 
-            const data = await prisma.car.findFirst({ where: { car_id: car_id } });
+            const data = await prisma.car.findFirst({ where: { car_id: car_id }, include: { user: true } });
             if (!data) return SendError(res, 404, EMessage.NotFound);
             return SendSuccess(res, SMessage.SelectOne, data)
         } catch (error) {
@@ -93,7 +93,7 @@ export default class CarController {
         try {
             const userId = req.params.userId;
 
-            const data = await prisma.car.findMany({ where: { userId: userId } });
+            const data = await prisma.car.findMany({ where: { userId: userId }, include: { user: true } });
             if (!data) return SendError(res, 404, EMessage.NotFound);
             return SendSuccess(res, SMessage.SelectBy, data)
         } catch (error) {
@@ -104,7 +104,7 @@ export default class CarController {
         try {
             const userId = req.params.userId;
 
-            const data = await prisma.car.findMany({ where: { userId: userId } });
+            const data = await prisma.car.findMany({ where: { userId: userId }, include: { user: true } });
             if (!data) return SendError(res, 404, EMessage.NotFound);
             return SendSuccess(res, SMessage.SelectBy, data)
         } catch (error) {
@@ -270,4 +270,6 @@ export default class CarController {
             return SendError(res, 500, EMessage.ServerInternal, error);
         }
     }
+
+
 }
