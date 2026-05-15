@@ -51,7 +51,6 @@ export default class BookingController {
         try {
             const { page = 1, limit = 10, search, startDate, endDate, status } = req.query;
             const query = {};
-
             // 1. Search Logic
             if (search) {
                 query['OR'] = [
@@ -99,7 +98,6 @@ export default class BookingController {
 
             const count = await prisma.booking.count({ where: query });
             const totalPage = Math.ceil(count / parseInt(limit));
-
             return SendSuccess(res, SMessage.SelectAll, { data: booking, totalPage });
         } catch (error) {
             console.error("Error in getAllBooking:", error); // ສໍາຄັນຫຼາຍເພື່ອເບິ່ງ Error ແທ້ໆ
@@ -215,6 +213,7 @@ export default class BookingController {
                     time: true,
                     user: true,
                     branch: true,
+                    Fix: true,
                 }
             });
             if (!data) return SendError(res, 404, EMessage.NotFound);
@@ -232,9 +231,42 @@ export default class BookingController {
                 include: {
                     car: true,
                     time: true,
-                    user: true,
+                    user: {
+                        select: {
+                            user_id: true,
+                            customer_number: true,
+                            username: true,
+                            email: true,
+                            phoneNumber: true,
+                            password: true,
+                            role: true,
+                            profile: true,
+                            point: true,
+                            province: true,
+                            district: true,
+                            village: true,
+                            coperate: true,
+                            corperate_name: true,
+                            gender: true,
+                            first_name: true,
+                            last_name: true,
+                            dob: true,
+                            ocupation: true,
+                            nationality: true,
+                            house: true,
+                            unit: true,
+                            street: true,
+                            pobox: true,
+                            address: true,
+                            deviceToken: true,
+                            createdAt: true,
+                            updatedAt: true,
+                            Card: true,
+                        }
+                    },
                     branch: true,
                     zone: true,
+                    Fix: true,
                 }, where: { booking_id: booking_id }
             });
             if (!data) return SendError(res, 404, EMessage.NotFound);
@@ -243,6 +275,7 @@ export default class BookingController {
             return SendError(res, 500, EMessage.ServerInternal, error);
         }
     }
+
     static async SelectByBranch(req, res) {
         try {
             const branchId = req.params.branch_id;
@@ -474,19 +507,19 @@ export default class BookingController {
     }
     static async DeleteBooking(req, res) {
         try {
-           const { booking_id } = req.params;
+            const { booking_id } = req.params;
             await prisma.$transaction(async (tx) => {
-            // 2. ລຶບຂໍ້ມູນໃນ Table "ລູກ" ທີ່ອ້າງອີງຫາ booking_id ນີ້ກ່ອນ
-            // ປ່ຽນ 'bookingDetail' ເປັນຊື່ Table ທີ່ເຈົ້າມີໃນ Schema (ຖ້າມີຫຼາຍ Table ກໍຕ້ອງລຶບໃຫ້ໝົດ)
-            await tx.bookingDetail.deleteMany({
-                where: { bookingId: booking_id }
+                // 2. ລຶບຂໍ້ມູນໃນ Table "ລູກ" ທີ່ອ້າງອີງຫາ booking_id ນີ້ກ່ອນ
+                // ປ່ຽນ 'bookingDetail' ເປັນຊື່ Table ທີ່ເຈົ້າມີໃນ Schema (ຖ້າມີຫຼາຍ Table ກໍຕ້ອງລຶບໃຫ້ໝົດ)
+                await tx.bookingDetail.deleteMany({
+                    where: { bookingId: booking_id }
+                });
+                // 3. ຫຼັງຈາກລຶບ "ລູກ" ແລ້ວ ຈຶ່ງມາລຶບ "Booking" (ໂຕແມ່)
+                const deletedBooking = await tx.booking.delete({
+                    where: { booking_id: booking_id }
+                });
+                return deletedBooking;
             });
-            // 3. ຫຼັງຈາກລຶບ "ລູກ" ແລ້ວ ຈຶ່ງມາລຶບ "Booking" (ໂຕແມ່)
-            const deletedBooking = await tx.booking.delete({
-                where: { booking_id: booking_id }
-            });
-            return deletedBooking;
-        });
             return SendSuccess(res, SMessage.Delete, data)
         } catch (error) {
             console.log(error);

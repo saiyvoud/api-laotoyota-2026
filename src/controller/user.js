@@ -38,11 +38,21 @@ export default class UserController {
             const query = {};
 
             if (search) {
+
                 query.OR = [
-                    { username: { contains: search } },
-                    ...(!isNaN(search)
-                        ? [{ phoneNumber: Number(search) }]
-                        : [])
+
+                    {
+                        username: {
+                            contains: search
+                        }
+                    },
+
+                    {
+                        phoneNumber: {
+                            contains: search
+                        }
+                    }
+
                 ];
             }
 
@@ -90,11 +100,21 @@ export default class UserController {
             //         search
             //     );
             if (search) {
+
                 query.OR = [
-                    { username: { contains: search } },
-                    ...(!isNaN(search)
-                        ? [{ phoneNumber: Number(search) }]
-                        : [])
+
+                    {
+                        username: {
+                            contains: search
+                        }
+                    },
+
+                    {
+                        phoneNumber: {
+                            contains: search
+                        }
+                    }
+
                 ];
             }
 
@@ -230,7 +250,7 @@ export default class UserController {
             const data = await prisma.user.create({
                 data: {
                     username,
-                    phoneNumber: parseInt(phoneNumber),
+                    phoneNumber: String(phoneNumber),
                     password: generatePassword,
                     province,
                     district,
@@ -249,6 +269,7 @@ export default class UserController {
             return SendError(res, 500, EMessage.ServerInternal, error)
         }
     }
+
     static async RegisterAdmin(req, res) {
         try {
             const { username, phoneNumber, password, province, district, village, email } = req.body;
@@ -268,7 +289,7 @@ export default class UserController {
             const data = await prisma.user.create({
                 data: {
                     username,
-                    phoneNumber: parseInt(phoneNumber),
+                    phoneNumber: String(phoneNumber),
                     password: generatePassword,
                     province,
                     district,
@@ -460,7 +481,7 @@ export default class UserController {
         try {
             const user_id = req.params.customer_id;
             const { username, phoneNumber, province, district, village, email } = req.body;
-            // console.log(req.body);
+            console.log(req.body);
             const validate = await ValidateData({ username, phoneNumber, province, district, village, });
             if (validate.length > 0) {
                 return SendError(res, 400, EMessage.BadRequest, validate.join(","))
@@ -468,7 +489,7 @@ export default class UserController {
             await FindOneUser(user_id); // ສ້າງຢູ່ Serivce
             const data = await prisma.user.update({
                 data: {
-                    username, phoneNumber: parseInt(phoneNumber), province, district, village, email: email || null,
+                    username, phoneNumber, province, district, village, email: email || null,
                 },
                 where: {
                     user_id: user_id
@@ -541,6 +562,7 @@ export default class UserController {
                 Province: item.province,
                 District: item.district,
                 Village: item.village,
+                Point: item.point
             }));
             // เรียกใช้ ExcelBuilder
             return await ExcelBuilder.export(res, {
@@ -553,37 +575,39 @@ export default class UserController {
             return SendError(res, 500, EMessage.ServerInternal, error);
         }
     }
-    static async ExportEmployee(req, res) {
-        try {
-            const { startDate, endDate } = req.query;
-            const query = {};
-            if (startDate || endDate) {
-                query['createdAt'] = {};
-                if (startDate) query['createdAt']['gte'] = new Date(startDate);
-                if (endDate) query['createdAt']['lt'] = new Date(endDate);
-            }
-            const data = await prisma.employee.findMany({ where: query });
-            if (!data) return SendError(res, 404, EMessage.NotFound);
-            const exportData = data.map(item => ({
-                Name: item.employee_name,
-                Position: item.position,
-                Branch: item.branch.branch_name,
-                PhoneNumber: item.user.phoneNumber,
-                Province: item.user.province,
-                District: item.user.district,
-                Village: item.user.village,
-            }));
-            // เรียกใช้ ExcelBuilder
-            return await ExcelBuilder.export(res, {
-                sheetName: "Employee Report",
-                columns: ReportColumns.employee,
-                data: exportData,
-                fileName: "employee-report.xlsx",
-            })
-        } catch (error) {
-            return SendError(res, 500, EMessage.ServerInternal, error);
-        }
-    }
+    // static async ExportEmployee(req, res) {
+    //     try {
+    //         const { startDate, endDate } = req.query;
+    //         const query = {};
+    //         if (startDate || endDate) {
+    //             query['createdAt'] = {};
+    //             if (startDate) query['createdAt']['gte'] = new Date(startDate);
+    //             if (endDate) query['createdAt']['lt'] = new Date(endDate);
+    //         }
+    //         const data = await prisma.employee.findMany({ where: query });
+    //         console.log(data);
+    //         if (!data) return SendError(res, 404, EMessage.NotFound);
+    //         const exportData = data.map(item => ({
+    //             Name: item.employee_name,
+    //             Position: item.position,
+    //             Branch: item.branch.branch_name,
+    //             PhoneNumber: item.user.phoneNumber,
+    //             Province: item.user.province,
+    //             District: item.user.district,
+    //             Village: item.user.village,
+    //         }));
+    //         // เรียกใช้ ExcelBuilder
+    //         return await ExcelBuilder.export(res, {
+    //             sheetName: "Employee Report",
+    //             columns: ReportColumns.employee,
+    //             data: exportData,
+    //             fileName: "employee-report.xlsx",
+    //         })
+    //     } catch (error) {
+    //         console.log(error);
+    //         return SendError(res, 500, EMessage.ServerInternal, error);
+    //     }
+    // }
     static async ExportAdmin(req, res) {
         try {
             const { startDate, endDate } = req.query;
@@ -624,7 +648,7 @@ export default class UserController {
     static async ChangeCustomerPassword(req, res) {
         try {
             const user_id = req.params.customer_id;
-            const {  newPassword } = req.body;
+            const { newPassword } = req.body;
             const validate = await ValidateData({ newPassword });
             if (validate.length > 0) {
                 return SendError(res, 400, EMessage.BadRequest, validate.join(","))

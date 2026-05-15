@@ -2,7 +2,7 @@ import { ValidateData } from "../service/validate.js"
 import { EMessage, SMessage } from "../service/message.js"
 import { SendError, SendCreate, SendSuccess } from "../service/response.js"
 import prisma from "../config/prima.js";
-import { FindOneUser, FindOneGiftCard, FindOneGiftHistory } from "../service/service.js";
+import { FindOneUser, FindOneGiftCard, FindOneGiftHistory, FindOneCard } from "../service/service.js";
 import { ExcelBuilder, ReportColumns } from "../service/excelBuilder.js";
 
 export default class GiftHistoryController {
@@ -15,7 +15,6 @@ export default class GiftHistoryController {
                 startDate,
                 endDate,
             } = req.query;
-            // console.log("req.query:", req.query);
             const query = {};
             // if (search)
             //     query['OR'] = getSearchQuery(
@@ -89,16 +88,16 @@ export default class GiftHistoryController {
     }
     static async Insert(req, res) {
         try {
-
-            const { userId, giftcardId, amount } = req.body;
-            const validate = await ValidateData({ userId, giftcardId, amount });
+            const { userId, giftcardId, cardId, amount } = req.body;
+            const validate = await ValidateData({ userId, giftcardId, cardId, amount });
             if (validate.length > 0) {
                 return SendError(res, 400, EMessage.BadRequest, validate.join(','));
             }
             const user = await FindOneUser(userId);
-            const giftcardData = await FindOneGiftCard(giftcardId); 
+            const giftcardData = await FindOneGiftCard(giftcardId);
+            const cardData = await FindOneCard(cardId);
             // ຕັດສະ stock
-            const pointTotal = giftcardData.point * parseInt(amount)
+            const pointTotal = giftcardData.gift_Point * parseInt(amount)
             if (user.point < pointTotal) {
                 return SendError(res, 400, "Point Not Enough")
             }
@@ -116,9 +115,15 @@ export default class GiftHistoryController {
 
             const data = await prisma.giftHistory.create({
                 data: {
-                    userId: userId, giftcardId: giftcardId,
+                    userId: userId,
+                    giftcardId: giftcardId,
+                    cardId: cardId,
+                    card_number: cardData.card_number,
+                    gift_Code: giftcardData.gift_Code,
                     amount: parseInt(amount),
                     total: parseInt(pointTotal),
+                    claimed_date: new Date(),
+                    createBy: req.employee_id
                 }
             })
             return SendCreate(res, SMessage.Insert, data);
@@ -175,7 +180,7 @@ export default class GiftHistoryController {
         }
     }
 
-   static async DeleteGifthistory(req, res) {
+    static async DeleteGifthistory(req, res) {
         try {
             const gifthistory_id = req.params.gifthistory_id;
             const history = await prisma.giftHistory.findUnique({ where: { gifthistory_id: gifthistory_id } })
@@ -183,10 +188,10 @@ export default class GiftHistoryController {
                 where: {
                     user_id: history.userId
                 }
-            }); 
+            });
             const check = await prisma.user.update({
                 data: {
-                    point:  user.point + history.total
+                    point: user.point + history.total
                 }, where: {
                     user_id: history.userId
                 }

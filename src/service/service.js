@@ -17,7 +17,7 @@ export const CheckPhoneNumber = async (phoneNumber) => {
     return new Promise(async (resolve, reject) => {
         try {
 
-            const data = await prisma.user.findFirst({ where: { phoneNumber: parseInt(phoneNumber) } });
+            const data = await prisma.user.findFirst({ where: { phoneNumber: String(phoneNumber) } });
             if (data) {
                 return reject("phoneNumber is already");
             }
@@ -31,7 +31,7 @@ export const FindByPhoneNumber = async (phoneNumber) => {
     return new Promise(async (resolve, reject) => {
         try {
 
-            const data = await prisma.user.findFirst({ where: { phoneNumber: parseInt(phoneNumber) } });
+            const data = await prisma.user.findFirst({ where: { phoneNumber: String(phoneNumber) } });
             if (!data) {
                 return reject(EMessage.NotFound);
             }
@@ -201,6 +201,20 @@ export const FindOneGiftHistory = async (gifthistory_id) => {
         try {
 
             const data = await prisma.giftHistory.findFirst({ where: { gifthistory_id: gifthistory_id } });
+            if (!data) {
+                return reject(EMessage.NotFound);
+            }
+            return resolve(data)
+        } catch (error) {
+            return reject(error)
+        }
+    })
+}
+export const FindOneCard = async (card_id) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+
+            const data = await prisma.card.findFirst({ where: { card_id: card_id } });
             if (!data) {
                 return reject(EMessage.NotFound);
             }

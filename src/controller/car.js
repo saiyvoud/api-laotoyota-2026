@@ -30,7 +30,6 @@ export default class CarController {
     static async getAllCar(req, res) {
         try {
             const { page = 1, limit = 10, search, startDate, endDate } = req.query;
-            // const { page = 1, limit = 2, search, startDate, endDate } = matchedData(req);
             const query = {};
 
             if (search) {

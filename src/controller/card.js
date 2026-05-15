@@ -4,22 +4,19 @@ import { SendError, SendCreate, SendSuccess } from "../service/response.js"
 import prisma from "../config/prima.js";
 import { FindOneUser } from "../service/service.js";
 import { UploadImageToCloud } from "../config/cloudinary.js";
+import { ExcelBuilder, ReportColumns } from "../service/excelBuilder.js";
 export default class CardController {
     static async getAllCard(req, res) {
         try {
-            const {
-                page = 1,
-                limit = 10,
-                search,
-                startDate,
-                endDate,
-            } = req.query;
+            const { page = 1, limit = 10, search, startDate, endDate, } = req.query;
             const query = {};
-            if (search)
-                query['OR'] = getSearchQuery(
-                    ['customer_number', 'card_number', 'vip_number'],
-                    search
-                );
+            if (search) {
+                query['OR'] = [
+                    { customer_number: { contains: search } },
+                    { card_number: { contains: search } },
+                    { vip_number: { contains: search } },
+                ];
+            }
 
             if (startDate || endDate) {
                 query['createdAt'] = {};
@@ -31,18 +28,23 @@ export default class CardController {
                 orderBy: {
                     createdAt: 'desc',
                 },
-                skip: (page - 1) * limit,
-                take: limit,
+                skip: (parseInt(page) - 1) * parseInt(limit),
+                take: parseInt(limit),
+                include: {
+                    user: true,
+                },
             });
             if (!card) return SendError(res, 404, EMessage.NotFound);
-            return SendSuccess(res, SMessage.GetAll, card, page, limit);
-            function getSearchQuery(columns, search) {
-                const searchQuery = {};
-                columns.forEach(column => {
-                    searchQuery[column] = { contains: search };
-                });
-                return searchQuery;
-            }
+            const count = await prisma.card.count({ where: query });
+            const totalPage = Math.ceil(count / limit);
+            return SendSuccess(res, SMessage.SelectAll, { data: card, totalPage });
+            // function getSearchQuery(columns, search) {
+            //     const searchQuery = {};
+            //     columns.forEach(column => {
+            //         searchQuery[column] = { contains: search };
+            //     });
+            //     return searchQuery;
+            // }
         } catch (error) {
             return SendError(res, 500, EMessage.ServerInternal, error);
         }
@@ -70,13 +72,13 @@ export default class CardController {
     }
     static async Insert(req, res) {
         try {
-            const { userId, customer_number, card_number, vip_number, discount } = req.body;
-            const validate = await ValidateData({ userId, customer_number, card_number, vip_number, discount });
+            const { userId, card_number, vip_number, discount } = req.body;
+            const validate = await ValidateData({ userId, card_number, vip_number, discount });
             if (validate.length > 0) {
                 return SendError(res, 400, EMessage.BadRequest, validate.join(','));
             }
-            await FindOneUser(userId);
-
+            const userData = await FindOneUser(userId);
+            const customer_number = userData.customer_number
             const data = await prisma.card.create({
                 data: {
                     userId, customer_number, card_number, vip_number, discount: parseInt(discount), createBy: req.employee
@@ -92,12 +94,13 @@ export default class CardController {
         try {
             const card_id = req.params.card_id;
 
-            const { userId, customer_number, card_number, vip_number, discount } = req.body;
-            const validate = await ValidateData({ userId, customer_number, card_number, vip_number, discount });
+            const { userId, card_number, vip_number, discount } = req.body;
+            const validate = await ValidateData({ userId, card_number, vip_number, discount });
             if (validate.length > 0) {
                 return SendError(res, 400, EMessage.BadRequest, validate.join(','));
             }
-            await FindOneUser(userId);
+            const userData = await FindOneUser(userId);
+            const customer_number = userData.customer_number
             const data = await prisma.card.update({
                 data: {
                     userId, customer_number, card_number, vip_number, discount: parseInt(discount), createBy: req.employee
@@ -116,12 +119,47 @@ export default class CardController {
     static async DeleteCard(req, res) {
         try {
             const card_id = req.params.card_id;
-
             const data = await prisma.card.delete({ where: { card_id: card_id } })
+            await prisma.giftHistory.deleteMany({ where: { card_id: id, } });
+            await prisma.card.delete({ where: { card_id: id, } });
             if (!data) return SendError(res, 404, EMessage.EDelete);
             return SendSuccess(res, SMessage.Delete, data)
         } catch (error) {
             return SendError(res, 500, EMessage.ServerInternal, error)
+        }
+    }
+
+
+    static async ExportCard(req, res) {
+        try {
+            const { startDate, endDate } = req.query;
+            const query = {};
+            if (startDate || endDate) {
+                query['createdAt'] = {};
+                if (startDate) query['createdAt']['gte'] = new Date(startDate);
+                if (endDate) query['createdAt']['lt'] = new Date(endDate);
+            }
+            const data = await prisma.card.findMany({
+                where: query,
+
+            });
+            if (!data) return SendError(res, 404, EMessage.NotFound);
+            const exportData = data.map(item => ({
+                cardNumber: item.card_number,
+                customerNumber: item.customer_number,
+                vipNumber: item.vip_number,
+                discount: item.discount
+            }));
+            // เรียกใช้ ExcelBuilder
+            return await ExcelBuilder.export(res, {
+                sheetName: "Card Report",
+                columns: ReportColumns.card,
+                data: exportData,
+                fileName: "card-report.xlsx",
+            })
+        } catch (error) {
+            console.log(error);
+            return SendError(res, 500, EMessage.ServerInternal, error);
         }
     }
 }

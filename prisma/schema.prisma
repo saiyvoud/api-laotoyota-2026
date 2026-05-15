@@ -14,26 +14,39 @@ datasource db {
 }
 
 model User {
-  user_id         String        @id @default(uuid()) @db.VarChar(36)
-  customer_number String
-  username        String
-  email           String?
-  phoneNumber     Int           @unique
-  password        String
-  role            String
-  profile         String?
-  point           Int           @default(0)
-  province        String
-  district        String
-  village         String
-  deviceToken     String?
-  createdAt       DateTime      @default(now())
-  updatedAt       DateTime      @updatedAt
-  GiftHistory     GiftHistory[]
-  Card            Card[]
-  Car             Car[]
-  booking         Booking[]
-  Employee        Employee[]
+  user_id String @id @default(uuid()) @db.VarChar(36)
+  customer_number String @unique @db.VarChar(10)
+  username String
+  email    String?
+  phoneNumber String  @db.VarChar(20)
+  password String
+  role     String
+  profile String?
+  point Int @default(0)
+  province String? @db.VarChar(5)
+  district String? @db.VarChar(30)
+  village  String? @db.VarChar(30)
+  coperate       String? @db.VarChar(1)
+  corperate_name String? @db.VarChar(100)
+  gender String? @db.VarChar(1)
+  first_name String? @db.VarChar(25)
+  last_name  String? @db.VarChar(25)
+  dob DateTime? @db.DateTime
+  ocupation String? @db.VarChar(40)
+  nationality String? @db.VarChar(20)
+  house String? @db.VarChar(5)
+  unit  String? @db.VarChar(5)
+  street String? @db.VarChar(30)
+  pobox String? @db.VarChar(10)
+  address String? @db.VarChar(70)
+  deviceToken String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  GiftHistory GiftHistory[]
+  Card        Card[]
+  Car         Car[]
+  booking     Booking[]
+  Employee    Employee[]
 }
 
 model Employee {
@@ -86,16 +99,17 @@ model Service {
 }
 
 model GiftCard {
-  giftcard_id String        @id @default(uuid()) @db.VarChar(36)
-  name        String
-  amount      Int 
-  point       Int
-  image       String
-  status      Boolean       @default(true)
-  createBy    String?       @db.VarChar(36)
-  createdAt   DateTime      @default(now())
-  updatedAt   DateTime      @updatedAt
-  GiftHistory GiftHistory[]
+  giftcard_id  String         @id @default(uuid()) @db.VarChar(36)
+  gift_Code    String         @unique @db.VarChar(3)
+  gift_Name    String?         @db.VarChar(10)
+  gift_Point   Float?
+  amount       Int
+  image        String
+  status       Boolean        @default(true)
+  createBy     String?        @db.VarChar(36)
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+  GiftHistory  GiftHistory[]
 }
 
 model GiftHistory {
@@ -104,26 +118,51 @@ model GiftHistory {
   user           User     @relation(fields: [userId], references: [user_id])
   giftcardId     String   @db.VarChar(36)
   giftcard       GiftCard @relation(fields: [giftcardId], references: [giftcard_id])
+  cardId         String  @db.VarChar(36)
+  card           Card    @relation(fields: [cardId], references: [card_id])
+  card_number    String  @db.VarChar(10)
+  gift_Code      String  @db.VarChar(3)
+  claimed_date   DateTime @db.DateTime
   amount         Int
   total          Int?
-  status         Boolean  @default(true) // 1 ລາງວັນ 2 ສະຖານະ 3 ປະຫວັດ 
+  status         Boolean  @default(true)
   createBy       String?  @db.VarChar(36)
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
 }
 
 model Card {
-  card_id         String   @id @default(uuid()) @db.VarChar(36)
-  userId          String   @db.VarChar(36)
-  user            User     @relation(fields: [userId], references: [user_id])
-  customer_number String
-  card_number     String
-  vip_number      String
-  discount        Int
-  createBy        String?  @db.VarChar(36)
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  card_id         String         @id @default(uuid()) @db.VarChar(36)
+  userId          String         @db.VarChar(36)
+  user            User           @relation(fields: [userId], references: [user_id])
+  customer_number String         @db.VarChar(10)
+  card_number     String         @unique @db.VarChar(10)
+  vip_number      String         @db.VarChar(5)
+  discount        Int?
+  card_type       String?        @db.VarChar(1)
+  goldIssued      DateTime?      @db.DateTime
+  received        String?        @db.VarChar(1)
+  issued_date     DateTime?      @db.DateTime
+  expiration_date DateTime?      @db.DateTime
+  plate_number    String?        @db.VarChar(10)
+  vehicle_model   String?        @db.VarChar(30)
+  color           String?        @db.VarChar(20)
+  frame_number    String?        @db.VarChar(30)
+  engine_number   String?        @db.VarChar(30)
+  active_point    Float?
+  total_point     Float?
+  running_part    Float?
+  running_labour  Float?
+  countCard       Decimal?       @db.Decimal(18, 0)
+  createBy        String?        @db.VarChar(36)
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+  GiftHistory     GiftHistory[]
+  Fix          Fix[]
 }
+
+
+
 
 model Car {
   car_id       String    @id @default(uuid()) @db.VarChar(36)
@@ -139,13 +178,15 @@ model Car {
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
   booking      Booking[]
+
 }
+
 model Setting {
-  setting_id       String    @id @default(uuid()) @db.VarChar(36)     
+  setting_id String   @id @default(uuid()) @db.VarChar(36)
   priceFix   Int // 1,000,000 / 100,000 = 10
   pricePart  Int // 500,000 / 50,000 = 10 20
-  createdAt    DateTime  @default(now())
-  updatedAt    DateTime  @updatedAt
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
 }
 
 model TimeFix {
@@ -224,13 +265,19 @@ model Fix {
   detailFix    String?
   kmLast       Int?
   kmNext       Int?
-  fixCarPrice  Int?
-  carPartPrice Int?
-  totalPrice   Int?
-  totalPoint   Int?
+  part_total     Int?
+  part_point     Float?
+  labour_total   Int?
+  labour_point   Float?
+  totalPrice     Int?
   fixStatus    String   @default("padding")
+  card_number    String   @db.VarChar(10)
+  card           Card     @relation(fields: [card_number], references: [card_number])
+  invoice_number String   @unique @db.VarChar(8)
+  invoice_date   DateTime? @db.DateTime
+  exchange_rate  Int?
+  payment_type   String?  @db.VarChar(10)
   createBy     String?  @db.VarChar(36)
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
-
 }

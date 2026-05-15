@@ -26,19 +26,13 @@ export default class FixController {
     }
     static async getAllFix(req, res) {
         try {
-            const {
-                page = 1,
-                limit = 10,
-                search,
-                startDate,
-                endDate,
-                status,
-            } = req.query;
+            const { page = 1, limit = 10, search, startDate, endDate, status, } = req.query;
             const query = {};
-            if (search)
+            if (search) {
                 query['OR'] = [
                     { detailFix: { contains: search } },
                 ];
+            }
 
             if (startDate || endDate) {
                 query['createdAt'] = {};
@@ -50,9 +44,7 @@ export default class FixController {
             }
             const fix = await prisma.fix.findMany({
                 where: query,
-                orderBy: {
-                    createdAt: 'desc',
-                },
+                orderBy: { createdAt: 'desc' },
                 skip: (parseInt(page) - 1) * parseInt(limit),
                 take: parseInt(limit),
                 include: {
@@ -64,7 +56,7 @@ export default class FixController {
                             branch: true,
                         },
                     },
-                   
+
                 },
             });
             if (!fix) return SendError(res, 404, EMessage.NotFound);
@@ -72,6 +64,7 @@ export default class FixController {
             const totalPage = Math.ceil(count / parseInt(limit));
             return SendSuccess(res, SMessage.SelectAll, { data: fix, totalPage });
         } catch (error) {
+            console.log(error);
             return SendError(res, 500, EMessage.ServerInternal, error);
         }
     }
@@ -110,7 +103,7 @@ export default class FixController {
                             branch: true,
                         },
                     },
-                   
+
                 },
             });
             if (!data) return SendError(res, 404, EMessage.NotFound);
@@ -129,7 +122,7 @@ export default class FixController {
                 {
                     include: {
                         booking: true,
-                       
+
                     },
                 }
             );
@@ -147,13 +140,45 @@ export default class FixController {
                 where: { fix_id: fix_id },
                 include: {
                     booking: true,
-                   
+
                 },
             });
             if (!data) return SendError(res, 404, EMessage.NotFound);
             return SendSuccess(res, SMessage.SelectOne, data)
         } catch (error) {
             return SendError(res, 500, EMessage.ServerInternal, error);
+        }
+    }
+
+
+    static async SelectFixByBooking(req, res) {
+        try {
+            const { bookingId } = req.params;
+            console.log(bookingId);
+
+            const data = await prisma.fix.findFirst({
+                where: {
+                    bookingId: bookingId,
+                },
+            });
+            if (!data) {
+                return SendError(res, 404, EMessage.NotFound);
+            }
+
+            return SendSuccess(
+                res,
+                SMessage.SelectOne,
+                data
+            );
+        } catch (error) {
+            console.log(error);
+
+            return SendError(
+                res,
+                500,
+                EMessage.ServerInternal,
+                error
+            );
         }
     }
 
@@ -175,17 +200,19 @@ export default class FixController {
 
     static async Insert(req, res) {
         try {
-            const { bookingId } = req.body;
-            const validate = await ValidateData({ bookingId });
+            const { bookingId, invoice_number, card_number } = req.body;
+            const validate = await ValidateData({ bookingId, invoice_number, card_number });
             if (validate.length > 0) {
                 return SendError(res, 400, EMessage.BadRequest, validate.join(','));
             }
             await FindOneBooking(bookingId);
-           
-
             const data = await prisma.fix.create({
                 data: {
-                    bookingId: bookingId, createBy: req.employee
+                    bookingId: bookingId,
+                    invoice_number,
+                    invoice_date: new Date(),
+                    card_number,
+                    createBy: req.employee,
                 }
             })
             return SendCreate(res, SMessage.Insert, data);
@@ -197,20 +224,27 @@ export default class FixController {
     static async UpdateFixSuccess(req, res) {
         try {
             const fix_id = req.params.fix_id;
-            const { bookingId,  detailFix, kmLast, kmNext, fixCarPrice, carPartPrice, totalPrice,totalPoint } = req.body; // ເພີ່ມ fixCarPrice, carPartPrice
-            const validate = await ValidateData({ bookingId,  kmLast, kmNext, fixCarPrice, carPartPrice, totalPrice ,totalPoint }); // ຕເພີ່ມ fixCarPrice, carPartPrice
+            const { bookingId, detailFix, kmLast, kmNext, labour_total, part_total, part_point, labour_point, card_number, exchange_rate, payment_type } = req.body; // ເພີ່ມ fixCarPrice, carPartPrice
+            const validate = await ValidateData({ bookingId, kmLast, kmNext }); // ຕເພີ່ມ fixCarPrice, carPartPrice
             if (validate.length > 0) {
                 return SendError(res, 400, EMessage.BadRequest, validate.join(','));
             }
             const booking = await FindOneBooking(bookingId);
-        
             const user = await FindOneUser(booking.userId)
             const data = await prisma.fix.update({
                 data: {
-                    bookingId,  detailFix,
-                    kmLast: parseInt(kmLast), kmNext: parseInt(kmNext), fixCarPrice: parseInt(fixCarPrice), carPartPrice: parseInt(carPartPrice), totalPrice: parseInt(totalPrice), // ເພີ່ມ fixCarPrice, carPartPrice
+                    bookingId, detailFix,
+                    kmLast: parseInt(kmLast),
+                    kmNext: parseInt(kmNext),
+                    labour_total: parseInt(labour_total || 0),
+                    part_total: parseInt(part_total || 0),
+                    part_point: parseInt(part_point || 0),
+                    labour_point: parseInt(labour_point || 0),
+                    totalPrice: parseInt(labour_total || 0) + parseInt(part_total || 0),
+                    card_number,
+                    exchange_rate: parseInt(exchange_rate || 0),
+                    payment_type,
                     fixStatus: FixStatus.success,
-                    totalPoint: parseInt(totalPoint),
                     createBy: req.employee
                 },
                 where: {
@@ -218,9 +252,10 @@ export default class FixController {
                 }
             });
             if (!data) return SendError(res, 404, EMessage.EUpdate);
+            const totalPoint = parseInt(labour_point || 0) + parseInt(part_point || 0);
             const update = await prisma.user.update({
                 data: {
-                    point: user.point + totalPoint,
+                    point: (user.point || 0) + totalPoint,
                 }, where: { user_id: booking.userId }
             })
             if (!update) {
@@ -236,16 +271,16 @@ export default class FixController {
         try {
             const fix_id = req.params.fix_id;
 
-            const { bookingId,  } = req.body;
+            const { bookingId, } = req.body;
             const validate = await ValidateData({ bookingId, });
             if (validate.length > 0) {
                 return SendError(res, 400, EMessage.BadRequest, validate.join(","))
             }
             await FindOneBooking(bookingId); // ສ້າງໃນ service
-          
+
             const data = await prisma.fix.update({
                 data: {
-                     bookingId, createBy: req.employee
+                    bookingId, createBy: req.employee
                 }, where: { fix_id: fix_id }
             })
             if (!data) return SendError(res, 404, EMessage.EUpdate);

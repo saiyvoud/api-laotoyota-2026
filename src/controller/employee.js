@@ -168,13 +168,23 @@ export default class EmployeeController {
                 if (startDate) query['createdAt']['gte'] = new Date(startDate);
                 if (endDate) query['createdAt']['lt'] = new Date(endDate);
             }
-            const data = await prisma.employee.findMany({ where: query });
+            const data = await prisma.employee.findMany({
+                where: query,
+                include: {
+                    user: true,
+                    branch: true
+                },
+            });
             if (!data) return SendError(res, 404, EMessage.NotFound);
             const exportData = data.map(item => ({
                 EmployeeCode: item.employee_code,
                 EmployeeName: item.employee_name,
                 Position: item.position,
                 Branch: item.branch.branch_name,
+                PhoneNumber: item.user.phoneNumber,
+                Province: item.user.province,
+                District: item.user.district,
+                Village: item.user.village,
             }));
             // เรียกใช้ ExcelBuilder
             return await ExcelBuilder.export(res, {

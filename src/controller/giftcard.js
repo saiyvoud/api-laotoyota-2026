@@ -20,10 +20,12 @@ export default class GiftCardController {
             //         ['name'],
             //         search
             //     );
-            if (search)
+            if (search) {
                 query['OR'] = [
-                    { name: { contains: search } },
+                    { gift_Name: { contains: search } },
+                    { gift_Code: { contains: search } },
                 ];
+            }
 
             if (startDate || endDate) {
                 query['createdAt'] = {};
@@ -70,8 +72,8 @@ export default class GiftCardController {
     }
     static async Insert(req, res) {
         try {
-            const { name, point, amount } = req.body;
-            const validate = await ValidateData({ name, point, amount });
+            const { gift_Name, gift_Point, amount } = req.body;
+            const validate = await ValidateData({ gift_Name, gift_Point, amount });
             if (validate.length > 0) {
                 return SendError(res, 400, EMessage.BadRequest, validate.join(','));
             }
@@ -84,10 +86,15 @@ export default class GiftCardController {
                 return SendError(res, 404, EMessage.EUpload)
             }
 
+            const random = "G" + `${Math.floor(Math.random() * (1000000 - 1 + 1)) + 1}`;
             const data = await prisma.giftCard.create({
                 data: {
-                    name, point: parseInt(point), amount: parseInt(amount), 
-                    image: img_url, createBy: req.employee
+                    gift_Name,
+                    gift_Code: random.toString(),
+                    gift_Point: parseInt(gift_Point),
+                    amount: parseInt(amount),
+                    image: img_url,
+                    createBy: req.employee
                 }
             })
             return SendCreate(res, SMessage.Insert, data);
@@ -100,8 +107,8 @@ export default class GiftCardController {
         try {
             const giftcard_id = req.params.giftcard_id;
 
-            const { name, point } = req.body;
-            const validate = await ValidateData({ name, point });
+            const { gift_Name, gift_Point, amount } = req.body;
+            const validate = await ValidateData({ gift_Name, gift_Point, amount });
             if (validate.length > 0) {
                 return SendError(res, 400, EMessage.BadRequest, validate.join(','));
             }
@@ -120,7 +127,7 @@ export default class GiftCardController {
                     giftcard_id: giftcard_id, createBy: req.employee
                 },
                 data: {
-                    name, point: parseInt(point), ...(img_url && { image: img_url })
+                    gift_Name, gift_Point: parseInt(gift_Point), amount: parseInt(amount), ...(img_url && { image: img_url })
                 },
             });
             if (!data) return SendError(res, 404, EMessage.EUpdate);
@@ -171,8 +178,8 @@ export default class GiftCardController {
             const data = await prisma.giftCard.findMany({ where: query });
             if (!data) return SendError(res, 404, EMessage.NotFound);
             const exportData = data.map(item => ({
-                name: item.name,
-                point: item.point,
+                name: item.gift_Name,
+                point: item.gift_Point,
                 amount: item.amount,
             }));
             // เรียกใช้ ExcelBuilder

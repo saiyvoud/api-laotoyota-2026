@@ -91,13 +91,12 @@ export const ReportColumns = {
     ],
     service: [
         { header: "ServiceName", key: "ServiceName", width: 36 },
-        { header: "ServiceDetail", key: "ServiceDetail", width: 36 },
+        { header: "ServiceDetail", key: "Description", width: 36 },
     ],
     time: [
         { header: "Time", key: "Time", width: 36 },
         { header: "Date", key: "Date", width: 36 },
-        { header: "Zone", key: "Zone", width: 36 },
-        { header: "Branch", key: "Branch", width: 36 },
+        { header: "Qty", key: "Qty", width: 36 },
         { header: "TimeStatus", key: "TimeStatus", width: 36 },
     ],
     customer: [
@@ -106,9 +105,11 @@ export const ReportColumns = {
         { header: "Province", key: "Province", width: 36 },
         { header: "District", key: "District", width: 36 },
         { header: "Village", key: "Village", width: 36 },
+        { header: "Point", key: "Point", width: 36 },
     ],
     employee: [
         { header: "EmployeeName", key: "EmployeeName", width: 36 },
+        { header: "EmployeeCode", key: "EmployeeCode", width: 36 },
         { header: "Position", key: "Position", width: 36 },
         { header: "Branch", key: "Branch", width: 36 },
         { header: "PhoneNumber", key: "PhoneNumber", width: 36 },
@@ -127,6 +128,12 @@ export const ReportColumns = {
         { header: "ZoneName", key: "ZoneName", width: 36 },
         { header: "TimeFix", key: "TimeFix", width: 36 },
         { header: "ZoneStatus", key: "ZoneStatus", width: 36 },
+    ],
+    card: [
+        { header: "CustomerNumber", key: "customerNumber", width: 36 },
+        { header: "CardNumber", key: "cardNumber", width: 36 },
+        { header: "VipNumber", key: "vipNumber", width: 36 },
+        { header: "Discount", key: "discount", width: 36 },
     ],
 
 

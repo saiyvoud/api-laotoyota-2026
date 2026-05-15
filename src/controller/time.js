@@ -232,7 +232,7 @@ export default class TimeController {
     }
     static async ExportTime(req, res) {
         try {
-            const { start, endDate } = req.query;
+            const { startDate, endDate } = req.query;
             const query = {};
             if (startDate || endDate) {
                 query['createdAt'] = {};
@@ -246,6 +246,7 @@ export default class TimeController {
             if (!data) return SendError(res, 404, EMessage.NotFound);
             const exportData = data.map(item => ({
                 Time: item.time,
+                Date: item.date,
                 Qty: item.qty,
                 TimeStatus: item.timeStatus
             }));
@@ -257,6 +258,7 @@ export default class TimeController {
                 fileName: "time-report.xlsx",
             })
         } catch (error) {
+            console.log(error);
             return SendError(res, 500, EMessage.ServerInternal, error);
         }
     }
