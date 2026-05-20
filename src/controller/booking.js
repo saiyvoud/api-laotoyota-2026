@@ -421,7 +421,6 @@ export default class BookingController {
             await FindOneBooking(booking_id);
 
             const { timeId, carId, remark, day, branchId, zoneId } = req.body;
-            console.log("body of update booking:", req.body);
 
             const validate = await ValidateData({ timeId, carId, remark, day, branchId, zoneId });
             if (validate.length > 0) {

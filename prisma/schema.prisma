@@ -23,7 +23,7 @@ model User {
   role     String
   profile String?
   point Int @default(0)
-  province String? @db.VarChar(5)
+  province String? @db.VarChar(30)
   district String? @db.VarChar(30)
   village  String? @db.VarChar(30)
   coperate       String? @db.VarChar(1)

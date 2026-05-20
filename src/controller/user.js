@@ -575,39 +575,7 @@ export default class UserController {
             return SendError(res, 500, EMessage.ServerInternal, error);
         }
     }
-    // static async ExportEmployee(req, res) {
-    //     try {
-    //         const { startDate, endDate } = req.query;
-    //         const query = {};
-    //         if (startDate || endDate) {
-    //             query['createdAt'] = {};
-    //             if (startDate) query['createdAt']['gte'] = new Date(startDate);
-    //             if (endDate) query['createdAt']['lt'] = new Date(endDate);
-    //         }
-    //         const data = await prisma.employee.findMany({ where: query });
-    //         console.log(data);
-    //         if (!data) return SendError(res, 404, EMessage.NotFound);
-    //         const exportData = data.map(item => ({
-    //             Name: item.employee_name,
-    //             Position: item.position,
-    //             Branch: item.branch.branch_name,
-    //             PhoneNumber: item.user.phoneNumber,
-    //             Province: item.user.province,
-    //             District: item.user.district,
-    //             Village: item.user.village,
-    //         }));
-    //         // เรียกใช้ ExcelBuilder
-    //         return await ExcelBuilder.export(res, {
-    //             sheetName: "Employee Report",
-    //             columns: ReportColumns.employee,
-    //             data: exportData,
-    //             fileName: "employee-report.xlsx",
-    //         })
-    //     } catch (error) {
-    //         console.log(error);
-    //         return SendError(res, 500, EMessage.ServerInternal, error);
-    //     }
-    // }
+
     static async ExportAdmin(req, res) {
         try {
             const { startDate, endDate } = req.query;
@@ -670,6 +638,42 @@ export default class UserController {
             return SendError(res, 500, EMessage.ServerInternal, error)
         }
 
+    }
+
+    static async ResetCutomerPassword(req, res) {
+        try {
+            const user_id = req.params.customer_id;
+            await FindOneUser(user_id);
+            if (!user_id) { return res.status(404).json({ success: false, message: "User not found" }); }
+            // ================= GENERATE TEMP PASSWORD =================
+            const temporaryPassword = Math.random().toString(36).slice(-8);
+            // ================= HASH PASSWORD =================
+            const generatePassword = await EncryptData(temporaryPassword)
+
+            // ================= UPDATE DATABASE =================
+            await prisma.user.update({
+                where: {
+                    user_id: user_id
+                },
+                data: {
+                    password: generatePassword
+                }
+            });
+
+            // ================= RETURN TEMP PASSWORD =================
+
+            return res.status(200).json({
+                success: true,
+                message: "Password reset successfully",
+                temporaryPassword
+            });
+        } catch (error) {
+            console.log(error);
+            return res.status(500).json({
+                success: false,
+                message: "Server Error"
+            });
+        }
     }
 
 

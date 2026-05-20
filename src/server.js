@@ -4,6 +4,7 @@ import cors from "cors";
 import router from "./router/index.js";
 import fileUpload from "express-fileupload";
 import bodyParser from "body-parser";
+import "./cron/deleteOldTimeFix.js";
 const app = express();
 // app.use(cors({
 //   origin: 'http://localhost:5173', // หรือ URL ของ frontend

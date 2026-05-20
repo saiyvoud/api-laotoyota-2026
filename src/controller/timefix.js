@@ -82,7 +82,7 @@ export default class TimeFixController {
     try {
       const data = await prisma.timeFix.findMany({
         include: {
-          zone: true, time: true, branch: true // new
+          zone: true, time: true, branch: true 
         }
       });
       if (!data.length) return SendError(res, 404, EMessage.NotFound);
