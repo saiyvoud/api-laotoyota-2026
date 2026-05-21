@@ -157,8 +157,7 @@ export default class UserController {
     static async SelectOne(req, res) {
         try {
             const user_id = req.params.user_id;
-
-            const data = await prisma.user.findFirst({ where: { user_id: user_id } });
+            const data = await prisma.user.findFirst({ where: { user_id: user_id }, include: { card: true } });
             if (!data) return SendError(res, 404, EMessage.NotFound);
             return SendSuccess(res, SMessage.SelectOne, data)
         } catch (error) {
@@ -234,18 +233,14 @@ export default class UserController {
     static async Register(req, res) {
         try {
             const { username, phoneNumber, password, province, district, village, email } = req.body;
-
-            const validate = await ValidateData({
-                username, phoneNumber,
-                password, province, district, village
-            });
-
+            const finalPassword = password || Math.random().toString(36).slice(-8);
+            const validate = await ValidateData({ username, phoneNumber, password: finalPassword, province, district, village });
             if (validate.length > 0) {
                 return SendError(res, 400, EMessage.BadRequest, validate.join(','))
             }
             const checkPhoneNumber = await CheckPhoneNumber(phoneNumber); // ສ້າງຢູ່ service
             if (!checkPhoneNumber) return SendError(res, 404, EMessage.NotFound)
-            const generatePassword = await EncryptData(password)
+            const generatePassword = await EncryptData(finalPassword)
             const randow = "LTS" + `${Math.floor(Math.random() * (1000000 - 1 + 1)) + 1}`;
             const data = await prisma.user.create({
                 data: {

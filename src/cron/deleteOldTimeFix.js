@@ -38,6 +38,7 @@ const parseDate = (date) => {
 // ================= CRON =================
 // PRODUCTION MODE
 // "0 0 * * *", // every day at 00:00
+// "*/10 * * * * *", // every day at 00:10
 cron.schedule("0 0 * * *", async () => {
     try {
         // ================= TODAY =================
@@ -68,6 +69,7 @@ cron.schedule("0 0 * * *", async () => {
                     timeId: { in: oldTimeIds }
                 }
             });
+            
 
         }
     } catch (error) {

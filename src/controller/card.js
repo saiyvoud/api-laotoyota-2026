@@ -72,7 +72,27 @@ export default class CardController {
     }
     static async Insert(req, res) {
         try {
-            const { userId, card_number, vip_number, discount } = req.body;
+            const {
+                userId,
+                card_number,
+                vip_number,
+                discount,
+                card_type,
+                goldIssued,
+                received,
+                issued_date,
+                expiration_date,
+                plate_number,
+                vehicle_model,
+                color,
+                frame_number,
+                engine_number,
+                active_point,
+                total_point,
+                running_part,
+                running_labour,
+                countCard,
+            } = req.body;
             const validate = await ValidateData({ userId, card_number, vip_number, discount });
             if (validate.length > 0) {
                 return SendError(res, 400, EMessage.BadRequest, validate.join(','));
@@ -81,7 +101,7 @@ export default class CardController {
             const customer_number = userData.customer_number
             const data = await prisma.card.create({
                 data: {
-                    userId, customer_number, card_number, vip_number, discount: parseInt(discount), createBy: req.employee
+                    userId, customer_number, card_number, vip_number, discount: parseInt(discount), card_type, goldIssued, received, issued_date, expiration_date, plate_number, vehicle_model, color, frame_number, engine_number, active_point: parseInt(active_point), total_point: parseInt(total_point), running_part: parseInt(running_part), running_labour: parseInt(running_labour), countCard: parseInt(countCard), createBy: req.employee
                 }
             })
             return SendCreate(res, SMessage.Insert, data);

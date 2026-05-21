@@ -419,9 +419,7 @@ export default class BookingController {
             const booking_id = req.params.booking_id;
             const employee = req.employee;
             await FindOneBooking(booking_id);
-
             const { timeId, carId, remark, day, branchId, zoneId } = req.body;
-
             const validate = await ValidateData({ timeId, carId, remark, day, branchId, zoneId });
             if (validate.length > 0) {
                 return SendError(res, 400, EMessage.BadRequest, validate.join(','));
