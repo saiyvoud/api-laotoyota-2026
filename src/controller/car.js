@@ -110,52 +110,7 @@ export default class CarController {
             return SendError(res, 500, EMessage.ServerInternal, error);
         }
     }
-    // static async Insert(req, res) {
-    //     try {
-    //         const { userId, model, frameNumber, engineNumber, plateNumber, province, color } = req.body;
-    //         // console.log("Inserting car:", { userId });
-    //         console.log("car body : ",req.body);
-    //         const validate = await ValidateData({ userId, model, frameNumber, engineNumber, plateNumber, province, color });
-    //         if (validate.length > 0) {
-    //             return SendError(res, 400, EMessage.BadRequest, validate.join(','));
-    //         }
-    //         await FindOneUser(userId);
 
-    //         const data = await prisma.car.create({
-    //             data: {
-    //                 userId, model, frameNumber, engineNumber, plateNumber, province, color, createBy: req.employee
-    //             }
-    //         })
-    //         return SendCreate(res, SMessage.Insert, data);
-    //     } catch (error) {
-    //         return SendError(res, 500, EMessage.ServerInternal, error);
-    //     }
-    // }
-    // static async UpdateCar(req, res) {
-    //     try {
-    //         const car_id = req.params.car_id;
-    //         const { userId, model, frameNumber, engineNumber, plateNumber, province, color } = req.body;
-    //         // console.log("Updating car:", car_id);
-    //         // console.log("New car data:", { userId, model, frameNumber, engineNumber, plateNumber, province });
-    //         const validate = await ValidateData({ userId, model, frameNumber, engineNumber, plateNumber, province, color });
-    //         if (validate.length > 0) {
-    //             return SendError(res, 400, EMessage.BadRequest, validate.join(','));
-    //         }
-    //         await FindOneUser(userId);
-    //         const data = await prisma.car.update({
-    //             data: {
-    //                 userId, model, frameNumber, engineNumber, plateNumber, province,createBy: req.employee
-    //             },
-    //             where: {
-    //                 car_id: car_id
-    //             }
-    //         });
-    //         if (!data) return SendError(res, 404, EMessage.EUpdate);
-    //         return SendSuccess(res, SMessage.Update, data)
-    //     } catch (error) {
-    //         return SendError(res, 500, EMessage.ServerInternal, error)
-    //     }
-    // }
 
     static async Insert(req, res) {
         try {

@@ -144,13 +144,16 @@ model Card {
   received        String?        @db.VarChar(1)
   issued_date     DateTime?      @db.DateTime
   expiration_date DateTime?      @db.DateTime
+
   plate_number    String?        @db.VarChar(10)
   vehicle_model   String?        @db.VarChar(30)
   color           String?        @db.VarChar(20)
   frame_number    String?        @db.VarChar(30)
   engine_number   String?        @db.VarChar(30)
+
   active_point    Float?
   total_point     Float?
+
   running_part    Float?
   running_labour  Float?
   countCard       Decimal?       @db.Decimal(18, 0)
@@ -178,6 +181,7 @@ model Car {
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
   booking      Booking[]
+  
 
 }
 
