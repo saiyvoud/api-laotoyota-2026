@@ -64,8 +64,19 @@ export default class TimeFixController {
         take: parseInt(limit),
         include: {
           zone: true,
-          time: true,
-          branch: true // new
+          time: {
+            select: {
+              time: true,
+              date: true,
+              qty: true,
+              timeStatus: true,
+              createBy: true,
+              createdAt: true,
+              updatedAt: true,
+              bookings: true, // include booking relation
+            },
+          },
+          branch: true 
         },
       });
       if (!timeFix.length) return SendError(res, 404, EMessage.NotFound);

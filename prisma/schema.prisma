@@ -201,6 +201,7 @@ model TimeFix {
   branchId   String?  @db.VarChar(36)
   zoneId     String   @db.VarChar(36)
   zone       Zone     @relation(fields: [zoneId], references: [zone_id])
+  date       DateTime @db.DateTime
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
 }

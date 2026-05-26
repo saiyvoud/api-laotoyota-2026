@@ -88,9 +88,11 @@ export default class TimeController {
     static async SelectOne(req, res) {
         try {
             const time_id = req.params.time_id;
-
             const data = await prisma.time.findFirst({
-                where: { time_id: time_id },
+                where: { time_id: time_id},
+                include: {
+                    booking: true, 
+                }
                 
             });
             if (!data) return SendError(res, 404, EMessage.NotFound);
@@ -131,7 +133,7 @@ export default class TimeController {
     }
     static async Insert(req, res) {
         try {
-            const { time, qty,date } = req.body;
+            const { time, qty, date } = req.body;
             const validate = await ValidateData({ time, qty });
             if (validate.length > 0) {
                 return SendError(res, 400, EMessage.BadRequest, validate.join(','));
@@ -222,7 +224,6 @@ export default class TimeController {
     static async DeleteTime(req, res) {
         try {
             const time_id = req.params.time_id;
-            console.log(time_id);
             const data = await prisma.time.delete({ where: { time_id: time_id } })
             if (!data) return SendError(res, 404, EMessage.EDelete);
             return SendSuccess(res, SMessage.Delete)

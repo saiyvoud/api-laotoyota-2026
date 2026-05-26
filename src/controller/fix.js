@@ -154,7 +154,6 @@ export default class FixController {
     static async SelectFixByBooking(req, res) {
         try {
             const { bookingId } = req.params;
-            console.log(bookingId);
 
             const data = await prisma.fix.findFirst({
                 where: {
@@ -224,8 +223,8 @@ export default class FixController {
     static async UpdateFixSuccess(req, res) {
         try {
             const fix_id = req.params.fix_id;
-            const { bookingId, detailFix, kmLast, kmNext, labour_total, part_total, part_point, labour_point, card_number, exchange_rate, payment_type } = req.body; // ເພີ່ມ fixCarPrice, carPartPrice
-            const validate = await ValidateData({ bookingId, kmLast, kmNext }); // ຕເພີ່ມ fixCarPrice, carPartPrice
+            const { bookingId, detailFix, kmLast, kmNext, labour_total, part_total, part_point, labour_point, card_number, exchange_rate, payment_type,  } = req.body; 
+            const validate = await ValidateData({ bookingId, kmLast, kmNext }); 
             if (validate.length > 0) {
                 return SendError(res, 400, EMessage.BadRequest, validate.join(','));
             }

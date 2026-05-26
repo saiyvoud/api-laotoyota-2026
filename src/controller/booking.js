@@ -165,7 +165,7 @@ export default class BookingController {
     static async getAllBookingByBranch(req, res) {
         try {
             const branchId = req.params.branch_id;
-            const { page = 1, limit = 10, search, startDate, endDate } = req.query;
+            const { page = 1, limit = 10, search, startDate, endDate, status } = req.query;
             if (!branchId) {
                 return SendError(res, 400, "branch_id is required");
             }
@@ -181,6 +181,9 @@ export default class BookingController {
                 if (startDate) query['createdAt']['gte'] = new Date(startDate);
                 if (endDate) query['createdAt']['lt'] = new Date(endDate);
             }
+            if (status) {
+                query['bookingStatus'] = status;
+            }
 
             const data = await prisma.booking.findMany({
                 where: query,
@@ -191,7 +194,9 @@ export default class BookingController {
                     car: true,
                     time: true,
                     user: true,
+                    zone: true,
                     branch: true,
+                    Fix: true
                 },
                 skip: (parseInt(page) - 1) * parseInt(limit),
                 take: parseInt(limit),
@@ -206,7 +211,6 @@ export default class BookingController {
     }
     static async SelectAll(req, res) {
         try {
-
             const data = await prisma.booking.findMany({
                 include: {
                     car: true,
@@ -357,7 +361,6 @@ export default class BookingController {
                 now.getMilliseconds().toString().padStart(2, "0");
 
             const code = "LTS" + dateStr;
-            // console.log(code);
             const data = await prisma.booking.create({
                 data: {
                     code: code,
@@ -459,7 +462,8 @@ export default class BookingController {
                     data: {
                         timeId: result.timeId,
                         zoneId: result.zoneId,
-                        branchId: result.branchId
+                        branchId: result.branchId,
+                        date: new Date(result.day),
                     }
                 })
                 if (!insert) return SendError(res, 400, EMessage.BadRequest)
