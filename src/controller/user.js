@@ -177,7 +177,7 @@ export default class UserController {
             if (decryptPassword !== password) {
                 return SendError(res, 404, EMessage.NotMatch);
             }
-            if (deviceToken) {
+            if (!deviceToken) {
                 await prisma.user.update({
                     data: {
                         deviceToken
