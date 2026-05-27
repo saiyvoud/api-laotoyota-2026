@@ -133,8 +133,12 @@ export const ReportColumns = {
         { header: "CustomerNumber", key: "customerNumber", width: 36 },
         { header: "CardNumber", key: "cardNumber", width: 36 },
         { header: "VipNumber", key: "vipNumber", width: 36 },
-        { header: "Discount", key: "discount", width: 36 },
-    ],
+        { header: "CardType", key: "cardType", width: 36 },
+        { header: "GoldIssued", key: "goldIssued", width: 36 },
+        { header: "Received", key: "received", width: 36 },
+        { header: "IssuedDate", key: "issuedDate", width: 36 },
+        { header: "ExpirationDate", key: "expirationDate", width: 36 },
+    ]
 
 
 

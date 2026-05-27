@@ -133,34 +133,27 @@ model GiftHistory {
 
 model Card {
   card_id         String         @id @default(uuid()) @db.VarChar(36)
-  userId          String         @db.VarChar(36)
-  user            User           @relation(fields: [userId], references: [user_id])
-  customer_number String         
+  userId          String?         @db.VarChar(36)
+  user            User?           @relation(fields: [userId], references: [user_id])
   card_number     String         @unique 
   vip_number      String         
   card_type       String?        
   goldIssued      DateTime?      
   received        String?        
   issued_date     DateTime?     
-  expiration_date DateTime?     
-
-  plate_number    String?        
-  vehicle_model   String?        
-  color           String?        
-  frame_number    String?        
-  engine_number   String?        
-
+  expiration_date DateTime?         
   active_point    Float?
   total_point     Float?
-
   running_part    Float?
   running_labour  Float?
-  countCard       Decimal?       
+  countCard       Int?       
   createBy        String?    
   createdAt       DateTime       @default(now())
   updatedAt       DateTime       @updatedAt
   GiftHistory     GiftHistory[]
-  Fix          Fix[]
+  Fix             Fix[]
+  carId           String    @unique @db.VarChar(36) 
+  car             Car       @relation(fields: [carId], references: [car_id])
 }
 
 
@@ -180,8 +173,7 @@ model Car {
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
   booking      Booking[]
-  
-
+  card         Card?      
 }
 
 model Setting {

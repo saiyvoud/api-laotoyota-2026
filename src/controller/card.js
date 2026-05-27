@@ -31,7 +31,11 @@ export default class CardController {
                 skip: (parseInt(page) - 1) * parseInt(limit),
                 take: parseInt(limit),
                 include: {
-                    user: true,
+                    car: {
+                        include: {
+                            user: true,
+                        }
+                    },
                 },
             });
             if (!card) return SendError(res, 404, EMessage.NotFound);
@@ -52,7 +56,16 @@ export default class CardController {
     static async SelectAll(req, res) {
         try {
 
-            const data = await prisma.card.findMany();
+            const data = await prisma.card.findMany(
+                {
+                    include: {
+                        car: {
+                            include: {
+                                user: true,
+                            }
+                        },
+                    }
+                });
             if (!data) return SendError(res, 404, EMessage.NotFound);
             return SendSuccess(res, SMessage.SelectAll, data);
         } catch (error) {
@@ -63,7 +76,7 @@ export default class CardController {
         try {
             const card_id = req.params.card_id;
 
-            const data = await prisma.card.findFirst({ where: { card_id: card_id } });
+            const data = await prisma.card.findFirst({ where: { card_id: card_id }, include: { car: { include: { user: true } } } });
             if (!data) return SendError(res, 404, EMessage.NotFound);
             return SendSuccess(res, SMessage.SelectOne, data)
         } catch (error) {
@@ -73,35 +86,23 @@ export default class CardController {
     static async Insert(req, res) {
         try {
             const {
-                userId,
+                carId,
                 card_number,
                 vip_number,
-                discount,
                 card_type,
                 goldIssued,
                 received,
                 issued_date,
                 expiration_date,
-                plate_number,
-                vehicle_model,
-                color,
-                frame_number,
-                engine_number,
-                active_point,
-                total_point,
-                running_part,
-                running_labour,
                 countCard,
             } = req.body;
-            const validate = await ValidateData({ userId, card_number, vip_number, discount });
+            const validate = await ValidateData({ carId, card_number, vip_number,card_type });
             if (validate.length > 0) {
                 return SendError(res, 400, EMessage.BadRequest, validate.join(','));
             }
-            const userData = await FindOneUser(userId);
-            const customer_number = userData.customer_number
             const data = await prisma.card.create({
                 data: {
-                    userId, customer_number, card_number, vip_number, discount: parseInt(discount), card_type, goldIssued, received, issued_date, expiration_date, plate_number, vehicle_model, color, frame_number, engine_number, active_point: parseInt(active_point), total_point: parseInt(total_point), running_part: parseInt(running_part), running_labour: parseInt(running_labour), countCard: parseInt(countCard), createBy: req.employee
+                    carId, card_number, vip_number, card_type, goldIssued, received, issued_date, expiration_date, countCard: parseInt(countCard), createBy: req.employee
                 }
             })
             return SendCreate(res, SMessage.Insert, data);
@@ -113,17 +114,24 @@ export default class CardController {
     static async UpdateCard(req, res) {
         try {
             const card_id = req.params.card_id;
-
-            const { userId, card_number, vip_number, discount } = req.body;
-            const validate = await ValidateData({ userId, card_number, vip_number, discount });
+            const {
+                carId,
+                card_number,
+                vip_number,
+                card_type,
+                goldIssued,
+                received,
+                issued_date,
+                expiration_date,
+                countCard,
+            } = req.body;
+            const validate = await ValidateData({ carId, card_number, vip_number,card_type });
             if (validate.length > 0) {
                 return SendError(res, 400, EMessage.BadRequest, validate.join(','));
             }
-            const userData = await FindOneUser(userId);
-            const customer_number = userData.customer_number
             const data = await prisma.card.update({
                 data: {
-                    userId, customer_number, card_number, vip_number, discount: parseInt(discount), createBy: req.employee
+                    carId, card_number, vip_number, card_type, goldIssued, received, issued_date, expiration_date, countCard: parseInt(countCard), createBy: req.employee
                 },
                 where: {
                     card_id: card_id
@@ -161,14 +169,25 @@ export default class CardController {
             }
             const data = await prisma.card.findMany({
                 where: query,
+                include: {
+                    car: {
+                        include: {
+                            user: true,
+                        }
+                    },
+                },
 
             });
             if (!data) return SendError(res, 404, EMessage.NotFound);
             const exportData = data.map(item => ({
                 cardNumber: item.card_number,
-                customerNumber: item.customer_number,
+                customerNumber: item?.car?.user?.customer_number,
                 vipNumber: item.vip_number,
-                discount: item.discount
+                cardType: item.card_type,
+                goldIssued: item.goldIssued,
+                received: item.received,
+                issuedDate: item.issued_date,
+                expirationDate: item.expiration_date,
             }));
             // เรียกใช้ ExcelBuilder
             return await ExcelBuilder.export(res, {
