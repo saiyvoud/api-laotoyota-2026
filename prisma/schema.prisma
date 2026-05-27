@@ -16,32 +16,32 @@ datasource db {
 model User {
   user_id String @id @default(uuid()) @db.VarChar(36)
   customer_number String @unique @db.VarChar(10)
-  username String
-  email    String?
-  phoneNumber String  
-  password String
-  role     String
-  profile String?
-  point Int @default(0)
-  province String? 
-  district String? 
-  village  String? 
-  coperate       String?
-  corperate_name String? 
-  gender String? 
-  first_name String?
-  last_name  String?
-  dob DateTime? @db.DateTime
-  ocupation String? 
-  nationality String? 
-  house String? 
-  unit  String? 
-  street String? 
-  pobox String? 
-  address String?
-  deviceToken String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  username        String
+  email           String?
+  phoneNumber     String  
+  password        String
+  role            String
+  profile         String?
+  point           Int @default(0)
+  province        String? 
+  district        String? 
+  village         String? 
+  coperate        String?
+  corperate_name  String? 
+  gender          String? 
+  first_name      String?
+  last_name       String?
+  dob             DateTime? 
+  ocupation       String? 
+  nationality     String? 
+  house           String? 
+  unit            String? 
+  street          String? 
+  pobox           String? 
+  address         String?
+  deviceToken     String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
   GiftHistory GiftHistory[]
   Card        Card[]
   Car         Car[]
@@ -58,7 +58,7 @@ model Employee {
   branch        Branch   @relation(fields: [branchId], references: [branch_id])
   userId        String   @db.VarChar(36)
   user          User     @relation(fields: [userId], references: [user_id])
-  createBy      String?  @db.VarChar(36)
+  createBy      String?  
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 }
@@ -69,7 +69,7 @@ model Branch {
   branch_name String
   location    String
   phone       String?
-  createBy    String?    @db.VarChar(36)
+  createBy    String?   
   createdAt   DateTime   @default(now())
   updatedAt   DateTime   @updatedAt
   Employee    Employee[]
@@ -82,7 +82,7 @@ model Promotion {
   title        String
   detail       String   @db.Text
   image        String
-  createBy     String?  @db.VarChar(36)
+  createBy     String?
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 }
@@ -106,7 +106,7 @@ model GiftCard {
   amount       Int
   image        String
   status       Boolean        @default(true)
-  createBy     String?       
+  createBy     String?     
   createdAt    DateTime       @default(now())
   updatedAt    DateTime       @updatedAt
   GiftHistory  GiftHistory[]
@@ -114,11 +114,11 @@ model GiftCard {
 
 model GiftHistory {
   gifthistory_id String   @id @default(uuid()) @db.VarChar(36)
-  userId         String  
+  userId         String   @db.VarChar(36)
   user           User     @relation(fields: [userId], references: [user_id])
-  giftcardId     String   
+  giftcardId     String   @db.VarChar(36)
   giftcard       GiftCard @relation(fields: [giftcardId], references: [giftcard_id])
-  cardId         String  
+  cardId         String   @db.VarChar(36)
   card           Card    @relation(fields: [cardId], references: [card_id])
   card_number    String  
   gift_Code      String  
@@ -126,23 +126,23 @@ model GiftHistory {
   amount         Int
   total          Int?
   status         Boolean  @default(true)
-  createBy       String?  
+  createBy       String? 
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
 }
 
 model Card {
   card_id         String         @id @default(uuid()) @db.VarChar(36)
-  userId          String         
+  userId          String         @db.VarChar(36)
   user            User           @relation(fields: [userId], references: [user_id])
   customer_number String         
   card_number     String         @unique 
   vip_number      String         
   card_type       String?        
-  goldIssued      DateTime?      @db.DateTime
+  goldIssued      DateTime?      
   received        String?        
-  issued_date     DateTime?      @db.DateTime
-  expiration_date DateTime?      @db.DateTime
+  issued_date     DateTime?     
+  expiration_date DateTime?     
 
   plate_number    String?        
   vehicle_model   String?        
@@ -156,7 +156,7 @@ model Card {
   running_part    Float?
   running_labour  Float?
   countCard       Decimal?       
-  createBy        String?        
+  createBy        String?    
   createdAt       DateTime       @default(now())
   updatedAt       DateTime       @updatedAt
   GiftHistory     GiftHistory[]
@@ -168,7 +168,7 @@ model Card {
 
 model Car {
   car_id       String    @id @default(uuid()) @db.VarChar(36)
-  userId       String?   
+  userId       String?   @db.VarChar(36)
   user         User?     @relation(fields: [userId], references: [user_id])
   model        String
   frameNumber  String
@@ -176,7 +176,7 @@ model Car {
   plateNumber  String
   province     String
   color        String?
-  createBy     String?   
+  createBy     String? 
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
   booking      Booking[]
@@ -200,7 +200,7 @@ model TimeFix {
   branchId   String?  @db.VarChar(36)
   zoneId     String   @db.VarChar(36)
   zone       Zone     @relation(fields: [zoneId], references: [zone_id])
-  date       DateTime @db.DateTime
+  date       DateTime? @db.DateTime
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
 }
@@ -278,10 +278,10 @@ model Fix {
   card_number    String  
   card           Card     @relation(fields: [card_number], references: [card_number])
   invoice_number String   @unique 
-  invoice_date   DateTime? @db.DateTime
+  invoice_date   DateTime? 
   exchange_rate  Int?
   payment_type   String? 
-  createBy     String?  @db.VarChar(36)
+  createBy     String?  
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 }
