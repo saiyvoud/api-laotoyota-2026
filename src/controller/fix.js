@@ -2,7 +2,7 @@ import { ValidateData } from "../service/validate.js"
 import { EMessage, SMessage, FixStatus } from "../service/message.js"
 import { SendError, SendCreate, SendSuccess } from "../service/response.js"
 import prisma from "../config/prima.js";
-import { FindOneBooking, FindOneUser } from "../service/service.js";
+import { FindOneBooking, FindOneCard, FindOneUser } from "../service/service.js";
 import { ExcelBuilder, ReportColumns } from "../service/excelBuilder.js";
 export default class FixController {
     static async SearchFix(req, res) {
@@ -71,16 +71,41 @@ export default class FixController {
     static async getAllFixByBranch(req, res) {
         try {
             const branchId = req.params.branch_id;
-            // const { page = 1, limit = 10, search, startDate, endDate } = matchedData(req);
-            const { page = 1, limit = 10, search, startDate, endDate } = req.query;
-            const query = { branchId: branchId };
-            if (search)
+            const { page = 1, limit = 10, search, startDate, endDate, status } = req.query;
+
+            // 1. ກຳນົດຄ່າພື້ນຖານ (branchId ຕ້ອງມີສະເໝີ)
+            const query = {
+                branchId: branchId
+            };
+
+            // 2. ຖ້າມີການສົ່ງ status ມາ (ເຊັ່ນ: 'pending', 'completed')
+            if (status) {
+                query['fixStatus'] = status; // ຫຼື ໃຊ້ຊື່ field ຕາມ database ຂອງທ່ານ ເຊັ່ນ status: status
+            }
+
+            // 3. ເງື່ອນໄຂການ Search (ຄົ້ນຫາຈາກຕົວອັກສອນ)
+            if (search) {
                 query['OR'] = [
                     {
-                        fixStatus: { contains: search },
+                        booking: {
+                            car: {
+                                plateNumber: { contains: search },
+                            },
+                        },
                     },
+                    {
+                        booking: {
+                            car: {
+                                frameNumber: { contains: search },
+                            },
+                        },
+                    }
+                    // ທ່ານສາມາດເພີ່ມການ search field ອື່ນໆໄດ້ທີ່ນີ້ ເຊັ່ນ:
+                    // { booking: { car: { plateNumber: { contains: search } } } }
                 ];
+            }
 
+            // 4. ເງື່ອນໄຂຊ່ວງວັນທີ
             if (startDate || endDate) {
                 query['createdAt'] = {};
                 if (startDate) query['createdAt']['gte'] = new Date(startDate);
@@ -103,15 +128,15 @@ export default class FixController {
                             branch: true,
                         },
                     },
-
                 },
             });
-            if (!data) return SendError(res, 404, EMessage.NotFound);
+
             const count = await prisma.booking.count({ where: query });
             const totalPage = Math.ceil(count / parseInt(limit));
-            return SendSuccess(res, SMessage.SelectAll, { data, totalPage });
+
+            return SendSuccess(res, SMessage.SelectAll, { data: fix, totalPage });
         } catch (error) {
-            return SendError(res, 500, EMessage.ServerInternal, error)
+            return SendError(res, 500, EMessage.ServerInternal, error);
         }
     }
 
@@ -199,8 +224,8 @@ export default class FixController {
 
     static async Insert(req, res) {
         try {
-            const { bookingId, invoice_number, card_number } = req.body;
-            const validate = await ValidateData({ bookingId, invoice_number, card_number });
+            const { bookingId, invoice_number, cardId } = req.body;
+            const validate = await ValidateData({ bookingId, invoice_number, cardId });
             if (validate.length > 0) {
                 return SendError(res, 400, EMessage.BadRequest, validate.join(','));
             }
@@ -210,7 +235,7 @@ export default class FixController {
                     bookingId: bookingId,
                     invoice_number,
                     invoice_date: new Date(),
-                    card_number,
+                    cardId,
                     createBy: req.employee,
                 }
             })
@@ -223,13 +248,13 @@ export default class FixController {
     static async UpdateFixSuccess(req, res) {
         try {
             const fix_id = req.params.fix_id;
-            const { bookingId, detailFix, kmLast, kmNext, labour_total, part_total, part_point, labour_point, card_number, exchange_rate, payment_type,  } = req.body; 
-            const validate = await ValidateData({ bookingId, kmLast, kmNext }); 
+            const { bookingId, detailFix, kmLast, kmNext, labour_total, part_total, part_point, labour_point, cardId, exchange_rate, payment_type, } = req.body;
+            const validate = await ValidateData({ bookingId, kmLast, kmNext });
             if (validate.length > 0) {
                 return SendError(res, 400, EMessage.BadRequest, validate.join(','));
             }
             const booking = await FindOneBooking(bookingId);
-            const user = await FindOneUser(booking.userId)
+            const card = await FindOneCard(cardId);
             const data = await prisma.fix.update({
                 data: {
                     bookingId, detailFix,
@@ -240,7 +265,7 @@ export default class FixController {
                     part_point: parseInt(part_point || 0),
                     labour_point: parseInt(labour_point || 0),
                     totalPrice: parseInt(labour_total || 0) + parseInt(part_total || 0),
-                    card_number,
+                    cardId,
                     exchange_rate: parseInt(exchange_rate || 0),
                     payment_type,
                     fixStatus: FixStatus.success,
@@ -252,10 +277,10 @@ export default class FixController {
             });
             if (!data) return SendError(res, 404, EMessage.EUpdate);
             const totalPoint = parseInt(labour_point || 0) + parseInt(part_point || 0);
-            const update = await prisma.user.update({
+            const update = await prisma.card.update({
                 data: {
-                    point: (user.point || 0) + totalPoint,
-                }, where: { user_id: booking.userId }
+                    total_point: (card.total_point || 0) + totalPoint,
+                }, where: { card_id: cardId }
             })
             if (!update) {
                 SendError(res, 400, EMessage.EUpdate);

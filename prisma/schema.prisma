@@ -256,8 +256,8 @@ model BookingDetail {
 
 model Fix {
   fix_id       String   @id @default(uuid()) @db.VarChar(36)
-  bookingId    String   @db.VarChar(36)
-  booking      Booking  @relation(fields: [bookingId], references: [booking_id])
+  bookingId    String?   @db.VarChar(36)
+  booking      Booking?  @relation(fields: [bookingId], references: [booking_id])
   detailFix    String?
   kmLast       Int?
   kmNext       Int?
@@ -266,9 +266,9 @@ model Fix {
   labour_total   Int?
   labour_point   Float?
   totalPrice     Int?
-  fixStatus    String   @default("padding")
-  card_number    String  
-  card           Card     @relation(fields: [card_number], references: [card_number])
+  fixStatus    String?   @default("padding")
+  cardId       String?  
+  card           Card?     @relation(fields: [cardId], references: [card_id])
   invoice_number String   @unique 
   invoice_date   DateTime? 
   exchange_rate  Int?

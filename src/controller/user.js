@@ -157,7 +157,16 @@ export default class UserController {
     static async SelectOne(req, res) {
         try {
             const user_id = req.params.user_id;
-            const data = await prisma.user.findFirst({ where: { user_id: user_id }, include: { card: true } });
+            const data = await prisma.user.findFirst({
+                where: { user_id: user_id },
+                include: {
+                    Card: {
+                        include: {
+                            car: true
+                        }
+                    }
+                }
+            });
             if (!data) return SendError(res, 404, EMessage.NotFound);
             return SendSuccess(res, SMessage.SelectOne, data)
         } catch (error) {

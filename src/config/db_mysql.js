@@ -12,6 +12,7 @@ const connected = mysql.createConnection({
 //   user: "mysql",
 //   password: "Laotoyota123454321",
 //   database: "db_laotoyota"
+
 // });
 connected.connect((err) => {
   if (err) {

@@ -70,7 +70,7 @@ export default class CarController {
     static async SelectAll(req, res) {
         try {
 
-            const data = await prisma.car.findMany();
+            const data = await prisma.car.findMany({ include: { card: true } });
             if (!data) return SendError(res, 404, EMessage.NotFound);
             return SendSuccess(res, SMessage.SelectAll, data);
         } catch (error) {
