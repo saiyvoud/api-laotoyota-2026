@@ -10,7 +10,7 @@ import CardController from "../controller/card.js"
 import CarController from "../controller/car.js"
 import BookingController from "../controller/booking.js"
 import FixController from '../controller/fix.js';
-import { auth } from '../middleware/auth.js'
+import { auth, authAdminOrSuperAdmin } from '../middleware/auth.js'
 import BookingDetailController from '../controller/bookingDetail.js';
 import EmployeeController from '../controller/employee.js';
 import BranchController from '../controller/branch.js';
@@ -166,9 +166,11 @@ router.get("/fix/selOne/:fix_id", auth, FixController.SelectOne);
 router.get("/fix/selByBooking/:bookingId", auth, FixController.SelectFixByBooking);
 router.get("/fix/selByStatus", auth, FixController.SelectBy);
 router.get("/fix/getAll", auth, FixController.getAllFix);
-router.get("/fix/getAllByBranch", auth, FixController.getAllFixByBranch);
+router.get("/fix/getAllByBranch/:branch_id", auth, FixController.getAllFixByBranch);
 router.get("/fix/export", auth, FixController.ExportFix);
+router.get("/fix/exportWorkshopFix", auth, FixController.exportWorkshopFix);
 router.post("/fix/insert", auth, FixController.Insert);
+router.post("/fix/workshop", auth, authAdminOrSuperAdmin, FixController.WorkShopFix);
 router.put("/fix/update/:fix_id", auth, FixController.UpdateFix);
 router.put("/fix/updateStatus/:fix_id", auth, FixController.UpdateFixSuccess);
 router.delete("/fix/delete/:fix_id", auth, FixController.DeleteFix);

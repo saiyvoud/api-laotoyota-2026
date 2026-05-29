@@ -30,11 +30,11 @@ export class ExcelBuilder {
 
 export const ReportColumns = {
     booking: [
-        { header: "user_Name", key: "userName", width: 36 },
-        { header: "phone_Number", key: "phoneNumber", width: 36 },
-        { header: "branch_Name", key: "branchName", width: 36 },
-        { header: "car_Model", key: "carModel", width: 36 },
-        { header: "plate_Number", key: "plateNumber", width: 36 },
+        { header: "user Name", key: "userName", width: 36 },
+        { header: "phone Number", key: "phoneNumber", width: 36 },
+        { header: "branch Name", key: "branchName", width: 36 },
+        { header: "car Model", key: "carModel", width: 36 },
+        { header: "plate Number", key: "plateNumber", width: 36 },
         { header: "date", key: "date", width: 36 },
         { header: "time", key: "time", width: 36 },
     ],
@@ -138,7 +138,18 @@ export const ReportColumns = {
         { header: "Received", key: "received", width: 36 },
         { header: "IssuedDate", key: "issuedDate", width: 36 },
         { header: "ExpirationDate", key: "expirationDate", width: 36 },
+    ],
+    shopFix: [
+        { header: "userName", key: "userName", width: 36 },
+        { header: "phoneNumber", key: "phoneNumber", width: 36 },
+        { header: "carModel", key: "carModel", width: 36 },
+        { header: "plateNumber", key: "plateNumber", width: 36 },
+        { header: "engineNumber", key: "engineNumber", width: 36 },
+        { header: "frameNumber", key: "frameNumber", width: 36 },
+        { header: "date", key: "date", width: 36 },
     ]
+
+
 
 
 

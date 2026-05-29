@@ -87,7 +87,6 @@ export default class EmployeeController {
     static async SelectOne(req, res) {
         try {
             const employee_id = req.params.employee_id;
-
             const data = await prisma.employee.findFirst({ where: { employee_id: employee_id } });
             if (!data) return SendError(res, 404, EMessage.NotFound);
             return SendSuccess(res, SMessage.SelectOne, data)

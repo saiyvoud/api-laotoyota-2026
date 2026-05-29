@@ -559,7 +559,7 @@ export default class BookingController {
                 branchName: item.branch?.branch_name,
                 carModel: item.car?.model,
                 plateNumber: item.car?.plateNumber,
-                date: item.time?.date,
+                date: item.day.toISOString().split('T')[0],
                 time: item.time?.time,
             }));
 
@@ -575,4 +575,6 @@ export default class BookingController {
             return SendError(res, 500, EMessage.ServerInternal, error);
         }
     }
+    
+
 }

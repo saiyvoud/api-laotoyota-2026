@@ -56,6 +56,12 @@ export default class FixController {
                             branch: true,
                         },
                     },
+                    card: {
+                        include: {
+                            user: true,
+                            car: true
+                        },
+                    },
 
                 },
             });
@@ -68,51 +74,47 @@ export default class FixController {
             return SendError(res, 500, EMessage.ServerInternal, error);
         }
     }
+
     static async getAllFixByBranch(req, res) {
         try {
             const branchId = req.params.branch_id;
             const { page = 1, limit = 10, search, startDate, endDate, status } = req.query;
 
-            // 1. ກຳນົດຄ່າພື້ນຖານ (branchId ຕ້ອງມີສະເໝີ)
+            // 1. กำหนด Query พื้นฐาน (กรองตาม branchId ผ่าน booking relation)
             const query = {
-                branchId: branchId
+                booking: {
+                    branchId: branchId
+                }
             };
 
-            // 2. ຖ້າມີການສົ່ງ status ມາ (ເຊັ່ນ: 'pending', 'completed')
+            // 2. กรองตามสถานะของงานซ่อม (Fix Status)
             if (status) {
-                query['fixStatus'] = status; // ຫຼື ໃຊ້ຊື່ field ຕາມ database ຂອງທ່ານ ເຊັ່ນ status: status
+                query.fixStatus = status;
             }
 
-            // 3. ເງື່ອນໄຂການ Search (ຄົ້ນຫາຈາກຕົວອັກສອນ)
+            // 3. เงื่อนไขการ Search (ค้นหาทะเบียนรถ หรือ เลขตัวถัง)
             if (search) {
-                query['OR'] = [
+                // ใช้ AND ร่วมกับ OR เพื่อให้ยังคงกรองเฉพาะ branchId เดิมอยู่
+                query.AND = [
+                    { booking: { branchId: branchId } },
                     {
-                        booking: {
-                            car: {
-                                plateNumber: { contains: search },
-                            },
-                        },
-                    },
-                    {
-                        booking: {
-                            car: {
-                                frameNumber: { contains: search },
-                            },
-                        },
+                        OR: [
+                            { booking: { car: { plateNumber: { contains: search } } } },
+                            { booking: { car: { frameNumber: { contains: search } } } }
+                        ]
                     }
-                    // ທ່ານສາມາດເພີ່ມການ search field ອື່ນໆໄດ້ທີ່ນີ້ ເຊັ່ນ:
-                    // { booking: { car: { plateNumber: { contains: search } } } }
                 ];
             }
 
-            // 4. ເງື່ອນໄຂຊ່ວງວັນທີ
+            // 4. เงื่อนไขช่วงวันที่ (ของรายการ Fix)
             if (startDate || endDate) {
-                query['createdAt'] = {};
-                if (startDate) query['createdAt']['gte'] = new Date(startDate);
-                if (endDate) query['createdAt']['lt'] = new Date(endDate);
+                query.createdAt = {};
+                if (startDate) query.createdAt.gte = new Date(startDate);
+                if (endDate) query.createdAt.lt = new Date(endDate);
             }
 
-            const data = await prisma.booking.findMany({
+            // 5. ดึงข้อมูลจาก prisma.fix (ไม่ใช่ prisma.booking)
+            const data = await prisma.fix.findMany({
                 where: query,
                 orderBy: {
                     createdAt: 'desc',
@@ -128,15 +130,25 @@ export default class FixController {
                             branch: true,
                         },
                     },
+                    card: {
+                        include: {
+                            user: true,
+                            car: true
+                        },
+                    },
                 },
             });
 
-            const count = await prisma.booking.count({ where: query });
+            // 6. นับจำนวนทั้งหมดตามเงื่อนไขเพื่อทำ Pagination
+            const count = await prisma.fix.count({ where: query });
             const totalPage = Math.ceil(count / parseInt(limit));
 
-            return SendSuccess(res, SMessage.SelectAll, { data: fix, totalPage });
+            // 7. ส่งค่ากลับ (ใช้ data: data ให้ตรงกับตัวแปรที่ประกาศไว้)
+            return SendSuccess(res, SMessage.SelectAll, { data: data, totalPage });
+
         } catch (error) {
-            return SendError(res, 500, EMessage.ServerInternal, error);
+            console.error("Fetch Error:", error);
+            return SendError(res, 500, EMessage.ServerInternal, error.message);
         }
     }
 
@@ -146,8 +158,20 @@ export default class FixController {
             const data = await prisma.fix.findMany(
                 {
                     include: {
-                        booking: true,
-
+                        booking: {
+                            include: {
+                                car: true,
+                                time: true,
+                                user: true,
+                                branch: true,
+                            },
+                        },
+                        card: {
+                            include: {
+                                user: true,
+                                car: true
+                            },
+                        },
                     },
                 }
             );
@@ -164,8 +188,20 @@ export default class FixController {
             const data = await prisma.fix.findFirst({
                 where: { fix_id: fix_id },
                 include: {
-                    booking: true,
-
+                    booking: {
+                        include: {
+                            car: true,
+                            time: true,
+                            user: true,
+                            branch: true,
+                        },
+                    },
+                    card: {
+                        include: {
+                            user: true,
+                            car: true
+                        },
+                    },
                 },
             });
             if (!data) return SendError(res, 404, EMessage.NotFound);
@@ -291,6 +327,68 @@ export default class FixController {
             return SendError(res, 500, EMessage.ServerInternal, error)
         }
     }
+
+    static async WorkShopFix(req, res) {
+        try {
+            const {
+                detailFix, kmLast, kmNext,
+                labour_total, part_total, part_point,
+                labour_point, cardId, exchange_rate, payment_type, invoice_number
+            } = req.body;
+
+            // 1. Validate ข้อมูลพื้นฐาน
+            const validate = await ValidateData({ kmLast, kmNext });
+            if (validate.length > 0) {
+                return SendError(res, 400, EMessage.BadRequest, validate.join(','));
+            }
+
+            // เตรียมข้อมูลสำหรับ Insert
+            const fixData = {
+                detailFix,
+                kmLast: parseInt(kmLast),
+                kmNext: parseInt(kmNext),
+                labour_total: parseInt(labour_total || 0),
+                part_total: parseInt(part_total || 0),
+                part_point: parseFloat(part_point || 0),
+                labour_point: parseFloat(labour_point || 0),
+                totalPrice: parseInt(labour_total || 0) + parseInt(part_total || 0),
+                cardId: cardId,
+                exchange_rate: parseInt(exchange_rate || 0),
+                payment_type,
+                invoice_date: new Date(),
+                invoice_number,
+                fixStatus: FixStatus.success, // หรือใช้ FixStatus.success ตาม enum ของคุณ
+                createBy: req.employee // ตรวจสอบว่า middleware เก็บค่าไว้ที่ req.employee จริงหรือไม่
+            };
+
+            // กรณีมีบัตร: ใช้ Transaction เพื่อความปลอดภัย
+            const card = await prisma.card.findUnique({ where: { card_id: cardId } });
+            if (!card) return SendError(res, 404, EMessage.ESelect);
+            const totalPointToAdd = parseFloat(labour_point || 0) + parseFloat(part_point || 0);
+            const result = await prisma.$transaction(async (tx) => {
+                // บันทึกการซ่อม
+                const newFix = await tx.fix.create({ data: fixData });
+
+                // อัปเดตแต้มในบัตร
+                await tx.card.update({
+                    where: { card_id: cardId },
+                    data: {
+                        total_point: { increment: totalPointToAdd } // ใช้ increment ของ Prisma จะแม่นยำกว่า
+                    }
+                });
+
+                return newFix;
+            });
+
+            if (!result) return SendError(res, 400, EMessage.EInsert);
+
+            return SendSuccess(res, SMessage.Insert, result);
+
+        } catch (error) {
+            console.error("WorkshopFix Error:", error);
+            return SendError(res, 500, EMessage.ServerInternal, error.message);
+        }
+    }
     static async UpdateFix(req, res) {
         try {
             const fix_id = req.params.fix_id;
@@ -360,6 +458,55 @@ export default class FixController {
                 data: exportData,
                 fileName: "fix-report.xlsx",
             })
+        } catch (error) {
+            return SendError(res, 500, EMessage.ServerInternal, error);
+        }
+    }
+
+
+    static async exportWorkshopFix(req, res) {
+        try {
+            const { startDate, endDate } = req.query
+            const data = await prisma.fix.findMany({
+                where: {
+                    createdAt: {
+                        gte: new Date(startDate),
+                        lte: new Date(endDate),
+                    },
+                },
+                orderBy: { createdAt: "desc" },
+                include: {
+                    card: {
+                        include: {
+                            user: true,
+                            car: true
+                        },
+                    },
+                },
+            });
+
+            if (!data.length) {
+                return SendError(res, 404, "No data found for this date range");
+            }
+            // console.log("Booking data:", data);
+            const exportData = data.map(item => ({
+                userName: item.card?.user?.username,
+                phoneNumber: item.card?.user?.phoneNumber,
+                carModel: item.card?.car?.model,
+                plateNumber: item.card?.car?.plateNumber,
+                engineNumber: item.card?.car?.engineNumber,
+                frameNumber: item.card?.car?.frameNumber,
+                date: item.createdAt.toISOString().split('T')[0],
+            }));
+
+            // เรียกใช้ ExcelBuilder
+            return await ExcelBuilder.export(res, {
+                sheetName: "workshop fix Report",
+                columns: ReportColumns.shopFix,
+                data: exportData,
+                fileName: "workshop-fix.xlsx",
+            });
+
         } catch (error) {
             return SendError(res, 500, EMessage.ServerInternal, error);
         }

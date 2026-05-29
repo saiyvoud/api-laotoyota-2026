@@ -26,7 +26,7 @@ export const authAdmin = async (req, res, next) => {
             return SendError(res, 401, EMessage.Uaunthorization)
         }
         const user = await FindOneUser(admin) // ສ້າງໃນ serivce
-        if (user.role !== Role.admin) {
+        if (user.role !== Role.admin || user.role !== Role.superadmin) {
             return SendError(res, 401, EMessage.Uaunthorization)
         }
         const employee = await FindEmployeeByUser(user.user_id);
@@ -79,7 +79,7 @@ export const authAdminOrSuperAdmin = async (req, res, next) => {
             req.branch = employee.branchId
             return next();
         }
-        if (user.role === "super_admin" || user.role === "superadmin") {
+        if (user.role === "super_admin") {
             const employee = await FindEmployeeByUser(user.user_id);
             if (!employee) {
                 return SendError(res, 404, EMessage.EmployeeNotFound)

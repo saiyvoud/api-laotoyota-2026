@@ -87,15 +87,11 @@ export default class CardController {
             const {
                 carId,
                 card_number,
-                vip_number,
                 card_type,
-                goldIssued,
                 received,
-                issued_date,
                 expiration_date,
-                countCard,
             } = req.body;
-            const validate = await ValidateData({ carId, card_number, vip_number, card_type });
+            const validate = await ValidateData({ carId, card_number, card_type });
             if (validate.length > 0) {
                 return SendError(res, 400, EMessage.BadRequest, validate.join(','));
             }
@@ -105,7 +101,7 @@ export default class CardController {
             }
             const data = await prisma.card.create({
                 data: {
-                    carId, card_number, vip_number, card_type, goldIssued, received, issued_date, expiration_date, countCard: parseInt(countCard), userId: carData.userId, createBy: req.employee
+                    carId, card_number, card_type, received, expiration_date, userId: carData.userId, createBy: req.employee
                 }
             })
             return SendCreate(res, SMessage.Insert, data);
@@ -120,15 +116,11 @@ export default class CardController {
             const {
                 carId,
                 card_number,
-                vip_number,
                 card_type,
-                goldIssued,
                 received,
-                issued_date,
                 expiration_date,
-                countCard,
             } = req.body;
-            const validate = await ValidateData({ carId, card_number, vip_number, card_type });
+            const validate = await ValidateData({ carId, card_number, card_type });
             if (validate.length > 0) {
                 return SendError(res, 400, EMessage.BadRequest, validate.join(','));
             }
@@ -138,7 +130,7 @@ export default class CardController {
             }
             const data = await prisma.card.update({
                 data: {
-                    carId, card_number, vip_number, card_type, goldIssued, received, issued_date, expiration_date, countCard: parseInt(countCard), userId: carData.userId, createBy: req.employee
+                    carId, card_number, card_type, received, expiration_date, userId: carData.userId, createBy: req.employee
                 },
                 where: {
                     card_id: card_id

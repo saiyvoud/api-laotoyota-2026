@@ -136,11 +136,11 @@ model Card {
   userId          String?         @db.VarChar(36)
   user            User?           @relation(fields: [userId], references: [user_id])
   card_number     String         @unique 
-  vip_number      String         
+  vip_number      String?         
   card_type       String?        
-  goldIssued      DateTime?      
+  goldIssued      DateTime   @default(now())      
   received        String?        
-  issued_date     DateTime?     
+  issued_date     DateTime   @default(now())     
   expiration_date DateTime?         
   active_point    Float?
   total_point     Float?
