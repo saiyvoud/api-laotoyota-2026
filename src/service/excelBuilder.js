@@ -35,6 +35,8 @@ export const ReportColumns = {
         { header: "branch Name", key: "branchName", width: 36 },
         { header: "car Model", key: "carModel", width: 36 },
         { header: "plate Number", key: "plateNumber", width: 36 },
+        { header: "engine Number", key: "engineNumber", width: 36 },
+        { header: "frame Number", key: "frameNumber", width: 36 },
         { header: "date", key: "date", width: 36 },
         { header: "time", key: "time", width: 36 },
     ],
@@ -42,6 +44,7 @@ export const ReportColumns = {
         { header: "BranchCode", key: "BranchCode", width: 36 },
         { header: "BranchName", key: "BranchName", width: 36 },
         { header: "Location", key: "Location", width: 36 },
+        { header: "Phone", key: "Phone", width: 36 },
     ],
     car: [
         { header: "FrameNumber", key: "FrameNumber", width: 36 },
@@ -95,7 +98,6 @@ export const ReportColumns = {
     ],
     time: [
         { header: "Time", key: "Time", width: 36 },
-        { header: "Date", key: "Date", width: 36 },
         { header: "Qty", key: "Qty", width: 36 },
         { header: "TimeStatus", key: "TimeStatus", width: 36 },
     ],
@@ -123,16 +125,15 @@ export const ReportColumns = {
         { header: "Province", key: "Province", width: 36 },
         { header: "District", key: "District", width: 36 },
         { header: "Village", key: "Village", width: 36 },
+    
     ],
     zone: [
         { header: "ZoneName", key: "ZoneName", width: 36 },
-        { header: "TimeFix", key: "TimeFix", width: 36 },
         { header: "ZoneStatus", key: "ZoneStatus", width: 36 },
     ],
     card: [
         { header: "CustomerNumber", key: "customerNumber", width: 36 },
         { header: "CardNumber", key: "cardNumber", width: 36 },
-        { header: "VipNumber", key: "vipNumber", width: 36 },
         { header: "CardType", key: "cardType", width: 36 },
         { header: "GoldIssued", key: "goldIssued", width: 36 },
         { header: "Received", key: "received", width: 36 },

@@ -152,6 +152,7 @@ export default class BranchController {
                 BranchCode: item.branch_code,
                 BranchName: item.branch_name,
                 Location: item.location,
+                Phone: item.phone,
             }));
 
             // เรียกใช้ ExcelBuilder

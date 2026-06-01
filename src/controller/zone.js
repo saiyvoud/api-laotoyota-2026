@@ -191,7 +191,6 @@ export default class ZoneController {
             if (!data) return SendError(res, 404, EMessage.NotFound);
             const exportData = data.map(item => ({
                 ZoneName: item.zoneName,
-                TimeFix: item.timeFix,
                 ZoneStatus: item.zoneStatus
             }));
             // เรียกใช้ ExcelBuilder

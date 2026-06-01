@@ -88,25 +88,28 @@ export default class GiftHistoryController {
     }
     static async Insert(req, res) {
         try {
-            const { userId, giftcardId, cardId, amount } = req.body;
-            const validate = await ValidateData({ userId, giftcardId, cardId, amount });
+            // const { userId, giftcardId, cardId, amount } = req.body;
+            const { giftcardId, cardId, amount } = req.body;
+            const validate = await ValidateData({ giftcardId, cardId, amount });
             if (validate.length > 0) {
                 return SendError(res, 400, EMessage.BadRequest, validate.join(','));
             }
-            const user = await FindOneUser(userId);
+            // const user = await FindOneUser(userId);
             const giftcardData = await FindOneGiftCard(giftcardId);
             const cardData = await FindOneCard(cardId);
+            const userData = await FindOneUser(cardData.userId);
+
             // ຕັດສະ stock
             const pointTotal = giftcardData.gift_Point * parseInt(amount)
-            if (user.point < pointTotal) {
+            if (cardData.total_point < pointTotal) {
                 return SendError(res, 400, "Point Not Enough")
             }
-            const pointAll = user.point - pointTotal;
-            const update = await prisma.user.update({
+            const pointAll = cardData.total_point - pointTotal;
+            const update = await prisma.card.update({
                 data: {
-                    point: parseInt(pointAll)
+                    total_point: parseInt(pointAll)
                 },
-                where: { user_id: userId }
+                where: { card_id: cardId }
             })
             if (!update) {
                 return SendError(res, 400, "Error Update Point")
@@ -115,7 +118,7 @@ export default class GiftHistoryController {
 
             const data = await prisma.giftHistory.create({
                 data: {
-                    userId: userId,
+                    userId: userData?.user_id,
                     giftcardId: giftcardId,
                     cardId: cardId,
                     card_number: cardData.card_number,
@@ -135,38 +138,42 @@ export default class GiftHistoryController {
     static async UpdateGifthistory(req, res) {
         try {
             const gifthistory_id = req.params.gifthistory_id;
-            const { giftcardId, amount, } = req.body;
-            const validate = await ValidateData({ giftcardId, amount });
+            // const { giftcardId, amount, } = req.body;
+            const { amount } = req.body;
+            const validate = await ValidateData({ amount });
             if (validate.length > 0) {
                 return SendError(res, 400, EMessage.BadRequest, validate.join(','));
             }
             const gifthistoryData = await FindOneGiftHistory(gifthistory_id); // ສ້າງຢູ່ໃນ service
-            const user = await FindOneUser(gifthistoryData.userId);
-            const giftcardData = await FindOneGiftCard(giftcardId); // ສ້າງຢູ່ໃນ service
+            // const user = await FindOneUser(gifthistoryData.userId);
+            const card = await FindOneCard(gifthistoryData.cardId);
+            const giftcardData = await FindOneGiftCard(gifthistoryData.giftcardId); // ສ້າງຢູ່ໃນ service
             // ຕັດສະ stock
-            const pointTotalUpdate = giftcardData.point * parseInt(amount)
+            // const pointTotalUpdate = giftcardData.point * parseInt(amount)
+            const pointTotalUpdate = giftcardData.gift_Point * parseInt(amount)
             //console.log("pointUpdate ====> ", pointTotalUpdate);
-            const pointTotalBefore = giftcardData.point * gifthistoryData.amount;
+            // const pointTotalBefore = giftcardData.point * gifthistoryData.amount;
+            const pointTotalBefore = giftcardData.gift_Point * gifthistoryData.amount;
             //console.log("pointBefore ====> ", pointTotalBefore);
-            const points = pointTotalBefore + user.point;
+            const points = pointTotalBefore + card.total_point;
             //console.log("points ====> ", points);
             if (points < pointTotalUpdate) {
                 return SendError(res, 400, "Point Not Enough")
             }
             const pointAll = points - pointTotalUpdate;
             //console.log("pointAll ====> ", pointAll);
-            const update = await prisma.user.update({
+            const update = await prisma.card.update({
                 data: {
-                    point: parseInt(pointAll)
+                    total_point: parseInt(pointAll)
                 },
-                where: { user_id: gifthistoryData.userId }
+                where: { card_id: gifthistoryData.cardId }
             })
             if (!update) {
                 return SendError(res, 400, "Error Update Point")
             }
             const data = await prisma.giftHistory.update({
                 data: {
-                    giftcardId: giftcardId, amount: parseInt(amount)
+                    giftcardId: gifthistoryData.giftcardId, amount: parseInt(amount)
                 },
                 where: {
                     gifthistory_id: gifthistory_id
@@ -184,16 +191,16 @@ export default class GiftHistoryController {
         try {
             const gifthistory_id = req.params.gifthistory_id;
             const history = await prisma.giftHistory.findUnique({ where: { gifthistory_id: gifthistory_id } })
-            const user = await prisma.user.findUnique({
+            const card = await prisma.card.findUnique({
                 where: {
-                    user_id: history.userId
+                    card_id: history.cardId
                 }
             });
-            const check = await prisma.user.update({
+            const check = await prisma.card.update({
                 data: {
-                    point: user.point + history.total
+                    total_point: card.total_point + history.total
                 }, where: {
-                    user_id: history.userId
+                    card_id: history.cardId
                 }
             })
             if (!check) {
@@ -218,7 +225,7 @@ export default class GiftHistoryController {
             const data = await prisma.giftHistory.findMany({ where: query });
             if (!data) return SendError(res, 404, EMessage.NotFound);
             const exportData = data.map(item => ({
-                CustomerName: item.user.username,
+                CustomerName: item.card.user.username,
                 giftCard: item.giftcard.name,
                 amount: item.amount,
             }));

@@ -181,7 +181,6 @@ export default class CardController {
             const exportData = data.map(item => ({
                 cardNumber: item.card_number,
                 customerNumber: item?.car?.user?.customer_number,
-                vipNumber: item.vip_number,
                 cardType: item.card_type,
                 goldIssued: item.goldIssued,
                 received: item.received,

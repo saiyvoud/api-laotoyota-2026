@@ -77,7 +77,12 @@ export default class EmployeeController {
     static async SelectAll(req, res) {
         try {
 
-            const data = await prisma.employee.findMany();
+            const data = await prisma.employee.findMany({
+                include: {
+                    user: true,
+                    branch: true
+                }
+            });
             if (!data) return SendError(res, 404, EMessage.NotFound);
             return SendSuccess(res, SMessage.SelectAll, data);
         } catch (error) {
@@ -87,7 +92,7 @@ export default class EmployeeController {
     static async SelectOne(req, res) {
         try {
             const employee_id = req.params.employee_id;
-            const data = await prisma.employee.findFirst({ where: { employee_id: employee_id } });
+            const data = await prisma.employee.findFirst({ where: { employee_id: employee_id }, include: { user: true, branch: true } });
             if (!data) return SendError(res, 404, EMessage.NotFound);
             return SendSuccess(res, SMessage.SelectOne, data)
         } catch (error) {

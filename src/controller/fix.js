@@ -373,7 +373,7 @@ export default class FixController {
                 await tx.card.update({
                     where: { card_id: cardId },
                     data: {
-                        total_point: { increment: totalPointToAdd } // ใช้ increment ของ Prisma จะแม่นยำกว่า
+                        total_point: (card?.total_point || 0) + totalPointToAdd
                     }
                 });
 

@@ -559,6 +559,8 @@ export default class BookingController {
                 branchName: item.branch?.branch_name,
                 carModel: item.car?.model,
                 plateNumber: item.car?.plateNumber,
+                engineNumber: item.car?.engineNumber,
+                frameNumber: item.car?.frameNumber,
                 date: item.day.toISOString().split('T')[0],
                 time: item.time?.time,
             }));

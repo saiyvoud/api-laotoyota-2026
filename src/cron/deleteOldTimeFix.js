@@ -45,7 +45,7 @@ cron.schedule("0 0 * * *", async () => {
         const today = new Date();
         today.setHours(0, 0, 0, 0);
         // ================= GET ALL TIMES =================
-        const allTimes = await prisma.time.findMany();
+        const allTimes = await prisma.timeFix.findMany();
         // ================= FILTER OLD TIMES =================
         const oldTimeIds = allTimes.filter((item) => {
             // skip empty date
@@ -61,15 +61,16 @@ cron.schedule("0 0 * * *", async () => {
             const todayTime = today.getTime();
             const isOld = itemTime < todayTime;
             return isOld;
-        }).map((item) => item.time_id);
+        }).map((item) => item.timefix_id);
         // ================= DELETE TIMEFIX =================
         if (oldTimeIds.length > 0) {
             const deleted = await prisma.timeFix.deleteMany({
                 where: {
-                    timeId: { in: oldTimeIds }
+                    timefix_id: { in: oldTimeIds }
                 }
             });
-            
+            console.log("Deleted TimeFix records:", deleted);
+
 
         }
     } catch (error) {

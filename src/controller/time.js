@@ -247,7 +247,6 @@ export default class TimeController {
             if (!data) return SendError(res, 404, EMessage.NotFound);
             const exportData = data.map(item => ({
                 Time: item.time,
-                Date: item.date,
                 Qty: item.qty,
                 TimeStatus: item.timeStatus
             }));
