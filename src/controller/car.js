@@ -42,11 +42,20 @@ export default class CarController {
                 ];
             }
 
-            if (startDate || endDate) {
-                query['createdAt'] = {};
-                if (startDate) query['createdAt']['gte'] = new Date(startDate);
-                if (endDate) query['createdAt']['lt'] = new Date(endDate);
-            }
+      if (startDate || endDate) {
+    query.createdAt = {};
+
+    if (startDate) {
+        query.createdAt.gte = new Date(startDate);
+    }
+
+    if (endDate) {
+        const nextDay = new Date(endDate);
+        nextDay.setDate(nextDay.getDate() + 1);
+
+        query.createdAt.lt = nextDay;
+    }
+}
             const car = await prisma.car.findMany({
                 where: query,
                 orderBy: { createdAt: 'desc' },
@@ -198,11 +207,20 @@ export default class CarController {
         try {
             const { startDate, endDate } = req.query;
             const query = {};
-            if (startDate || endDate) {
-                query['createdAt'] = {};
-                if (startDate) query['createdAt']['gte'] = new Date(startDate);
-                if (endDate) query['createdAt']['lt'] = new Date(endDate);
-            }
+      if (startDate || endDate) {
+    query.createdAt = {};
+
+    if (startDate) {
+        query.createdAt.gte = new Date(startDate);
+    }
+
+    if (endDate) {
+        const nextDay = new Date(endDate);
+        nextDay.setDate(nextDay.getDate() + 1);
+
+        query.createdAt.lt = nextDay;
+    }
+}
             const data = await prisma.car.findMany({ where: query });
             if (!data) return SendError(res, 404, EMessage.NotFound);
             const exportData = data.map(item => ({

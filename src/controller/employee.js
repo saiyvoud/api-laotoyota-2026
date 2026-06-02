@@ -47,13 +47,23 @@ export default class EmployeeController {
                 query['OR'] = [
                     { employee_code: { contains: search } },
                     { employee_name: { contains: search } },
+                    { position: { contains: search } },
                 ];
 
-            if (startDate || endDate) {
-                query['createdAt'] = {};
-                if (startDate) query['createdAt']['gte'] = new Date(startDate);
-                if (endDate) query['createdAt']['lt'] = new Date(endDate);
-            }
+      if (startDate || endDate) {
+    query.createdAt = {};
+
+    if (startDate) {
+        query.createdAt.gte = new Date(startDate);
+    }
+
+    if (endDate) {
+        const nextDay = new Date(endDate);
+        nextDay.setDate(nextDay.getDate() + 1);
+
+        query.createdAt.lt = nextDay;
+    }
+}
 
 
             const employee = await prisma.employee.findMany({
@@ -167,11 +177,20 @@ export default class EmployeeController {
         try {
             const { startDate, endDate } = req.query;
             const query = {};
-            if (startDate || endDate) {
-                query['createdAt'] = {};
-                if (startDate) query['createdAt']['gte'] = new Date(startDate);
-                if (endDate) query['createdAt']['lt'] = new Date(endDate);
-            }
+      if (startDate || endDate) {
+    query.createdAt = {};
+
+    if (startDate) {
+        query.createdAt.gte = new Date(startDate);
+    }
+
+    if (endDate) {
+        const nextDay = new Date(endDate);
+        nextDay.setDate(nextDay.getDate() + 1);
+
+        query.createdAt.lt = nextDay;
+    }
+}
             const data = await prisma.employee.findMany({
                 where: query,
                 include: {

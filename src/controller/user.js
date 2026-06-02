@@ -38,9 +38,7 @@ export default class UserController {
             const query = {};
 
             if (search) {
-
                 query.OR = [
-
                     {
                         username: {
                             contains: search
@@ -51,15 +49,28 @@ export default class UserController {
                         phoneNumber: {
                             contains: search
                         }
+                    },
+                    {
+                        customer_number: {
+                            contains: search
+                        }
                     }
 
                 ];
             }
 
             if (startDate || endDate) {
-                query['createdAt'] = {};
-                if (startDate) query['createdAt']['gte'] = new Date(startDate);
-                if (endDate) query['createdAt']['lt'] = new Date(endDate);
+                query.createdAt = {};
+                if (startDate) {
+                    query.createdAt.gte = new Date(startDate);
+                }
+
+                if (endDate) {
+                    const nextDay = new Date(endDate);
+                    nextDay.setDate(nextDay.getDate() + 1);
+
+                    query.createdAt.lt = nextDay;
+                }
             }
 
             if (status) {
@@ -119,9 +130,16 @@ export default class UserController {
             }
 
             if (startDate || endDate) {
-                query['createdAt'] = {};
-                if (startDate) query['createdAt']['gte'] = new Date(startDate);
-                if (endDate) query['createdAt']['lt'] = new Date(endDate);
+                query.createdAt = {};
+                if (startDate) {
+                    query.createdAt.gte = new Date(startDate);
+                }
+
+                if (endDate) {
+                    const nextDay = new Date(endDate);
+                    nextDay.setDate(nextDay.getDate() + 1);
+                    query.createdAt.lt = nextDay;
+                }
             }
 
             if (status) {
@@ -554,9 +572,18 @@ export default class UserController {
                 }
             };
             if (startDate || endDate) {
-                query['createdAt'] = {};
-                if (startDate) query['createdAt']['gte'] = new Date(startDate);
-                if (endDate) query['createdAt']['lt'] = new Date(endDate);
+                query.createdAt = {};
+
+                if (startDate) {
+                    query.createdAt.gte = new Date(startDate);
+                }
+
+                if (endDate) {
+                    const nextDay = new Date(endDate);
+                    nextDay.setDate(nextDay.getDate() + 1);
+
+                    query.createdAt.lt = nextDay;
+                }
             }
             const data = await prisma.user.findMany({ where: query });
             if (!data) return SendError(res, 404, EMessage.NotFound);
@@ -589,9 +616,18 @@ export default class UserController {
                 }
             };
             if (startDate || endDate) {
-                query['createdAt'] = {};
-                if (startDate) query['createdAt']['gte'] = new Date(startDate);
-                if (endDate) query['createdAt']['lt'] = new Date(endDate);
+                query.createdAt = {};
+
+                if (startDate) {
+                    query.createdAt.gte = new Date(startDate);
+                }
+
+                if (endDate) {
+                    const nextDay = new Date(endDate);
+                    nextDay.setDate(nextDay.getDate() + 1);
+
+                    query.createdAt.lt = nextDay;
+                }
             }
             const data = await prisma.user.findMany({
                 where: query

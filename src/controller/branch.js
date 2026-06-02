@@ -24,14 +24,24 @@ export default class BranchController {
                     { branch_name: { contains: search } },
                     { location: { contains: search } },
                     { branch_code: { contains: search } },
+                    { phone: { contains: search } },
                 ];
 
 
-            if (startDate || endDate) {
-                query['createdAt'] = {};
-                if (startDate) query['createdAt']['gte'] = new Date(startDate);
-                if (endDate) query['createdAt']['lt'] = new Date(endDate);
-            }
+      if (startDate || endDate) {
+    query.createdAt = {};
+
+    if (startDate) {
+        query.createdAt.gte = new Date(startDate);
+    }
+
+    if (endDate) {
+        const nextDay = new Date(endDate);
+        nextDay.setDate(nextDay.getDate() + 1);
+
+        query.createdAt.lt = nextDay;
+    }
+}
 
 
             const branch = await prisma.branch.findMany({

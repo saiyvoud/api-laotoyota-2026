@@ -42,9 +42,18 @@ export default class TimeController {
                 ];
 
             if (startDate || endDate) {
-                query['createdAt'] = {};
-                if (startDate) query['createdAt']['gte'] = new Date(startDate);
-                if (endDate) query['createdAt']['lt'] = new Date(endDate);
+                query.createdAt = {};
+
+                if (startDate) {
+                    query.createdAt.gte = new Date(startDate);
+                }
+
+                if (endDate) {
+                    const nextDay = new Date(endDate);
+                    nextDay.setDate(nextDay.getDate() + 1);
+
+                    query.createdAt.lt = nextDay;
+                }
             }
 
             const time = await prisma.time.findMany({
@@ -54,7 +63,7 @@ export default class TimeController {
                 },
                 skip: (parseInt(page) - 1) * parseInt(limit),
                 take: parseInt(limit),
-               
+
             });
             if (!time) return SendError(res, 404, EMessage.NotFound);
             const count = await prisma.time.count({ where: query });
@@ -68,7 +77,7 @@ export default class TimeController {
         try {
             const data = await prisma.time.findMany({
                 where: { timeStatus: true },
-              
+
             });
             if (!data) return SendError(res, 404, EMessage.NotFound);
             return SendSuccess(res, SMessage.SelectAll, data);
@@ -89,11 +98,11 @@ export default class TimeController {
         try {
             const time_id = req.params.time_id;
             const data = await prisma.time.findFirst({
-                where: { time_id: time_id},
+                where: { time_id: time_id },
                 include: {
-                    booking: true, 
+                    bookings: true,
                 }
-                
+
             });
             if (!data) return SendError(res, 404, EMessage.NotFound);
             return SendSuccess(res, SMessage.SelectOne, data)
@@ -185,7 +194,9 @@ export default class TimeController {
 
             const data = await prisma.time.update({
                 data: {
-                    time, qty: parseInt(qty),  createBy: req.employee
+                    time,
+                    qty: parseInt(qty),
+                    createBy: req.employee
                 },
                 where: {
                     time_id: time_id
@@ -236,9 +247,18 @@ export default class TimeController {
             const { startDate, endDate } = req.query;
             const query = {};
             if (startDate || endDate) {
-                query['createdAt'] = {};
-                if (startDate) query['createdAt']['gte'] = new Date(startDate);
-                if (endDate) query['createdAt']['lt'] = new Date(endDate);
+                query.createdAt = {};
+
+                if (startDate) {
+                    query.createdAt.gte = new Date(startDate);
+                }
+
+                if (endDate) {
+                    const nextDay = new Date(endDate);
+                    nextDay.setDate(nextDay.getDate() + 1);
+
+                    query.createdAt.lt = nextDay;
+                }
             }
             const data = await prisma.time.findMany({
                 where: query,

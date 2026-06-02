@@ -24,29 +24,82 @@ export default class FixController {
             return SendError(res, 500, EMessage.ServerInternal, error);
         }
     }
-    static async getAllFix(req, res) {
+    static async getAllFixFromWorkshop(req, res) {
         try {
-            const { page = 1, limit = 10, search, startDate, endDate, status, } = req.query;
-            const query = {};
+            const {
+                page = 1,
+                limit = 10,
+                search,
+                startDate,
+                endDate,
+                status,
+            } = req.query;
+
+            const query = {
+                bookingId: null, // เฉพาะงาน Workshop
+            };
+
+            // Search
             if (search) {
-                query['OR'] = [
-                    { detailFix: { contains: search } },
+                query.OR = [
+                    {
+                        card: {
+                            car: {
+                                plateNumber: {
+                                    contains: search,
+                                },
+                            },
+                        },
+                    },
+                    {
+                        card: {
+                            car: {
+                                model: {
+                                    contains: search,
+                                },
+                            },
+                        },
+                    },
+                    {
+                        card: {
+                            user: {
+                                username: {
+                                    contains: search,
+                                },
+                            },
+                        },
+                    },
                 ];
             }
 
+            // Date Filter
             if (startDate || endDate) {
-                query['createdAt'] = {};
-                if (startDate) query['createdAt']['gte'] = new Date(startDate);
-                if (endDate) query['createdAt']['lt'] = new Date(endDate);
+                query.createdAt = {};
+
+                if (startDate) {
+                    query.createdAt.gte = new Date(startDate);
+                }
+
+                if (endDate) {
+                    const nextDay = new Date(endDate);
+                    nextDay.setDate(nextDay.getDate() + 1);
+                    query.createdAt.lt = nextDay;
+                }
             }
+
+            // Status Filter
             if (status) {
-                query['fixStatus'] = status;
+                query.fixStatus = status;
             }
+
             const fix = await prisma.fix.findMany({
                 where: query,
-                orderBy: { createdAt: 'desc' },
+                orderBy: {
+                    createdAt: "desc",
+                },
                 skip: (parseInt(page) - 1) * parseInt(limit),
                 take: parseInt(limit),
+
                 include: {
                     booking: {
                         include: {
@@ -59,16 +112,141 @@ export default class FixController {
                     card: {
                         include: {
                             user: true,
-                            car: true
+                            car: true,
                         },
                     },
-
                 },
             });
-            if (!fix) return SendError(res, 404, EMessage.NotFound);
-            const count = await prisma.fix.count({ where: query });
+
+            const count = await prisma.fix.count({
+                where: query,
+            });
+
             const totalPage = Math.ceil(count / parseInt(limit));
-            return SendSuccess(res, SMessage.SelectAll, { data: fix, totalPage });
+
+            return SendSuccess(res, SMessage.SelectAll, {
+                data: fix,
+                totalPage,
+                totalRecord: count,
+            });
+
+        } catch (error) {
+            console.log(error);
+
+            return SendError(
+                res,
+                500,
+                EMessage.ServerInternal,
+                error
+            );
+        }
+    }
+  
+
+    static async getAllFixFromBooking(req, res) {
+        try {
+            const {
+                page = 1,
+                limit = 10,
+                search,
+                startDate,
+                endDate,
+                status,
+            } = req.query;
+
+            const query = {
+                bookingId: { not: null }, // ✅ เอาเฉพาะ booking เท่านั้น
+            };
+
+            // SEARCH
+            if (search) {
+                query.OR = [
+                    {
+                        card: {
+                            car: {
+                                plateNumber: {
+                                    contains: search,
+                                },
+                            },
+                        },
+                    },
+                    {
+                        card: {
+                            car: {
+                                model: {
+                                    contains: search,
+                                },
+                            },
+                        },
+                    },
+                    {
+                        card: {
+                            user: {
+                                username: {
+                                    contains: search,
+                                },
+                            },
+                        },
+                    },
+                ];
+            }
+
+            // DATE FILTER
+            if (startDate || endDate) {
+                query.createdAt = {};
+
+                if (startDate) {
+                    query.createdAt.gte = new Date(startDate);
+                }
+
+                if (endDate) {
+                    const nextDay = new Date(endDate);
+                    nextDay.setDate(nextDay.getDate() + 1);
+                    query.createdAt.lt = nextDay;
+                }
+            }
+
+            // STATUS FILTER
+            if (status) {
+                query.fixStatus = status;
+            }
+
+            const fix = await prisma.fix.findMany({
+                where: query,
+                orderBy: { createdAt: "desc" },
+                skip: (parseInt(page) - 1) * parseInt(limit),
+                take: parseInt(limit),
+
+                include: {
+                    booking: {
+                        include: {
+                            car: true,
+                            time: true,
+                            user: true,
+                            branch: true,
+                        },
+                    },
+                    card: {
+                        include: {
+                            user: true,
+                            car: true,
+                        },
+                    },
+                },
+            });
+
+            const count = await prisma.fix.count({
+                where: query,
+            });
+
+            const totalPage = Math.ceil(count / parseInt(limit));
+
+            return SendSuccess(res, SMessage.SelectAll, {
+                data: fix,
+                totalPage,
+                totalRecord: count,
+            });
+
         } catch (error) {
             console.log(error);
             return SendError(res, 500, EMessage.ServerInternal, error);
@@ -428,9 +606,18 @@ export default class FixController {
             const { startDate, endDate } = req.query;
             const query = {};
             if (startDate || endDate) {
-                query['createdAt'] = {};
-                if (startDate) query['createdAt']['gte'] = new Date(startDate);
-                if (endDate) query['createdAt']['lt'] = new Date(endDate);
+                query.createdAt = {};
+
+                if (startDate) {
+                    query.createdAt.gte = new Date(startDate);
+                }
+
+                if (endDate) {
+                    const nextDay = new Date(endDate);
+                    nextDay.setDate(nextDay.getDate() + 1);
+
+                    query.createdAt.lt = nextDay;
+                }
             }
             const data = await prisma.fix.findMany({ where: query });
             if (!data) return SendError(res, 404, EMessage.NotFound);

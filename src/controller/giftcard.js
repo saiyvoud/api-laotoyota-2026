@@ -15,11 +15,6 @@ export default class GiftCardController {
                 endDate,
             } = req.query;
             const query = {};
-            // if (search)
-            //     query['OR'] = getSearchQuery(
-            //         ['name'],
-            //         search
-            //     );
             if (search) {
                 query['OR'] = [
                     { gift_Name: { contains: search } },
@@ -27,11 +22,20 @@ export default class GiftCardController {
                 ];
             }
 
-            if (startDate || endDate) {
-                query['createdAt'] = {};
-                if (startDate) query['createdAt']['gte'] = new Date(startDate);
-                if (endDate) query['createdAt']['lt'] = new Date(endDate);
-            }
+      if (startDate || endDate) {
+    query.createdAt = {};
+
+    if (startDate) {
+        query.createdAt.gte = new Date(startDate);
+    }
+
+    if (endDate) {
+        const nextDay = new Date(endDate);
+        nextDay.setDate(nextDay.getDate() + 1);
+
+        query.createdAt.lt = nextDay;
+    }
+}
             const giftcard = await prisma.giftCard.findMany({
                 where: query,
                 orderBy: {
@@ -170,11 +174,20 @@ export default class GiftCardController {
         try {
             const { startDate, endDate } = req.query;
             const query = {};
-            if (startDate || endDate) {
-                query['createdAt'] = {};
-                if (startDate) query['createdAt']['gte'] = new Date(startDate);
-                if (endDate) query['createdAt']['lt'] = new Date(endDate);
-            }
+      if (startDate || endDate) {
+    query.createdAt = {};
+
+    if (startDate) {
+        query.createdAt.gte = new Date(startDate);
+    }
+
+    if (endDate) {
+        const nextDay = new Date(endDate);
+        nextDay.setDate(nextDay.getDate() + 1);
+
+        query.createdAt.lt = nextDay;
+    }
+}
             const data = await prisma.giftCard.findMany({ where: query });
             if (!data) return SendError(res, 404, EMessage.NotFound);
             const exportData = data.map(item => ({

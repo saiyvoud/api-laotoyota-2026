@@ -12,17 +12,26 @@ export default class CardController {
             const query = {};
             if (search) {
                 query['OR'] = [
-                    { customer_number: { contains: search } },
+                    { user: { customer_number: { contains: search } } },
                     { card_number: { contains: search } },
-                    { vip_number: { contains: search } },
+                    { card_type: { contains: search } },
                 ];
             }
 
-            if (startDate || endDate) {
-                query['createdAt'] = {};
-                if (startDate) query['createdAt']['gte'] = new Date(startDate);
-                if (endDate) query['createdAt']['lt'] = new Date(endDate);
-            }
+      if (startDate || endDate) {
+    query.createdAt = {};
+
+    if (startDate) {
+        query.createdAt.gte = new Date(startDate);
+    }
+
+    if (endDate) {
+        const nextDay = new Date(endDate);
+        nextDay.setDate(nextDay.getDate() + 1);
+
+        query.createdAt.lt = nextDay;
+    }
+}
             const card = await prisma.card.findMany({
                 where: query,
                 orderBy: {
@@ -161,11 +170,20 @@ export default class CardController {
         try {
             const { startDate, endDate } = req.query;
             const query = {};
-            if (startDate || endDate) {
-                query['createdAt'] = {};
-                if (startDate) query['createdAt']['gte'] = new Date(startDate);
-                if (endDate) query['createdAt']['lt'] = new Date(endDate);
-            }
+      if (startDate || endDate) {
+    query.createdAt = {};
+
+    if (startDate) {
+        query.createdAt.gte = new Date(startDate);
+    }
+
+    if (endDate) {
+        const nextDay = new Date(endDate);
+        nextDay.setDate(nextDay.getDate() + 1);
+
+        query.createdAt.lt = nextDay;
+    }
+}
             const data = await prisma.card.findMany({
                 where: query,
                 include: {
