@@ -103,8 +103,8 @@ router.get("/gifthistory/selOne/:gifthistory_id", auth, GiftHistoryController.Se
 router.get("/gifthistory/getAll", auth, GiftHistoryController.getAllGiftHistory);
 router.get("/gifthistory/export", auth, GiftHistoryController.ExportGiftHistory);
 router.post("/gifthistory/insert", auth, GiftHistoryController.Insert);
-router.put("/gifthistory/update/:gifthistory_id", auth, GiftHistoryController.UpdateGifthistory);
-// router.delete("/gifthistory/delete/:gifthistory_id", auth, GiftHistoryController.DeleteGifthistory);
+// router.put("/gifthistory/update/:gifthistory_id", auth, GiftHistoryController.UpdateGifthistory);
+router.put("/gifthistory/delete/:gifthistory_id", auth, GiftHistoryController.DeleteGifthistory);
 //---- card ----
 router.get("/card/selAll", auth, CardController.SelectAll);
 router.get("/card/selOne/:card_id", auth, CardController.SelectOne);
