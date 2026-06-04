@@ -165,7 +165,11 @@ export default class UserController {
     static async SelectAll(req, res) {
         try {
 
-            const data = await prisma.user.findMany();
+            const data = await prisma.user.findMany({
+                include: {
+                    Employee: true
+                }
+            });
             if (!data) return SendError(res, 404, EMessage.NotFound);
             return SendSuccess(res, SMessage.SelectAll, data);
         } catch (error) {
