@@ -75,6 +75,7 @@ model Branch {
   Employee    Employee[]
   bookings    Booking[]
   timeFixes   TimeFix[]
+  fix         Fix[]
 }
 
 model Promotion {
@@ -258,6 +259,8 @@ model Fix {
   fix_id       String   @id @default(uuid()) @db.VarChar(36)
   bookingId    String?   @db.VarChar(36)
   booking      Booking?  @relation(fields: [bookingId], references: [booking_id])
+  branchId     String?   @db.VarChar(36)
+  branch       Branch?   @relation(fields: [branchId], references: [branch_id])
   detailFix    String?
   kmLast       Int?
   kmNext       Int?

@@ -2,7 +2,7 @@ import { ValidateData } from "../service/validate.js"
 import { EMessage, SMessage, FixStatus } from "../service/message.js"
 import { SendError, SendCreate, SendSuccess } from "../service/response.js"
 import prisma from "../config/prima.js";
-import { FindOneBooking, FindOneCard, FindOneUser } from "../service/service.js";
+import { FindOneBooking, FindOneBranch, FindOneCard, FindOneUser } from "../service/service.js";
 import { ExcelBuilder, ReportColumns } from "../service/excelBuilder.js";
 export default class FixController {
     static async SearchFix(req, res) {
@@ -101,14 +101,6 @@ export default class FixController {
                 take: parseInt(limit),
 
                 include: {
-                    booking: {
-                        include: {
-                            car: true,
-                            time: true,
-                            user: true,
-                            branch: true,
-                        },
-                    },
                     card: {
                         include: {
                             user: true,
@@ -141,7 +133,7 @@ export default class FixController {
             );
         }
     }
-  
+
 
     static async getAllFixFromBooking(req, res) {
         try {
@@ -253,26 +245,20 @@ export default class FixController {
         }
     }
 
-    static async getAllFixByBranch(req, res) {
+    static async getAllFixByBranchFromBooking(req, res) {
         try {
             const branchId = req.params.branch_id;
             const { page = 1, limit = 10, search, startDate, endDate, status } = req.query;
-
-            // 1. กำหนด Query พื้นฐาน (กรองตาม branchId ผ่าน booking relation)
             const query = {
                 booking: {
                     branchId: branchId
                 }
             };
-
-            // 2. กรองตามสถานะของงานซ่อม (Fix Status)
             if (status) {
                 query.fixStatus = status;
             }
 
-            // 3. เงื่อนไขการ Search (ค้นหาทะเบียนรถ หรือ เลขตัวถัง)
             if (search) {
-                // ใช้ AND ร่วมกับ OR เพื่อให้ยังคงกรองเฉพาะ branchId เดิมอยู่
                 query.AND = [
                     { booking: { branchId: branchId } },
                     {
@@ -284,7 +270,6 @@ export default class FixController {
                 ];
             }
 
-            // 4. เงื่อนไขช่วงวันที่ (ของรายการ Fix)
             if (startDate || endDate) {
                 query.createdAt = {};
                 if (startDate) query.createdAt.gte = new Date(startDate);
@@ -308,6 +293,67 @@ export default class FixController {
                             branch: true,
                         },
                     },
+                    card: {
+                        include: {
+                            user: true,
+                            car: true
+                        },
+                    },
+                },
+            });
+
+            // 6. นับจำนวนทั้งหมดตามเงื่อนไขเพื่อทำ Pagination
+            const count = await prisma.fix.count({ where: query });
+            const totalPage = Math.ceil(count / parseInt(limit));
+
+            // 7. ส่งค่ากลับ (ใช้ data: data ให้ตรงกับตัวแปรที่ประกาศไว้)
+            return SendSuccess(res, SMessage.SelectAll, { data: data, totalPage });
+
+        } catch (error) {
+            console.error("Fetch Error:", error);
+            return SendError(res, 500, EMessage.ServerInternal, error.message);
+        }
+    }
+
+    static async getAllFixByBranchFromWorkshop(req, res) {
+        try {
+            const branchId = req.params.branch_id;
+            const { page = 1, limit = 10, search, startDate, endDate, status } = req.query;
+            const query = {
+                branchId: branchId,
+                bookingId: null, // เฉพาะงาน Workshop
+            };
+            if (status) {
+                query.fixStatus = status;
+            }
+
+            if (search) {
+                query.AND = [
+                    { branchId: branchId },
+                    {
+                        OR: [
+                            { card: { car: { plateNumber: { contains: search } } } },
+                            { card: { car: { frameNumber: { contains: search } } } }
+                        ]
+                    }
+                ];
+            }
+
+            if (startDate || endDate) {
+                query.createdAt = {};
+                if (startDate) query.createdAt.gte = new Date(startDate);
+                if (endDate) query.createdAt.lt = new Date(endDate);
+            }
+
+            // 5. ดึงข้อมูลจาก prisma.fix (ไม่ใช่ prisma.booking)
+            const data = await prisma.fix.findMany({
+                where: query,
+                orderBy: {
+                    createdAt: 'desc',
+                },
+                skip: (parseInt(page) - 1) * parseInt(limit),
+                take: parseInt(limit),
+                include: {
                     card: {
                         include: {
                             user: true,
@@ -535,9 +581,11 @@ export default class FixController {
                 payment_type,
                 invoice_date: new Date(),
                 invoice_number,
-                fixStatus: FixStatus.success, // หรือใช้ FixStatus.success ตาม enum ของคุณ
-                createBy: req.employee // ตรวจสอบว่า middleware เก็บค่าไว้ที่ req.employee จริงหรือไม่
+                fixStatus: FixStatus.success, 
+                createBy: req.employee, 
             };
+
+
 
             // กรณีมีบัตร: ใช้ Transaction เพื่อความปลอดภัย
             const card = await prisma.card.findUnique({ where: { card_id: cardId } });
@@ -555,8 +603,27 @@ export default class FixController {
                     }
                 });
 
+
                 return newFix;
             });
+            // 1. หา Employee ก่อน
+            const employee = await prisma.employee.findFirst({
+                where: { employee_id: result.createBy }
+            });
+
+            // 2. เช็คว่าเจอพนักงานไหมก่อนจะเข้าถึง branchId
+            if (employee) {
+                const branchId = employee.branchId;
+                const branch = await FindOneBranch(branchId);
+                if (branch) {
+                    await prisma.fix.update({
+                        where: { fix_id: result.fix_id },
+                        data: { branchId: branch.branch_id }
+                    })
+                }
+            } else {
+                return SendError(res, 404, EMessage.ESelect);
+            }
 
             if (!result) return SendError(res, 400, EMessage.EInsert);
 
@@ -567,6 +634,8 @@ export default class FixController {
             return SendError(res, 500, EMessage.ServerInternal, error.message);
         }
     }
+
+
     static async UpdateFix(req, res) {
         try {
             const fix_id = req.params.fix_id;

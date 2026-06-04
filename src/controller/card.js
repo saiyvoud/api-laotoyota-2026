@@ -18,20 +18,20 @@ export default class CardController {
                 ];
             }
 
-      if (startDate || endDate) {
-    query.createdAt = {};
+            if (startDate || endDate) {
+                query.createdAt = {};
 
-    if (startDate) {
-        query.createdAt.gte = new Date(startDate);
-    }
+                if (startDate) {
+                    query.createdAt.gte = new Date(startDate);
+                }
 
-    if (endDate) {
-        const nextDay = new Date(endDate);
-        nextDay.setDate(nextDay.getDate() + 1);
+                if (endDate) {
+                    const nextDay = new Date(endDate);
+                    nextDay.setDate(nextDay.getDate() + 1);
 
-        query.createdAt.lt = nextDay;
-    }
-}
+                    query.createdAt.lt = nextDay;
+                }
+            }
             const card = await prisma.card.findMany({
                 where: query,
                 orderBy: {
@@ -83,10 +83,19 @@ export default class CardController {
     static async SelectOne(req, res) {
         try {
             const card_id = req.params.card_id;
-
             const data = await prisma.card.findFirst({ where: { card_id: card_id }, include: { car: { include: { user: true } } } });
             if (!data) return SendError(res, 404, EMessage.NotFound);
             return SendSuccess(res, SMessage.SelectOne, data)
+        } catch (error) {
+            return SendError(res, 500, EMessage.ServerInternal, error);
+        }
+    }
+    static async SelectByUser(req, res) {
+        try {
+            const userId = req.params.userId;
+            const data = await prisma.card.findMany({ where: { userId: userId }, include: { car: { include: { user: true } } } });
+            if (!data) return SendError(res, 404, EMessage.NotFound);
+            return SendSuccess(res, SMessage.SelectBy, data)
         } catch (error) {
             return SendError(res, 500, EMessage.ServerInternal, error);
         }
@@ -170,20 +179,20 @@ export default class CardController {
         try {
             const { startDate, endDate } = req.query;
             const query = {};
-      if (startDate || endDate) {
-    query.createdAt = {};
+            if (startDate || endDate) {
+                query.createdAt = {};
 
-    if (startDate) {
-        query.createdAt.gte = new Date(startDate);
-    }
+                if (startDate) {
+                    query.createdAt.gte = new Date(startDate);
+                }
 
-    if (endDate) {
-        const nextDay = new Date(endDate);
-        nextDay.setDate(nextDay.getDate() + 1);
+                if (endDate) {
+                    const nextDay = new Date(endDate);
+                    nextDay.setDate(nextDay.getDate() + 1);
 
-        query.createdAt.lt = nextDay;
-    }
-}
+                    query.createdAt.lt = nextDay;
+                }
+            }
             const data = await prisma.card.findMany({
                 where: query,
                 include: {
