@@ -132,7 +132,7 @@ export default class CardController {
     static async SelectCard(req, res) {
         try {
             const userId = req.params.userId;
-            const data = await prisma.card.findFirst({
+            const data = await prisma.card.findMany({
                 where: {
                     userId: userId,
                     status: true
