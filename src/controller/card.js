@@ -131,11 +131,10 @@ export default class CardController {
     }
     static async SelectCard(req, res) {
         try {
-            const userId = req.params.userId;
-
+            const user_id = req.user; // ມາຈາກ token 
             const data = await prisma.card.findFirst({
                 where: {
-                    userId: userId,
+                    userId: user_id,
                     status: true 
                 },
                 include: {
@@ -146,8 +145,6 @@ export default class CardController {
                     }
                 }
             });
-
-            // ใช้ findFirst ถ้าหาไม่เจอ data จะเป็น null ทันที ทำให้เงื่อนไขนี้ทำงานได้ถูกต้อง
             if (!data) return SendError(res, 404, EMessage.NotFound);
 
             return SendSuccess(res, SMessage.SelectOne, data);
