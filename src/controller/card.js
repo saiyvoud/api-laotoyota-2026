@@ -136,12 +136,12 @@ export default class CardController {
             const data = await prisma.card.findFirst({
                 where: {
                     userId: userId,
-                    status: true // ดึงใบที่เปิดใช้งานอยู่
+                    // status: true 
                 },
                 include: {
-                    car: {          // 👈 1. ดึงข้อมูลรถ (ชื่อฟิลด์ 'car' ตัวเล็ก ตรงตามโมเดลของคุณ)
+                    car: {          
                         include: {
-                            user: true // 👈 2. ดึงข้อมูลเจ้าของรถ (ต้องมั่นใจว่าในตาราง Car มีฟิลด์ relation ชื่อ user นะครับ)
+                            user: true 
                         }
                     }
                 }
