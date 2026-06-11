@@ -141,24 +141,26 @@ export default class CardController {
     }
     static async SetCard(req, res) {
         try {
-            const card_id = req.params.card_id;
+            const { userId, card_id } = req.params;
+
             const cardData = await FindOneCard(card_id);
-            if (!cardData) {
+            if (cardData.userId !== userId) {
                 return SendError(res, 404, EMessage.NotFound);
             }
             const [_, updatedCard] = await prisma.$transaction([
                 prisma.card.updateMany({
                     where: {
-                        card_id: { not: cardData.card_id }
+                        userId: cardData.userId, 
+                        card_id: { not: cardData.card_id } 
                     },
                     data: {
                         status: false
                     }
                 }),
-                // สั่งให้การ์ด "ใบที่เลือก" กลายเป็น true
                 prisma.card.update({
                     where: {
-                        card_id: cardData.card_id
+                        userId: cardData.userId,
+                        card_id: cardData.card_id 
                     },
                     data: {
                         status: true
