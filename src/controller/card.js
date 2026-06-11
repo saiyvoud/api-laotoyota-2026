@@ -141,10 +141,9 @@ export default class CardController {
     }
     static async SetCard(req, res) {
         try {
-            const { userId, card_id } = req.params;
-
+            const { card_id } = req.params;
             const cardData = await FindOneCard(card_id);
-            if (cardData.userId !== userId) {
+            if (!cardData) {
                 return SendError(res, 404, EMessage.NotFound);
             }
             const [_, updatedCard] = await prisma.$transaction([
