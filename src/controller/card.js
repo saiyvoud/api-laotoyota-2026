@@ -136,7 +136,7 @@ export default class CardController {
             const data = await prisma.card.findFirst({
                 where: {
                     userId: userId,
-                    // status: true 
+                    status: true 
                 },
                 include: {
                     car: {          
