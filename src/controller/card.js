@@ -175,32 +175,7 @@ export default class CardController {
             return SendError(res, 500, EMessage.ServerInternal, error);
         }
     }
-    static async UpdateCard(req, res) {
-        try {
-            const card_id = req.params.card_id;
-            const { carId, card_number, card_type, received, expiration_date } = req.body;
-            const validate = await ValidateData({ carId, card_number, card_type });
-            if (validate.length > 0) {
-                return SendError(res, 400, EMessage.BadRequest, validate.join(','));
-            }
-            const carData = await FindOneCar(carId);
-            if (!carData) {
-                return SendError(res, 404, EMessage.NotFound);
-            }
-            const data = await prisma.card.update({
-                data: {
-                    carId, card_number, card_type, received, expiration_date, userId: carData.userId, createBy: req.employee
-                },
-                where: {
-                    card_id: card_id
-                }
-            });
-            if (!data) return SendError(res, 404, EMessage.EUpdate);
-            return SendSuccess(res, SMessage.Update, data)
-        } catch (error) {
-            return SendError(res, 500, EMessage.ServerInternal, error)
-        }
-    }
+
     static async UpdateCard(req, res) {
         try {
             const card_id = req.params.card_id;
