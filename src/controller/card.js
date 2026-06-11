@@ -132,6 +132,7 @@ export default class CardController {
     static async SelectCard(req, res) {
         try {
             const userId = req.params.user_id;
+            console.log("user id : ",userId);
             const data = await prisma.card.findFirst({
                 where: {
                     userId: userId,
@@ -153,7 +154,7 @@ export default class CardController {
     }
     static async SetCard(req, res) {
         try {
-            const { card_id } = req.params;
+            const card_id = req.params.card_id;
             const cardData = await FindOneCard(card_id);
             if (!cardData) {
                 return SendError(res, 404, EMessage.NotFound);
