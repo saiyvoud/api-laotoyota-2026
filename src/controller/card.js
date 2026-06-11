@@ -131,8 +131,20 @@ export default class CardController {
     }
     static async SelectCard(req, res) {
         try {
-            const card_id = req.params.card_id;
-            const data = await prisma.card.findFirst({ where: { card_id: card_id, status: true }, include: { car: { include: { user: true } } } });
+            const userId = req.params.user_id;
+            const data = await prisma.card.findFirst({
+                where: {
+                    userId: userId,
+                    status: true
+                },
+                include: {
+                    car: {
+                        include: {
+                            user: true
+                        }
+                    }
+                }
+            });
             if (!data) return SendError(res, 404, EMessage.NotFound);
             return SendSuccess(res, SMessage.SelectOne, data)
         } catch (error) {
@@ -149,8 +161,8 @@ export default class CardController {
             const [_, updatedCard] = await prisma.$transaction([
                 prisma.card.updateMany({
                     where: {
-                        userId: cardData.userId, 
-                        card_id: { not: cardData.card_id } 
+                        userId: cardData.userId,
+                        card_id: { not: cardData.card_id }
                     },
                     data: {
                         status: false
@@ -159,7 +171,7 @@ export default class CardController {
                 prisma.card.update({
                     where: {
                         userId: cardData.userId,
-                        card_id: cardData.card_id 
+                        card_id: cardData.card_id
                     },
                     data: {
                         status: true
