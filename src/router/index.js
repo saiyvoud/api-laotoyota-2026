@@ -108,11 +108,13 @@ router.put("/gifthistory/delete/:gifthistory_id", auth, GiftHistoryController.De
 //---- card ----
 router.get("/card/selAll", auth, CardController.SelectAll);
 router.get("/card/selOne/:card_id", auth, CardController.SelectOne);
+router.get("/card/selCard/:card_id", auth, CardController.SelectCard);
 router.get("/card/getAll", auth, CardController.getAllCard);
 router.get("/card/export", auth, CardController.ExportCard);
 router.get("/card/selByUser/:userId", auth, CardController.SelectByUser);
 router.post("/card/insert", auth, CardController.Insert);
 router.put("/card/update/:card_id", auth, CardController.UpdateCard);
+router.put("/card/setCard/:card_id", auth, CardController.SetCard);
 router.delete("/card/delete/:card_id", auth, CardController.DeleteCard);
 //---- car ----
 router.get("/car/selAll", auth, CarController.SelectAll);

@@ -2,7 +2,7 @@ import { ValidateData } from "../service/validate.js"
 import { EMessage, SMessage } from "../service/message.js"
 import { SendError, SendCreate, SendSuccess } from "../service/response.js"
 import prisma from "../config/prima.js";
-import { FindOneCar, FindOneUser } from "../service/service.js";
+import { FindOneCar, FindOneCard, FindOneUser } from "../service/service.js";
 import { UploadImageToCloud } from "../config/cloudinary.js";
 import { ExcelBuilder, ReportColumns } from "../service/excelBuilder.js";
 export default class CardController {
@@ -100,6 +100,7 @@ export default class CardController {
             return SendError(res, 500, EMessage.ServerInternal, error);
         }
     }
+
     static async Insert(req, res) {
         try {
             const {
@@ -128,16 +129,81 @@ export default class CardController {
             return SendError(res, 500, EMessage.ServerInternal, error);
         }
     }
+    static async SelectCard(req, res) {
+        try {
+            const card_id = req.params.card_id;
+            const data = await prisma.card.findFirst({ where: { card_id: card_id, status: true }, include: { car: { include: { user: true } } } });
+            if (!data) return SendError(res, 404, EMessage.NotFound);
+            return SendSuccess(res, SMessage.SelectOne, data)
+        } catch (error) {
+            return SendError(res, 500, EMessage.ServerInternal, error);
+        }
+    }
+    static async SetCard(req, res) {
+        try {
+            const card_id = req.params.card_id;
+            const cardData = await FindOneCard(card_id);
+            if (!cardData) {
+                return SendError(res, 404, EMessage.NotFound);
+            }
+            const [_, updatedCard] = await prisma.$transaction([
+                prisma.card.updateMany({
+                    where: {
+                        card_id: { not: cardData.card_id }
+                    },
+                    data: {
+                        status: false
+                    }
+                }),
+                // สั่งให้การ์ด "ใบที่เลือก" กลายเป็น true
+                prisma.card.update({
+                    where: {
+                        card_id: cardData.card_id
+                    },
+                    data: {
+                        status: true
+                    }
+                })
+            ]);
+
+            if (!updatedCard) return SendError(res, 404, EMessage.EUpdate);
+
+            return SendSuccess(res, SMessage.Update, updatedCard);
+
+        } catch (error) {
+            return SendError(res, 500, EMessage.ServerInternal, error);
+        }
+    }
     static async UpdateCard(req, res) {
         try {
             const card_id = req.params.card_id;
-            const {
-                carId,
-                card_number,
-                card_type,
-                received,
-                expiration_date,
-            } = req.body;
+            const { carId, card_number, card_type, received, expiration_date } = req.body;
+            const validate = await ValidateData({ carId, card_number, card_type });
+            if (validate.length > 0) {
+                return SendError(res, 400, EMessage.BadRequest, validate.join(','));
+            }
+            const carData = await FindOneCar(carId);
+            if (!carData) {
+                return SendError(res, 404, EMessage.NotFound);
+            }
+            const data = await prisma.card.update({
+                data: {
+                    carId, card_number, card_type, received, expiration_date, userId: carData.userId, createBy: req.employee
+                },
+                where: {
+                    card_id: card_id
+                }
+            });
+            if (!data) return SendError(res, 404, EMessage.EUpdate);
+            return SendSuccess(res, SMessage.Update, data)
+        } catch (error) {
+            return SendError(res, 500, EMessage.ServerInternal, error)
+        }
+    }
+    static async UpdateCard(req, res) {
+        try {
+            const card_id = req.params.card_id;
+            const { carId, card_number, card_type, received, expiration_date } = req.body;
             const validate = await ValidateData({ carId, card_number, card_type });
             if (validate.length > 0) {
                 return SendError(res, 400, EMessage.BadRequest, validate.join(','));
@@ -173,7 +239,6 @@ export default class CardController {
             return SendError(res, 500, EMessage.ServerInternal, error)
         }
     }
-
 
     static async ExportCard(req, res) {
         try {
