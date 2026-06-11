@@ -108,7 +108,7 @@ router.put("/gifthistory/delete/:gifthistory_id", auth, GiftHistoryController.De
 //---- card ----
 router.get("/card/selAll", auth, CardController.SelectAll);
 router.get("/card/selOne/:card_id", auth, CardController.SelectOne);
-router.get("/card/selCard/:user_id", auth, CardController.SelectCard);
+router.get("/card/selCard/:userId", auth, CardController.SelectCard);
 router.get("/card/getAll", auth, CardController.getAllCard);
 router.get("/card/export", auth, CardController.ExportCard);
 router.get("/card/selByUser/:userId", auth, CardController.SelectByUser);
