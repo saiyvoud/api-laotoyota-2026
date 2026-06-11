@@ -132,21 +132,26 @@ export default class CardController {
     static async SelectCard(req, res) {
         try {
             const userId = req.params.userId;
+
             const data = await prisma.card.findFirst({
                 where: {
                     userId: userId,
-                    status: true
+                    status: true // ดึงใบที่เปิดใช้งานอยู่
                 },
                 include: {
-                    car: {
+                    car: {          // 👈 1. ดึงข้อมูลรถ (ชื่อฟิลด์ 'car' ตัวเล็ก ตรงตามโมเดลของคุณ)
                         include: {
-                            user: true
+                            user: true // 👈 2. ดึงข้อมูลเจ้าของรถ (ต้องมั่นใจว่าในตาราง Car มีฟิลด์ relation ชื่อ user นะครับ)
                         }
                     }
                 }
             });
+
+            // ใช้ findFirst ถ้าหาไม่เจอ data จะเป็น null ทันที ทำให้เงื่อนไขนี้ทำงานได้ถูกต้อง
             if (!data) return SendError(res, 404, EMessage.NotFound);
-            return SendSuccess(res, SMessage.SelectOne, data)
+
+            return SendSuccess(res, SMessage.SelectOne, data);
+
         } catch (error) {
             return SendError(res, 500, EMessage.ServerInternal, error);
         }
