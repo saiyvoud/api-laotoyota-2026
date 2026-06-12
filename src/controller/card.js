@@ -92,8 +92,8 @@ export default class CardController {
     }
     static async SelectByUser(req, res) {
         try {
-            const userId = req.params.userId;
-            const data = await prisma.card.findMany({ where: { userId: userId }, include: { car: { include: { user: true } } } });
+            const user_id = req.user; // ມາຈາກ token 
+            const data = await prisma.card.findMany({ where: { userId: user_id }, include: { car: { include: { user: true } } } });
             if (!data) return SendError(res, 404, EMessage.NotFound);
             return SendSuccess(res, SMessage.SelectBy, data)
         } catch (error) {

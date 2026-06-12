@@ -111,7 +111,7 @@ router.get("/card/selOne/:card_id", auth, CardController.SelectOne);
 router.get("/card/selCard", auth, CardController.SelectCard);
 router.get("/card/getAll", auth, CardController.getAllCard);
 router.get("/card/export", auth, CardController.ExportCard);
-router.get("/card/selByUser/:userId", auth, CardController.SelectByUser);
+router.get("/card/selByUser", auth, CardController.SelectByUser);
 router.post("/card/insert", auth, CardController.Insert);
 router.put("/card/update/:card_id", auth, CardController.UpdateCard);
 router.put("/card/setCard/:card_id", auth, CardController.SetCard);
