@@ -79,7 +79,7 @@ export default class EmployeeController {
             return SendSuccess(res, SMessage.SelectAll, { data: employee, totalPage })
             // return SendSuccess(res,SMessage.SelectAll,{employee,count})
         } catch (error) {
-            console.log(`employee/getAll error: ${error}`);
+            console.log(`employee getAll error: ${error}`);
 
             return SendError(res, 500, EMessage.ServerInternal, error)
         }

@@ -470,7 +470,6 @@ export default class UserController {
     static async Refresh(req, res) {
         try {
             const { refreshToken } = req.body;
-            // console.log(refreshToken);
             if (!refreshToken) {
                 return SendError(res, 400, EMessage.BadRequest, "refreshToken")
             }
@@ -597,6 +596,7 @@ export default class UserController {
                 Province: item.province,
                 District: item.district,
                 Village: item.village,
+                Email: item.email,
                 Point: item.point
             }));
             // เรียกใช้ ExcelBuilder
@@ -643,6 +643,7 @@ export default class UserController {
                 Province: item.province,
                 District: item.district,
                 Village: item.village,
+                Email: item.email
 
             }));
             // เรียกใช้ ExcelBuilder

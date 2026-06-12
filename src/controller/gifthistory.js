@@ -28,20 +28,20 @@ export default class GiftHistoryController {
                 ];
 
 
-      if (startDate || endDate) {
-    query.createdAt = {};
+            if (startDate || endDate) {
+                query.createdAt = {};
 
-    if (startDate) {
-        query.createdAt.gte = new Date(startDate);
-    }
+                if (startDate) {
+                    query.createdAt.gte = new Date(startDate);
+                }
 
-    if (endDate) {
-        const nextDay = new Date(endDate);
-        nextDay.setDate(nextDay.getDate() + 1);
+                if (endDate) {
+                    const nextDay = new Date(endDate);
+                    nextDay.setDate(nextDay.getDate() + 1);
 
-        query.createdAt.lt = nextDay;
-    }
-}
+                    query.createdAt.lt = nextDay;
+                }
+            }
             const giftHistory = await prisma.giftHistory.findMany({
                 where: query,
                 orderBy: {
@@ -91,6 +91,23 @@ export default class GiftHistoryController {
                 });
             if (!data) return SendError(res, 404, EMessage.NotFound);
             return SendSuccess(res, SMessage.SelectOne, data)
+        } catch (error) {
+            return SendError(res, 500, EMessage.ServerInternal, error);
+        }
+    }
+    static async SelectByUser(req, res) {
+        try {
+            const user_id = req.user; // ມາຈາກ token 
+            const data = await prisma.giftHistory.findMany({
+                where: { userId: user_id },
+                include: {
+                    user: true,
+                    giftcard: true,
+                    card: true
+                }
+            });
+            if (!data) return SendError(res, 404, EMessage.NotFound);
+            return SendSuccess(res, SMessage.SelectBy, data)
         } catch (error) {
             return SendError(res, 500, EMessage.ServerInternal, error);
         }
@@ -226,20 +243,20 @@ export default class GiftHistoryController {
         try {
             const { startDate, endDate } = req.query;
             const query = {};
-      if (startDate || endDate) {
-    query.createdAt = {};
+            if (startDate || endDate) {
+                query.createdAt = {};
 
-    if (startDate) {
-        query.createdAt.gte = new Date(startDate);
-    }
+                if (startDate) {
+                    query.createdAt.gte = new Date(startDate);
+                }
 
-    if (endDate) {
-        const nextDay = new Date(endDate);
-        nextDay.setDate(nextDay.getDate() + 1);
+                if (endDate) {
+                    const nextDay = new Date(endDate);
+                    nextDay.setDate(nextDay.getDate() + 1);
 
-        query.createdAt.lt = nextDay;
-    }
-}
+                    query.createdAt.lt = nextDay;
+                }
+            }
             const data = await prisma.giftHistory.findMany({ where: query });
             if (!data) return SendError(res, 404, EMessage.NotFound);
             const exportData = data.map(item => ({

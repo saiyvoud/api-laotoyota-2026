@@ -107,6 +107,7 @@ export const ReportColumns = {
         { header: "Province", key: "Province", width: 36 },
         { header: "District", key: "District", width: 36 },
         { header: "Village", key: "Village", width: 36 },
+        { header: "Email", key: "Email", width: 36 },
         { header: "Point", key: "Point", width: 36 },
     ],
     employee: [
@@ -125,6 +126,7 @@ export const ReportColumns = {
         { header: "Province", key: "Province", width: 36 },
         { header: "District", key: "District", width: 36 },
         { header: "Village", key: "Village", width: 36 },
+        { header: "Email", key: "Email", width: 36 },
     
     ],
     zone: [

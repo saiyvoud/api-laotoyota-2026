@@ -66,7 +66,6 @@ export default class CarController {
                 },
             });
             if (!car) return SendError(res, 404, EMessage.NotFound);
-            console.log("Fetching Page:", page, "Skip:", (page - 1) * limit);
 
             const count = await prisma.car.count({ where: query });
             const totalPage = Math.ceil(count / parseInt(limit));

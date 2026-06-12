@@ -102,6 +102,7 @@ router.get("/gifthistory/selAll", auth, GiftHistoryController.SelectAll);
 router.get("/gifthistory/selOne/:gifthistory_id", auth, GiftHistoryController.SelectOne);
 router.get("/gifthistory/getAll", auth, GiftHistoryController.getAllGiftHistory);
 router.get("/gifthistory/export", auth, GiftHistoryController.ExportGiftHistory);
+router.get("/gifthistory/selByUser", auth, GiftHistoryController.SelectByUser);
 router.post("/gifthistory/insert", auth, GiftHistoryController.Insert);
 // router.put("/gifthistory/update/:gifthistory_id", auth, GiftHistoryController.UpdateGifthistory);
 router.put("/gifthistory/delete/:gifthistory_id", auth, GiftHistoryController.DeleteGifthistory);

@@ -69,7 +69,6 @@ cron.schedule("0 0 * * *", async () => {
                     timefix_id: { in: oldTimeIds }
                 }
             });
-            console.log("Deleted TimeFix records:", deleted);
 
 
         }
