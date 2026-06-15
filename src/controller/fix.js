@@ -508,18 +508,18 @@ export default class FixController {
     static async UpdateFixSuccess(req, res) {
         try {
             const fix_id = req.params.fix_id;
-            const {  detailFix, kmLast, kmNext, labour_total, part_total, part_point, labour_point, exchange_rate, payment_type,cardId, tax_invoice_code } = req.body;
+            const { bookingId, detailFix, kmLast, kmNext, labour_total, part_total, part_point, labour_point, exchange_rate, payment_type,cardId, tax_invoice_code } = req.body;
             const validate = await ValidateData({  kmLast, kmNext, tax_invoice_code });
             if (validate.length > 0) {
                 return SendError(res, 400, EMessage.BadRequest, validate.join(','));
             }
-            // const booking = await FindOneBooking(bookingId);
-            // if (!booking) return SendError(res, 404, EMessage.ESelect);
+            const booking = await FindOneBooking(bookingId);
+            if (!booking) return SendError(res, 404, EMessage.ESelect);
             const card = await FindOneCard(cardId);
             if (!card) return SendError(res, 404, EMessage.ESelect);
             const data = await prisma.fix.update({
                 data: {
-                    // bookingId: booking.booking_id,
+                    bookingId: booking.booking_id,
                     detailFix,
                     kmLast: parseInt(kmLast),
                     kmNext: parseInt(kmNext),
@@ -528,7 +528,7 @@ export default class FixController {
                     part_point: parseInt(part_point || 0),
                     labour_point: parseInt(labour_point || 0),
                     totalPrice: parseInt(labour_total || 0) + parseInt(part_total || 0),
-                    // cardId: card.card_id,
+                    cardId: card.card_id,
                     tax_invoice_code: tax_invoice_code,
                     exchange_rate: parseInt(exchange_rate || 0),
                     payment_type,
@@ -570,6 +570,8 @@ export default class FixController {
             if (validate.length > 0) {
                 return SendError(res, 400, EMessage.BadRequest, validate.join(','));
             }
+            const card = await FindOneCard(cardId);
+
 
             // เตรียมข้อมูลสำหรับ Insert
             const fixData = {
@@ -581,7 +583,7 @@ export default class FixController {
                 part_point: parseFloat(part_point || 0),
                 labour_point: parseFloat(labour_point || 0),
                 totalPrice: parseInt(labour_total || 0) + parseInt(part_total || 0),
-                cardId: cardId,
+                cardId: card.card_id,
                 exchange_rate: parseInt(exchange_rate || 0),
                 payment_type,
                 invoice_date: new Date(),
