@@ -540,7 +540,7 @@ export default class FixController {
                 }
             });
             if (!data) return SendError(res, 404, EMessage.EUpdate);
-            const totalPoint = parseInt(labour_point || 0) + parseInt(part_point || 0);
+            const totalPoint = parseFloat(labour_point || 0) + parseFloat(part_point || 0);
             const update = await prisma.card.update({
                 data: {
                     total_point: (card.total_point || 0) + totalPoint,
