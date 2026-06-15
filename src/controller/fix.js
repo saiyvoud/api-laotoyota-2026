@@ -570,6 +570,8 @@ export default class FixController {
             if (validate.length > 0) {
                 return SendError(res, 400, EMessage.BadRequest, validate.join(','));
             }
+            const cardData = await FindOneCard(cardId);
+            if (!cardData) return SendError(res, 404, EMessage.ESelect);
 
 
             // เตรียมข้อมูลสำหรับ Insert
@@ -582,7 +584,7 @@ export default class FixController {
                 part_point: parseFloat(part_point || 0),
                 labour_point: parseFloat(labour_point || 0),
                 totalPrice: parseInt(labour_total || 0) + parseInt(part_total || 0),
-                cardId: cardId,
+                cardId: cardData.card_id,
                 exchange_rate: parseInt(exchange_rate || 0),
                 payment_type,
                 invoice_date: new Date(),
@@ -596,7 +598,7 @@ export default class FixController {
 
 
             // กรณีมีบัตร: ใช้ Transaction เพื่อความปลอดภัย
-            const card = await prisma.card.findUnique({ where: { card_id: cardId } });
+            const card = await prisma.card.findUnique({ where: { card_id: cardData.card_id } });
             if (!card) return SendError(res, 404, EMessage.ESelect);
             const totalPointToAdd = parseFloat(labour_point || 0) + parseFloat(part_point || 0);
             const result = await prisma.$transaction(async (tx) => {
@@ -605,7 +607,7 @@ export default class FixController {
 
                 // อัปเดตแต้มในบัตร
                 await tx.card.update({
-                    where: { card_id: cardId },
+                    where: { card_id: cardData.card_id },
                     data: {
                         total_point: (card?.total_point || 0) + totalPointToAdd
                     }
