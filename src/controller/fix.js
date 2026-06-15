@@ -484,8 +484,8 @@ export default class FixController {
 
     static async Insert(req, res) {
         try {
-            const { bookingId, invoice_number, cardId } = req.body;
-            const validate = await ValidateData({ bookingId, invoice_number, cardId });
+            const { bookingId, invoice_number, cardId, Tax_invoice_code } = req.body;
+            const validate = await ValidateData({ bookingId, invoice_number, cardId, Tax_invoice_code });
             if (validate.length > 0) {
                 return SendError(res, 400, EMessage.BadRequest, validate.join(','));
             }
@@ -495,6 +495,7 @@ export default class FixController {
                     bookingId: bookingId,
                     invoice_number,
                     invoice_date: new Date(),
+                    Tax_invoice_code,
                     cardId,
                     createBy: req.employee,
                 }
@@ -557,7 +558,7 @@ export default class FixController {
             const {
                 detailFix, kmLast, kmNext,
                 labour_total, part_total, part_point,
-                labour_point, cardId, exchange_rate, payment_type, invoice_number
+                labour_point, cardId, exchange_rate, payment_type, invoice_number,Tax_invoice_code
             } = req.body;
 
             // 1. Validate ข้อมูลพื้นฐาน
@@ -580,9 +581,10 @@ export default class FixController {
                 exchange_rate: parseInt(exchange_rate || 0),
                 payment_type,
                 invoice_date: new Date(),
+                Tax_invoice_code,
                 invoice_number,
-                fixStatus: FixStatus.success, 
-                createBy: req.employee, 
+                fixStatus: FixStatus.success,
+                createBy: req.employee,
             };
 
 
