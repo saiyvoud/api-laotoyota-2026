@@ -570,7 +570,6 @@ export default class FixController {
             if (validate.length > 0) {
                 return SendError(res, 400, EMessage.BadRequest, validate.join(','));
             }
-            const card = await FindOneCard(cardId);
 
 
             // เตรียมข้อมูลสำหรับ Insert
@@ -583,12 +582,12 @@ export default class FixController {
                 part_point: parseFloat(part_point || 0),
                 labour_point: parseFloat(labour_point || 0),
                 totalPrice: parseInt(labour_total || 0) + parseInt(part_total || 0),
-                cardId: card.card_id,
+                cardId: cardId,
                 exchange_rate: parseInt(exchange_rate || 0),
                 payment_type,
                 invoice_date: new Date(),
                 tax_invoice_code: tax_invoice_code,
-                invoice_number,
+                invoice_number: invoice_number,
                 fixStatus: FixStatus.success,
                 createBy: req.employee,
             };
