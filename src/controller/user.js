@@ -334,6 +334,44 @@ export default class UserController {
             return SendError(res, 500, EMessage.ServerInternal, error)
         }
     }
+    static async RegisterSuperAdmin(req, res) {
+        try {
+            const { username, phoneNumber, password, province, district, village, email } = req.body;
+            // console.log(req.body);
+            const validate = await ValidateData({
+                username, phoneNumber,
+                password, province, district, village
+            });
+
+            if (validate.length > 0) {
+                return SendError(res, 400, EMessage.BadRequest, validate.join(','))
+            }
+            const checkPhoneNumber = await CheckPhoneNumber(phoneNumber); // ສ້າງຢູ່ service
+            if (!checkPhoneNumber) return SendError(res, 404, EMessage.NotFound)
+            const generatePassword = await EncryptData(password)
+            const randow = "LTS" + `${Math.floor(Math.random() * (100 - 1 + 1)) + 1}`;
+            const data = await prisma.user.create({
+                data: {
+                    username,
+                    phoneNumber: String(phoneNumber),
+                    password: generatePassword,
+                    province,
+                    district,
+                    village,
+                    customer_number: randow.toString(),
+                    role: Role.superadmin,
+                    point: 0,
+                    email: email ?? null
+                }
+            })
+            data.password = undefined;
+            data.role = undefined;
+            return SendCreate(res, SMessage.Register, data)
+        } catch (error) {
+            console.log(error);
+            return SendError(res, 500, EMessage.ServerInternal, error)
+        }
+    }
     static async Forgot(req, res) {
         try {
 
