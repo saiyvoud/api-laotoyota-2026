@@ -382,16 +382,21 @@ export default class BookingController {
         try {
             const booking_id = req.params.booking_id;
             const employee = req.employee;
-            await FindOneBooking(booking_id);
-            const { timeId, carId, remark, day, branchId, zoneId } = req.body;
+            const booking = await FindOneBooking(booking_id);
+            if (!booking) {
+                return SendError(res, 404, "Booking not found");
+            } const { timeId, carId, remark, day, branchId, zoneId } = req.body;
             const validate = await ValidateData({ timeId, carId, remark, day, branchId, zoneId });
             if (validate.length > 0) {
                 return SendError(res, 400, EMessage.BadRequest, validate.join(','));
             }
-            await FindOneBranch(branchId);
-            await FindOneTime(timeId);
-            await FindOneCar(carId);
-            await FindOneZone(zoneId);
+            const branch = await FindOneBranch(branchId);
+            const time = await FindOneTime(timeId);
+            const car = await FindOneCar(carId);
+            const zone = await FindOneZone(zoneId);
+            if (!branch || !time || !car || !zone) {
+                return SendError(res, 404, EMessage.NotFound);
+            }
             const data = await prisma.booking.update({
                 data: {
                     zoneId: zoneId,

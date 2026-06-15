@@ -277,7 +277,7 @@ model Fix {
   invoice_date   DateTime? 
   exchange_rate  Int?
   payment_type   String? 
-  Tax_invoice_code String?
+  tax_invoice_code String?
   createBy     String?  
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt

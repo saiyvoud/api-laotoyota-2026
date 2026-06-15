@@ -484,8 +484,8 @@ export default class FixController {
 
     static async Insert(req, res) {
         try {
-            const { bookingId, invoice_number, cardId, Tax_invoice_code } = req.body;
-            const validate = await ValidateData({ bookingId, invoice_number, cardId, Tax_invoice_code });
+            const { bookingId, invoice_number, cardId } = req.body;
+            const validate = await ValidateData({ bookingId, invoice_number, cardId });
             if (validate.length > 0) {
                 return SendError(res, 400, EMessage.BadRequest, validate.join(','));
             }
@@ -495,7 +495,6 @@ export default class FixController {
                     bookingId: bookingId,
                     invoice_number,
                     invoice_date: new Date(),
-                    Tax_invoice_code,
                     cardId,
                     createBy: req.employee,
                 }
@@ -509,16 +508,19 @@ export default class FixController {
     static async UpdateFixSuccess(req, res) {
         try {
             const fix_id = req.params.fix_id;
-            const { bookingId, detailFix, kmLast, kmNext, labour_total, part_total, part_point, labour_point, cardId, exchange_rate, payment_type, } = req.body;
-            const validate = await ValidateData({ bookingId, kmLast, kmNext });
+            const {  detailFix, kmLast, kmNext, labour_total, part_total, part_point, labour_point, exchange_rate, payment_type,cardId, tax_invoice_code } = req.body;
+            const validate = await ValidateData({  kmLast, kmNext, tax_invoice_code });
             if (validate.length > 0) {
                 return SendError(res, 400, EMessage.BadRequest, validate.join(','));
             }
-            const booking = await FindOneBooking(bookingId);
+            // const booking = await FindOneBooking(bookingId);
+            // if (!booking) return SendError(res, 404, EMessage.ESelect);
             const card = await FindOneCard(cardId);
+            if (!card) return SendError(res, 404, EMessage.ESelect);
             const data = await prisma.fix.update({
                 data: {
-                    bookingId, detailFix,
+                    // bookingId: booking.booking_id,
+                    detailFix,
                     kmLast: parseInt(kmLast),
                     kmNext: parseInt(kmNext),
                     labour_total: parseInt(labour_total || 0),
@@ -526,7 +528,8 @@ export default class FixController {
                     part_point: parseInt(part_point || 0),
                     labour_point: parseInt(labour_point || 0),
                     totalPrice: parseInt(labour_total || 0) + parseInt(part_total || 0),
-                    cardId,
+                    // cardId: card.card_id,
+                    tax_invoice_code: tax_invoice_code,
                     exchange_rate: parseInt(exchange_rate || 0),
                     payment_type,
                     fixStatus: FixStatus.success,
@@ -558,11 +561,11 @@ export default class FixController {
             const {
                 detailFix, kmLast, kmNext,
                 labour_total, part_total, part_point,
-                labour_point, cardId, exchange_rate, payment_type, invoice_number,Tax_invoice_code
+                labour_point, cardId, exchange_rate, payment_type, invoice_number, tax_invoice_code
             } = req.body;
 
             // 1. Validate ข้อมูลพื้นฐาน
-            const validate = await ValidateData({ kmLast, kmNext });
+            const validate = await ValidateData({ kmLast, kmNext,tax_invoice_code });
             if (validate.length > 0) {
                 return SendError(res, 400, EMessage.BadRequest, validate.join(','));
             }
@@ -581,7 +584,7 @@ export default class FixController {
                 exchange_rate: parseInt(exchange_rate || 0),
                 payment_type,
                 invoice_date: new Date(),
-                Tax_invoice_code,
+                tax_invoice_code: tax_invoice_code,
                 invoice_number,
                 fixStatus: FixStatus.success,
                 createBy: req.employee,

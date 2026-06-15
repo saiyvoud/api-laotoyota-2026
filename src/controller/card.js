@@ -59,6 +59,7 @@ export default class CardController {
             //     return searchQuery;
             // }
         } catch (error) {
+            console.log(error);
             return SendError(res, 500, EMessage.ServerInternal, error);
         }
     }
