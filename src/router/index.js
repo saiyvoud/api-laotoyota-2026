@@ -178,7 +178,7 @@ router.get("/fix/getAllByBranchFromWorkshop/:branch_id", auth, FixController.get
 router.get("/fix/export", auth, FixController.ExportFix);
 router.get("/fix/exportWorkshopFix", auth, FixController.exportWorkshopFix);
 router.post("/fix/insert", auth, FixController.Insert);
-router.post("/fix/workshop", auth, FixController.WorkShopFix);
+router.post("/fix/workshop", auth, authAdminOrSuperAdmin, FixController.WorkShopFix);
 router.put("/fix/update/:fix_id", auth, FixController.UpdateFix);
 router.put("/fix/updateStatus/:fix_id", auth, FixController.UpdateFixSuccess);
 router.delete("/fix/delete/:fix_id", auth, FixController.DeleteFix);
