@@ -591,6 +591,7 @@ export default class FixController {
                 fixStatus: FixStatus.success,
                 createBy: req.employee,
             };
+            console.log("fix data : ",fixData)
 
 
 
