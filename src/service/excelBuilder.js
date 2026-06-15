@@ -47,9 +47,9 @@ export const ReportColumns = {
         { header: "Phone", key: "Phone", width: 36 },
     ],
     car: [
-        { header: "FrameNumber", key: "FrameNumber", width: 36 },
-        { header: "PlateNumber", key: "PlateNumber", width: 36 },
         { header: "Model", key: "Model", width: 36 },
+        { header: "PlateNumber", key: "PlateNumber", width: 36 },
+        { header: "FrameNumber", key: "FrameNumber", width: 36 },
         { header: "EngineNumber", key: "EngineNumber", width: 36 },
         { header: "Province", key: "Province", width: 36 },
         { header: "Color", key: "Color", width: 36 },
