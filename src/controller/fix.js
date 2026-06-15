@@ -563,6 +563,7 @@ export default class FixController {
                 labour_total, part_total, part_point,
                 labour_point, cardId, exchange_rate, payment_type, invoice_number, tax_invoice_code
             } = req.body;
+            console.log(req.body);
 
             // 1. Validate ข้อมูลพื้นฐาน
             const validate = await ValidateData({ kmLast, kmNext,tax_invoice_code });
