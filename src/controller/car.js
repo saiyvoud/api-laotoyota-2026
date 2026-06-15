@@ -223,9 +223,9 @@ export default class CarController {
             const data = await prisma.car.findMany({ where: query });
             if (!data) return SendError(res, 404, EMessage.NotFound);
             const exportData = data.map(item => ({
-                FrameNumber: item.frameNumber,
-                PlateNumber: item.plateNumber,
                 Model: item.model,
+                PlateNumber: item.plateNumber,
+                FrameNumber: item.frameNumber,
                 EngineNumber: item.engineNumber,
                 Province: item.province,
                 Color: item.color,
