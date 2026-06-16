@@ -121,10 +121,11 @@ export default class EmployeeController {
             if (!userData) return SendError(res, 400, EMessage.BadRequest);
             const branchData = await prisma.branch.findFirst({ where: { branch_id: branchId } })
             if (!branchData) return SendError(res, 400, EMessage.BadRequest);
-            await prisma.user.update({
-                where: { user_id: userId },
-                data: { role: Role.admin }
-            });
+
+            // await prisma.user.update({
+            //     where: { user_id: userId },
+            //     data: { role: Role.admin }
+            // });
             const data = await prisma.employee.create({
                 data: {
                     userId, branchId, employee_name, position, employee_code: "LTS_EMPL_" + shortid.generate(),
