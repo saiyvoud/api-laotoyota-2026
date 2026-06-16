@@ -204,6 +204,9 @@ export default class UserController {
             }
             const user = await FindByPhoneNumber(phoneNumber); // ສ້າງໃນ service
             if (!user) return SendError(res, 404, EMessage.NotFound);
+            if (user.role !== Role.general) {
+                return SendError(res, 400, EMessage.BadRequest);
+            }
             const decryptPassword = await DecryptData(user.password);
             if (decryptPassword !== password) {
                 return SendError(res, 404, EMessage.NotMatch);

@@ -571,7 +571,6 @@ export default class FixController {
             }
             const cardData = await FindOneCard(cardId);
             if (!cardData) return SendError(res, 404, EMessage.ESelect);
-            console.log("card : ",cardData);
 
 
             // เตรียมข้อมูลสำหรับ Insert
