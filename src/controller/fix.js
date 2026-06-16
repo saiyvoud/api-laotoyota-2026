@@ -540,7 +540,7 @@ export default class FixController {
                 }
             });
             if (!data) return SendError(res, 404, EMessage.EUpdate);
-            const totalPoint = parseFloat(labour_point || 0) + parseFloat(part_point || 0);
+            const totalPoint = parseInt(labour_point || 0) + parseInt(part_point || 0);
             const update = await prisma.card.update({
                 data: {
                     total_point: (card.total_point || 0) + totalPoint,
@@ -580,8 +580,8 @@ export default class FixController {
                 kmNext: parseInt(kmNext),
                 labour_total: parseInt(labour_total || 0),
                 part_total: parseInt(part_total || 0),
-                part_point: parseFloat(part_point || 0),
-                labour_point: parseFloat(labour_point || 0),
+                part_point: parseInt(part_point || 0),
+                labour_point: parseInt(labour_point || 0),
                 totalPrice: parseInt(labour_total || 0) + parseInt(part_total || 0),
                 cardId: cardData.card_id,
                 exchange_rate: parseInt(exchange_rate || 0),
@@ -598,7 +598,7 @@ export default class FixController {
             // กรณีมีบัตร: ใช้ Transaction เพื่อความปลอดภัย
             const card = await prisma.card.findUnique({ where: { card_id: cardData.card_id } });
             if (!card) return SendError(res, 404, EMessage.ESelect);
-            const totalPointToAdd = parseFloat(labour_point || 0) + parseFloat(part_point || 0);
+            const totalPointToAdd = parseInt(labour_point || 0) + parseInt(part_point || 0);
             const result = await prisma.$transaction(async (tx) => {
                 // บันทึกการซ่อม
                 const newFix = await tx.fix.create({ data: fixData });
