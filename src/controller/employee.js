@@ -141,15 +141,16 @@ export default class EmployeeController {
     static async Updateemployee(req, res) {
         try {
             const employee_id = req.params.employee_id;
-            const { userId, employee_name, position } = req.body;
-            const validate = await ValidateData({ userId, employee_name, position });
+            const { userId, employee_name, position, branchId } = req.body;
+            const validate = await ValidateData({ userId, employee_name, position, branchId });
             if (validate.length > 0) {
                 return SendError(res, 400, EMessage.BadRequest, validate.join(','));
             }
-            await FindOneUser(userId);
+            const userData =await FindOneUser(userId);
+            if (!userData) return SendError(res, 400, EMessage.BadRequest);
             const data = await prisma.employee.update({
                 data: {
-                    userId, employee_name, position
+                    userId, employee_name, position, branchId,
                 },
                 where: {
                     employee_id: employee_id
