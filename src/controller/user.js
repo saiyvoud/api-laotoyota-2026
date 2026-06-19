@@ -272,10 +272,19 @@ export default class UserController {
             if (validate.length > 0) {
                 return SendError(res, 400, EMessage.BadRequest, validate.join(','))
             }
-            const checkPhoneNumber = await CheckPhoneNumber(phoneNumber); // ສ້າງຢູ່ service
-            if (!checkPhoneNumber) return SendError(res, 404, EMessage.NotFound)
+            // const checkPhoneNumber = await CheckPhoneNumber(phoneNumber); // ສ້າງຢູ່ service
+
+            // ✅ ถ้า phoneNumber ซ้ำ → skip
+            const existingPhoneNumber = await prisma.user.findFirst({
+                where: { phoneNumber: String(phoneNumber) },
+            });
+            if (existingPhoneNumber) {
+                return SendCreate(res, "Phone number already exists", existingPhoneNumber);
+            }
+
             const generatePassword = await EncryptData(finalPassword)
             const randow = "LTS" + `${Math.floor(Math.random() * (1000000 - 1 + 1)) + 1}`;
+
             const data = await prisma.user.create({
                 data: {
                     username,
@@ -311,8 +320,16 @@ export default class UserController {
             if (validate.length > 0) {
                 return SendError(res, 400, EMessage.BadRequest, validate.join(','))
             }
-            const checkPhoneNumber = await CheckPhoneNumber(phoneNumber); // ສ້າງຢູ່ service
-            if (!checkPhoneNumber) return SendError(res, 404, EMessage.NotFound)
+            // const checkPhoneNumber = await CheckPhoneNumber(phoneNumber); // ສ້າງຢູ່ service
+            // if (!checkPhoneNumber) return SendError(res, 404, EMessage.NotFound)
+            // ✅ ถ้า phoneNumber ซ้ำ → skip
+            const existingPhoneNumber = await prisma.user.findFirst({
+                where: { phoneNumber: String(phoneNumber) },
+            });
+            if (existingPhoneNumber) {
+                return SendCreate(res, "Phone number already exists", existingPhoneNumber);
+            }
+
             const generatePassword = await EncryptData(password)
             const randow = "LTS" + `${Math.floor(Math.random() * (100 - 1 + 1)) + 1}`;
             const data = await prisma.user.create({
@@ -547,12 +564,21 @@ export default class UserController {
         try {
             const user_id = req.params.customer_id;
             const { username, phoneNumber, province, district, village, email } = req.body;
-            console.log(req.body);
+            // console.log(req.body);
             const validate = await ValidateData({ username, phoneNumber, province, district, village, });
             if (validate.length > 0) {
                 return SendError(res, 400, EMessage.BadRequest, validate.join(","))
             }
-            await FindOneUser(user_id); // ສ້າງຢູ່ Serivce
+            const userData = await FindOneUser(user_id); // ສ້າງຢູ່ Serivce
+            if (!userData) return SendError(res, 404, EMessage.EUpdate);
+
+            // check phoneNumber duplicate
+            const existingPhoneNumber = await prisma.user.findFirst({
+                where: { phoneNumber: String(phoneNumber), NOT: { user_id: user_id } },
+            });
+            if (existingPhoneNumber) {
+                return SendCreate(res, "Phone number already exists", existingPhoneNumber);
+            }
             const data = await prisma.user.update({
                 data: {
                     username, phoneNumber, province, district, village, email: email || null,
@@ -583,30 +609,30 @@ export default class UserController {
     }
 
 
-    static async UpdatePoint(req, res) {
-        try {
-            const { user_id, point } = req.body;
-            console.log(req.body);
-            const validate = await ValidateData({ user_id, point });
-            if (validate.length > 0) {
-                return SendError(res, 400, EMessage.BadRequest, validate.join(","))
-            }
-            await FindOneUser(user_id); // ສ້າງຢູ່ Serivce
-            const data = await prisma.user.update({
-                data: {
-                    point: { increment: parseInt(point) }
-                },
-                where: {
-                    user_id: user_id
-                }
-            });
-            if (!data) return SendError(res, 404, EMessage.EUpdate);
-            return SendSuccess(res, SMessage.Update)
-        } catch (error) {
-            return SendError(res, 500, EMessage.ServerInternal, error)
-        }
+    // static async UpdatePoint(req, res) {
+    //     try {
+    //         const { user_id, point } = req.body;
+    //         // console.log(req.body);
+    //         const validate = await ValidateData({ user_id, point });
+    //         if (validate.length > 0) {
+    //             return SendError(res, 400, EMessage.BadRequest, validate.join(","))
+    //         }
+    //         await FindOneUser(user_id); // ສ້າງຢູ່ Serivce
+    //         const data = await prisma.user.update({
+    //             data: {
+    //                 point: { increment: parseInt(point) }
+    //             },
+    //             where: {
+    //                 user_id: user_id
+    //             }
+    //         });
+    //         if (!data) return SendError(res, 404, EMessage.EUpdate);
+    //         return SendSuccess(res, SMessage.Update)
+    //     } catch (error) {
+    //         return SendError(res, 500, EMessage.ServerInternal, error)
+    //     }
 
-    }
+    // }
     static async ExportCustomer(req, res) {
         try {
             const { startDate, endDate } = req.query;

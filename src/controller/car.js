@@ -42,20 +42,20 @@ export default class CarController {
                 ];
             }
 
-      if (startDate || endDate) {
-    query.createdAt = {};
+            if (startDate || endDate) {
+                query.createdAt = {};
 
-    if (startDate) {
-        query.createdAt.gte = new Date(startDate);
-    }
+                if (startDate) {
+                    query.createdAt.gte = new Date(startDate);
+                }
 
-    if (endDate) {
-        const nextDay = new Date(endDate);
-        nextDay.setDate(nextDay.getDate() + 1);
+                if (endDate) {
+                    const nextDay = new Date(endDate);
+                    nextDay.setDate(nextDay.getDate() + 1);
 
-        query.createdAt.lt = nextDay;
-    }
-}
+                    query.createdAt.lt = nextDay;
+                }
+            }
             const car = await prisma.car.findMany({
                 where: query,
                 orderBy: { createdAt: 'desc' },
@@ -130,9 +130,18 @@ export default class CarController {
             if (validate.length > 0) {
                 return SendError(res, 400, EMessage.BadRequest, validate.join(','));
             }
-            // ตรวจสอบ user ถ้ามีค่า userId
+            // ✅ ถ้า frameNumber ซ้ำ → skip
+            const existingCar = await prisma.car.findFirst({
+                where: { frameNumber }
+            });
+            if (existingCar) {
+                return SendCreate(res, "Car already exists", existingCar);
+            }
             if (userId) {
-                await FindOneUser(userId);
+                const userData = await FindOneUser(userId);
+                if (!userData) {
+                    return SendError(res, 404, EMessage.NotFound, "User not found");
+                }
             }
             const data = await prisma.car.create({
                 data: {
@@ -162,9 +171,22 @@ export default class CarController {
             if (validate.length > 0) {
                 return SendError(res, 400, EMessage.BadRequest, validate.join(','));
             }
-            // ตรวจสอบ user ถ้ามีค่า userId
+            // ✅ check frameNumber ซ้ำ แต่ยกเว้นคันตัวเอง
+            const existingCar = await prisma.car.findFirst({
+                where: {
+                    frameNumber: String(frameNumber),
+                    NOT: { car_id }
+                }
+            });
+            if (existingCar) {
+                return SendCreate(res, "Car already exists", existingCar);
+            }
+            // check userId if not null
             if (userId) {
-                await FindOneUser(userId);
+                const userData = await FindOneUser(userId);
+                if (!userData) {
+                    return SendError(res, 404, EMessage.NotFound, "User not found");
+                }
             }
             const data = await prisma.car.update({
                 where: { car_id },
@@ -206,20 +228,20 @@ export default class CarController {
         try {
             const { startDate, endDate } = req.query;
             const query = {};
-      if (startDate || endDate) {
-    query.createdAt = {};
+            if (startDate || endDate) {
+                query.createdAt = {};
 
-    if (startDate) {
-        query.createdAt.gte = new Date(startDate);
-    }
+                if (startDate) {
+                    query.createdAt.gte = new Date(startDate);
+                }
 
-    if (endDate) {
-        const nextDay = new Date(endDate);
-        nextDay.setDate(nextDay.getDate() + 1);
+                if (endDate) {
+                    const nextDay = new Date(endDate);
+                    nextDay.setDate(nextDay.getDate() + 1);
 
-        query.createdAt.lt = nextDay;
-    }
-}
+                    query.createdAt.lt = nextDay;
+                }
+            }
             const data = await prisma.car.findMany({ where: query });
             if (!data) return SendError(res, 404, EMessage.NotFound);
             const exportData = data.map(item => ({

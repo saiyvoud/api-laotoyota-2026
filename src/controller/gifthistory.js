@@ -114,7 +114,6 @@ export default class GiftHistoryController {
     }
     static async Insert(req, res) {
         try {
-            // const { userId, giftcardId, cardId, amount } = req.body;
             const { giftcardId, cardId, amount } = req.body;
             const validate = await ValidateData({ giftcardId, cardId, amount });
             if (validate.length > 0) {
@@ -130,16 +129,18 @@ export default class GiftHistoryController {
             if (cardData.total_point < pointTotal) {
                 return SendError(res, 400, "Point Not Enough")
             }
-            const pointAll = cardData.total_point - pointTotal;
-            const update = await prisma.card.update({
-                data: {
-                    total_point: parseInt(pointAll)
-                },
-                where: { card_id: cardId }
-            })
-            if (!update) {
-                return SendError(res, 400, "Error Update Point")
-            }
+
+
+            // const pointAll = cardData.total_point - pointTotal;
+            // const update = await prisma.card.update({
+            //     data: {
+            //         total_point: parseInt(pointAll)
+            //     },
+            //     where: { card_id: cardId }
+            // })
+            // if (!update) {
+            //     return SendError(res, 400, "Error Update Point")
+            // }
             //--------
 
             const data = await prisma.giftHistory.create({
@@ -161,59 +162,108 @@ export default class GiftHistoryController {
             return SendError(res, 500, EMessage.ServerInternal, error);
         }
     }
-    static async UpdateGifthistory(req, res) {
+
+    static async Confirm(req, res) {
         try {
-            const gifthistory_id = req.params.gifthistory_id;
-            // const { giftcardId, amount, } = req.body;
-            const { amount } = req.body;
-            const validate = await ValidateData({ amount });
-            if (validate.length > 0) {
-                return SendError(res, 400, EMessage.BadRequest, validate.join(','));
-            }
-            const gifthistoryData = await FindOneGiftHistory(gifthistory_id); // ສ້າງຢູ່ໃນ service
-            // const user = await FindOneUser(gifthistoryData.userId);
-            const card = await FindOneCard(gifthistoryData.cardId);
-            const giftcardData = await FindOneGiftCard(gifthistoryData.giftcardId); // ສ້າງຢູ່ໃນ service
-            // ຕັດສະ stock
-            // const pointTotalUpdate = giftcardData.point * parseInt(amount)
-            const pointTotalUpdate = giftcardData.gift_Point * parseInt(amount)
-            //console.log("pointUpdate ====> ", pointTotalUpdate);
-            // const pointTotalBefore = giftcardData.point * gifthistoryData.amount;
-            const pointTotalBefore = giftcardData.gift_Point * gifthistoryData.amount;
-            //console.log("pointBefore ====> ", pointTotalBefore);
-            const points = pointTotalBefore + card.total_point;
-            //console.log("points ====> ", points);
-            if (points < pointTotalUpdate) {
+            const { gifthistory_id } = req.params;
+
+            const giftHistoryData = await FindOneGiftHistory(gifthistory_id);
+            if (!giftHistoryData) return SendError(res, 404, EMessage.NotFound);
+
+            const cardData = await FindOneCard(giftHistoryData.cardId);
+            if (!cardData) return SendError(res, 404, EMessage.NotFound);
+
+            if (cardData.total_point < giftHistoryData.total) {
                 return SendError(res, 400, "Point Not Enough")
             }
-            const pointAll = points - pointTotalUpdate;
-            //console.log("pointAll ====> ", pointAll);
+            const pointAll = cardData.total_point - giftHistoryData.total;
+            
             const update = await prisma.card.update({
                 data: {
                     total_point: parseInt(pointAll)
                 },
-                where: { card_id: gifthistoryData.cardId }
+                where: { card_id: giftHistoryData.cardId }
             })
             if (!update) {
                 return SendError(res, 400, "Error Update Point")
             }
+            // ตัดคะแนนไปแล้วตอน Insert → แค่เปลี่ยน received = true
             const data = await prisma.giftHistory.update({
-                data: {
-                    giftcardId: gifthistoryData.giftcardId, amount: parseInt(amount)
-                },
-                where: {
-                    gifthistory_id: gifthistory_id
-                }
+                where: { gifthistory_id },
+                data: { received: true }
             });
-            if (!data) return SendError(res, 404, EMessage.EUpdate);
             return SendSuccess(res, SMessage.Update, data)
+
         } catch (error) {
             console.log(error);
-            return SendError(res, 500, EMessage.ServerInternal, error)
+            return SendError(res, 500, EMessage.ServerInternal, error);
         }
     }
 
-    static async DeleteGifthistory(req, res) {
+    static async Cancel(req, res) {
+        try {
+            const { gifthistory_id } = req.params;
+            const data = await prisma.giftHistory.delete({ where: { gifthistory_id: gifthistory_id } })
+            if (!data) return SendError(res, 404, EMessage.NotFound);
+            return SendSuccess(res, SMessage.Update, data)
+        } catch (error) {
+            console.log(error);
+            return SendError(res, 500, EMessage.ServerInternal, error);
+        }
+    }
+    // static async UpdateGifthistory(req, res) {
+    //     try {
+    //         const gifthistory_id = req.params.gifthistory_id;
+    //         // const { giftcardId, amount, } = req.body;
+    //         const { amount } = req.body;
+    //         const validate = await ValidateData({ amount });
+    //         if (validate.length > 0) {
+    //             return SendError(res, 400, EMessage.BadRequest, validate.join(','));
+    //         }
+    //         const gifthistoryData = await FindOneGiftHistory(gifthistory_id); // ສ້າງຢູ່ໃນ service
+    //         // const user = await FindOneUser(gifthistoryData.userId);
+    //         const card = await FindOneCard(gifthistoryData.cardId);
+    //         const giftcardData = await FindOneGiftCard(gifthistoryData.giftcardId); // ສ້າງຢູ່ໃນ service
+    //         // ຕັດສະ stock
+    //         // const pointTotalUpdate = giftcardData.point * parseInt(amount)
+    //         const pointTotalUpdate = giftcardData.gift_Point * parseInt(amount)
+    //         //console.log("pointUpdate ====> ", pointTotalUpdate);
+    //         // const pointTotalBefore = giftcardData.point * gifthistoryData.amount;
+    //         const pointTotalBefore = giftcardData.gift_Point * gifthistoryData.amount;
+    //         //console.log("pointBefore ====> ", pointTotalBefore);
+    //         const points = pointTotalBefore + card.total_point;
+    //         //console.log("points ====> ", points);
+    //         if (points < pointTotalUpdate) {
+    //             return SendError(res, 400, "Point Not Enough")
+    //         }
+    //         const pointAll = points - pointTotalUpdate;
+    //         //console.log("pointAll ====> ", pointAll);
+    //         const update = await prisma.card.update({
+    //             data: {
+    //                 total_point: parseInt(pointAll)
+    //             },
+    //             where: { card_id: gifthistoryData.cardId }
+    //         })
+    //         if (!update) {
+    //             return SendError(res, 400, "Error Update Point")
+    //         }
+    //         const data = await prisma.giftHistory.update({
+    //             data: {
+    //                 giftcardId: gifthistoryData.giftcardId, amount: parseInt(amount)
+    //             },
+    //             where: {
+    //                 gifthistory_id: gifthistory_id
+    //             }
+    //         });
+    //         if (!data) return SendError(res, 404, EMessage.EUpdate);
+    //         return SendSuccess(res, SMessage.Update, data)
+    //     } catch (error) {
+    //         console.log(error);
+    //         return SendError(res, 500, EMessage.ServerInternal, error)
+    //     }
+    // }
+
+    static async ReturnPointGifthistory(req, res) {
         try {
             const gifthistory_id = req.params.gifthistory_id;
             const history = await prisma.giftHistory.findUnique({ where: { gifthistory_id: gifthistory_id } })

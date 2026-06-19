@@ -121,6 +121,7 @@ model GiftHistory {
   cardId         String   @db.VarChar(36)
   card_number    String
   claimed_date   DateTime @db.DateTime(0)
+  received    Boolean  @default(false)
   gift_Code      String
   card           Card     @relation(fields: [cardId], references: [card_id])
   giftcard       GiftCard @relation(fields: [giftcardId], references: [giftcard_id])
@@ -136,7 +137,7 @@ model Card {
   createBy        String?
   createdAt       DateTime      @default(now())
   updatedAt       DateTime      @updatedAt
-  active_point    Float?
+  active_point    Int?
   carId           String        @unique @db.VarChar(36)
   card_type       String?
   countCard       Int?
@@ -147,13 +148,11 @@ model Card {
   running_labour  Float?
   running_part    Float?
   status          Boolean       @default(false)
-  total_point     Float?
+  total_point     Int?
   car             Car           @relation(fields: [carId], references: [car_id])
   user            User?         @relation(fields: [userId], references: [user_id])
   Fix             Fix[]
   GiftHistory     GiftHistory[]
-
-
 }
 
 model Car {
@@ -274,9 +273,9 @@ model Fix {
   exchange_rate    Int?
   invoice_date     DateTime?
   invoice_number   String    @unique
-  labour_point     Float?
+  labour_point     Int?
   labour_total     Int?
-  part_point       Float?
+  part_point       Int?
   part_total       Int?
   payment_type     String?
   tax_invoice_code String?

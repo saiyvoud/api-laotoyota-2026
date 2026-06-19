@@ -119,6 +119,16 @@ export default class CardController {
             if (!carData) {
                 return SendError(res, 404, EMessage.NotFound);
             }
+
+            const existingCard = await prisma.card.findFirst({
+                where: {
+                    card_number: String(card_number)
+                }
+            });
+            if (existingCard) {
+                return SendCreate(res, "Card already exists", existingCard);
+            }
+
             const data = await prisma.card.create({
                 data: {
                     carId, card_number, card_type, received, expiration_date, userId: carData.userId, createBy: req.employee
@@ -136,12 +146,12 @@ export default class CardController {
             const data = await prisma.card.findFirst({
                 where: {
                     userId: user_id,
-                    status: true 
+                    status: true
                 },
                 include: {
-                    car: {          
+                    car: {
                         include: {
-                            user: true 
+                            user: true
                         }
                     }
                 }
@@ -202,6 +212,15 @@ export default class CardController {
             const carData = await FindOneCar(carId);
             if (!carData) {
                 return SendError(res, 404, EMessage.NotFound);
+            }
+            const existingCard = await prisma.card.findFirst({
+                where: {
+                    card_number: String(card_number),
+                    NOT: { card_id }
+                }
+            });
+            if (existingCard) {
+                return SendCreate(res, "Card already exists", existingCard);
             }
             const data = await prisma.card.update({
                 data: {

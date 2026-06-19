@@ -37,7 +37,7 @@ router.put("/user/refresh", UserController.Refresh);
 router.put("/user/update", auth, UserController.UpdateUser);
 router.put("/user/update/profile", auth, UserController.updateProfile);
 router.put("/user/update/:customer_id", auth, UserController.UpdateCustomer);
-router.put("/user/updatePoint", auth, UserController.UpdatePoint);
+// router.put("/user/updatePoint", auth, UserController.UpdatePoint);
 router.put("/user/changeCustomerPassword/:customer_id", auth, UserController.ChangeCustomerPassword);
 router.put("/user/resetCutomerPassword/:customer_id", auth, UserController.ResetCutomerPassword);
 router.delete("/user/delete/:customer_id", auth, UserController.DeleteCustomer);
@@ -106,7 +106,9 @@ router.get("/gifthistory/export", auth, GiftHistoryController.ExportGiftHistory)
 router.get("/gifthistory/selByUser", auth, GiftHistoryController.SelectByUser);
 router.post("/gifthistory/insert", auth, GiftHistoryController.Insert);
 // router.put("/gifthistory/update/:gifthistory_id", auth, GiftHistoryController.UpdateGifthistory);
-router.put("/gifthistory/delete/:gifthistory_id", auth, GiftHistoryController.DeleteGifthistory);
+router.put("/gifthistory/returnPoint/:gifthistory_id", auth, GiftHistoryController.ReturnPointGifthistory);
+router.put("/gifthistory/confirm/:gifthistory_id", auth, GiftHistoryController.Confirm);
+router.delete("/gifthistory/cancel/:gifthistory_id", auth, GiftHistoryController.Cancel);
 //---- card ----
 router.get("/card/selAll", auth, CardController.SelectAll);
 router.get("/card/selOne/:card_id", auth, CardController.SelectOne);
