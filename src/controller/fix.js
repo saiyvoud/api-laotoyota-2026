@@ -508,8 +508,8 @@ export default class FixController {
     static async UpdateFixSuccess(req, res) {
         try {
             const fix_id = req.params.fix_id;
-            const { bookingId, detailFix, kmLast, kmNext, labour_total, part_total, part_point, labour_point, exchange_rate, payment_type,cardId, tax_invoice_code } = req.body;
-            const validate = await ValidateData({  kmLast, kmNext, tax_invoice_code });
+            const { bookingId, detailFix, kmLast, kmNext, labour_total, part_total, part_point, labour_point, exchange_rate, payment_type, cardId, tax_invoice_code } = req.body;
+            const validate = await ValidateData({ kmLast, kmNext, tax_invoice_code });
             if (validate.length > 0) {
                 return SendError(res, 400, EMessage.BadRequest, validate.join(','));
             }
@@ -565,7 +565,7 @@ export default class FixController {
             } = req.body;
 
             // 1. Validate ข้อมูลพื้นฐาน
-            const validate = await ValidateData({ kmLast, kmNext,tax_invoice_code });
+            const validate = await ValidateData({ kmLast, kmNext, tax_invoice_code });
             if (validate.length > 0) {
                 return SendError(res, 400, EMessage.BadRequest, validate.join(','));
             }
@@ -773,6 +773,48 @@ export default class FixController {
 
         } catch (error) {
             return SendError(res, 500, EMessage.ServerInternal, error);
+        }
+    }
+
+    // setting point
+
+    static async createSettingPoint(req, res) {
+        try {
+            const { priceFix, pricePart } = req.body;
+            const data = await prisma.setting.upsert({
+                where: {
+                    setting_id: "GLOBAL_SETTING",
+                },
+                update: {
+                    priceFix: parseInt(priceFix),
+                    pricePart: parseInt(pricePart),
+                },
+                create: {
+                    setting_id: "GLOBAL_SETTING",
+                    priceFix: parseInt(priceFix),
+                    pricePart: parseInt(pricePart),
+                },
+            });
+
+            return SendSuccess(res, SMessage.UpdateSuccess, data);
+
+        } catch (error) {
+            return SendError(res, 500, EMessage.ServerInternal, error);
+        }
+    }
+
+    static async getSettingPoint(req, res) {
+        try {
+            const data = await prisma.setting.findFirst();
+
+            if (!data) {
+                return SendError(res, 404, "Not Found");
+            }
+
+            return SendSuccess(res, "Success", data);
+
+        } catch (error) {
+            return SendError(res, 500, "Server Error", error);
         }
     }
 }

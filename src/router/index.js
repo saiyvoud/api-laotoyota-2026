@@ -179,8 +179,10 @@ router.get("/fix/getAllByBranchFromBooking/:branch_id", auth, FixController.getA
 router.get("/fix/getAllByBranchFromWorkshop/:branch_id", auth, FixController.getAllFixByBranchFromWorkshop);
 router.get("/fix/export", auth, FixController.ExportFix);
 router.get("/fix/exportWorkshopFix", auth, FixController.exportWorkshopFix);
+router.get("/fix/setting", auth, FixController.getSettingPoint);
 router.post("/fix/insert", auth, FixController.Insert);
 router.post("/fix/workshop", auth, authAdminOrSuperAdmin, FixController.WorkShopFix);
+router.post("/fix/setting", auth, FixController.createSettingPoint);
 router.put("/fix/update/:fix_id", auth, FixController.UpdateFix);
 router.put("/fix/updateStatus/:fix_id", auth, FixController.UpdateFixSuccess);
 router.delete("/fix/delete/:fix_id", auth, FixController.DeleteFix);
