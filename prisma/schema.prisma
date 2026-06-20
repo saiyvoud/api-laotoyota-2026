@@ -160,9 +160,9 @@ model Car {
   userId       String?   @db.VarChar(36)
   model        String
   frameNumber  String
-  engineNumber String
+  engineNumber String?
   plateNumber  String
-  province     String
+  province     String?
   color        String?
   createBy     String?
   createdAt    DateTime  @default(now())
