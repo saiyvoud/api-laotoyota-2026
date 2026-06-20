@@ -226,7 +226,7 @@ export default class CarController {
     }
     static DeletAllCar(req, res) {
         try {
-            const data = prisma.car.deleteMany({});
+            const data = prisma.car.deleteMany();
             if (!data) return SendError(res, 404, EMessage.EDelete);
             return SendSuccess(res, SMessage.Delete, data)
         } catch (error) {
