@@ -224,6 +224,15 @@ export default class CarController {
             return SendError(res, 500, EMessage.ServerInternal, error)
         }
     }
+    static DeletAllCar(req, res) {
+        try {
+            const data = prisma.car.deleteMany({});
+            if (!data) return SendError(res, 404, EMessage.EDelete);
+            return SendSuccess(res, SMessage.Delete, data)
+        } catch (error) {
+            return SendError(res, 500, EMessage.ServerInternal, error)
+        }
+    }
     static async ExportCar(req, res) {
         try {
             const { startDate, endDate } = req.query;
