@@ -130,7 +130,7 @@ router.get("/car/export", auth, CarController.ExportCar);
 router.post("/car/insert", auth, CarController.Insert);
 router.put("/car/update/:car_id", auth, CarController.UpdateCar);
 router.delete("/car/delete/:car_id", auth, CarController.DeleteCar);
-router.delete("/car/deleteAll", auth, CarController.DeletAllCar);
+router.delete("/car/deleteAll", auth, CarController.DeleteAllCar);
 //---- booking ----
 router.get("/booking/selAll", auth, BookingController.SelectAll);
 router.get("/booking/search", auth, BookingController.SearchBooking);
