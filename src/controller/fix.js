@@ -561,16 +561,23 @@ export default class FixController {
             const {
                 detailFix, kmLast, kmNext,
                 labour_total, part_total, part_point,
-                labour_point, cardId, exchange_rate, payment_type, invoice_number, tax_invoice_code
+                labour_point, cardId, card_number, exchange_rate, payment_type, invoice_number, tax_invoice_code
             } = req.body;
+            console.log(req.body);
 
             // 1. Validate ข้อมูลพื้นฐาน
             const validate = await ValidateData({ kmLast, kmNext, tax_invoice_code });
             if (validate.length > 0) {
                 return SendError(res, 400, EMessage.BadRequest, validate.join(','));
             }
-            const cardData = await FindOneCard(cardId);
-            if (!cardData) return SendError(res, 404, EMessage.ESelect);
+            let cardData = null;
+            if (cardId) {
+                cardData = await FindOneCard(cardId);
+            } else if (card_number) {
+                cardData = await prisma.card.findFirst({
+                    where: { card_number }
+                });
+            }
 
 
             // เตรียมข้อมูลสำหรับ Insert
@@ -584,6 +591,7 @@ export default class FixController {
                 labour_point: parseInt(labour_point || 0),
                 totalPrice: parseInt(labour_total || 0) + parseInt(part_total || 0),
                 cardId: cardData.card_id,
+                card_number: cardData.card_number,
                 exchange_rate: parseInt(exchange_rate || 0),
                 payment_type,
                 invoice_date: new Date(),

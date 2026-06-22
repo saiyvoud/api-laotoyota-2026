@@ -270,9 +270,10 @@ model Fix {
   updatedAt        DateTime  @updatedAt
   branchId         String?   @db.VarChar(36)
   cardId           String?
+  card_number     String?
   exchange_rate    Int?
   invoice_date     DateTime?
-  invoice_number   String    @unique
+  invoice_number   String?
   labour_point     Int?
   labour_total     Int?
   part_point       Int?
