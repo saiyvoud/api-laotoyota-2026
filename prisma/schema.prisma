@@ -178,6 +178,8 @@ model Setting {
   setting_id String   @id @default(uuid()) @db.VarChar(36)
   priceFix   Int
   pricePart  Int
+  pointFix   Int
+  pointPart  Int
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
 }
@@ -270,7 +272,7 @@ model Fix {
   updatedAt        DateTime  @updatedAt
   branchId         String?   @db.VarChar(36)
   cardId           String?
-  card_number     String?
+  frameNumber     String?
   exchange_rate    Int?
   invoice_date     DateTime?
   invoice_number   String?
