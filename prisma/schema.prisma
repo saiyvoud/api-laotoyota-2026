@@ -178,8 +178,8 @@ model Setting {
   setting_id String   @id @default(uuid()) @db.VarChar(36)
   priceFix   Int
   pricePart  Int
-  pointFix   Int
-  pointPart  Int
+  pointFix   Int  @default(0)
+  pointPart  Int  @default(0)
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
 }
