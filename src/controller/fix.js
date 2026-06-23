@@ -1024,7 +1024,11 @@ export default class FixController {
 
     static async getSettingPoint(req, res) {
         try {
-            const data = await prisma.setting.findMany();
+            const data = await prisma.setting.findFirst({
+                where: {
+                    setting_id: "GLOBAL_SETTING",
+                },
+            })
             if (!data) {
                 return SendError(res, 404, "Not Found");
             }
