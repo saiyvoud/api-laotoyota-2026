@@ -10,13 +10,18 @@ const app = express();
 //   origin: 'http://localhost:5173', // หรือ URL ของ frontend
 //   credentials: true, // <- อนุญาตให้ส่ง credentials ได้
 // }));
-app.use(cors());
+app.use(cors(
+    {
+        origin: 'https://webadmin.laotoyotaservice.la',
+        credentials: true
+    }
+));
 app.use(fileUpload())
 app.use(express.json());
-app.use(express.urlencoded({extended: true,limit: "500mb",parameterLimit: 5000}));
+app.use(express.urlencoded({ extended: true, limit: "500mb", parameterLimit: 5000 }));
 app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({extended: true,limit: "500mb",parameterLimit: 5000}));
-app.use("/api",router);
-app.listen(8000,()=>{
+app.use(bodyParser.urlencoded({ extended: true, limit: "500mb", parameterLimit: 5000 }));
+app.use("/api", router);
+app.listen(8000, () => {
     console.log(`http://localhost:8000`);
 })
