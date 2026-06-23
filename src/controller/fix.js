@@ -1024,13 +1024,11 @@ export default class FixController {
 
     static async getSettingPoint(req, res) {
         try {
-            const data = await prisma.setting.findFirst();
-
+            const data = await prisma.setting.findMany();
             if (!data) {
                 return SendError(res, 404, "Not Found");
             }
             return SendSuccess(res, "Success", data);
-
         } catch (error) {
             return SendError(res, 500, "Server Error", error);
         }
