@@ -791,8 +791,8 @@ export default class FixController {
                 Math.floor(labourPoint) +
                 Math.floor(partPoint);
 
-            const result = await prisma.$transaction(
-                async (tx) => {
+            // const result = await prisma.$transaction(
+            //     async (tx) => {
                     // สร้างรายการซ่อม
                     const newFix = {
                         detailFix,
@@ -824,8 +824,12 @@ export default class FixController {
                         createBy: req.employee,
                     };
 
+                   const result = await prisma.fix.create({
+                        data: newFix,
+                    });
+
                     // เพิ่มแต้ม
-                    await tx.card.update({
+                    await prisma.card.update({
                         where: {
                             card_id: cardData.card_id,
                         },
@@ -836,9 +840,9 @@ export default class FixController {
                         },
                     });
 
-                    return newFix;
-                }
-            );
+            //         return newFix;
+            //     }
+            // );
 
             return SendSuccess(
                 res,
