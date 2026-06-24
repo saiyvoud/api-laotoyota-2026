@@ -89,7 +89,7 @@ export default class UserController {
             if (!user) return SendError(res, 404, EMessage.NotFound);
             const count = await prisma.user.count({ where: query });
             const totalPage = Math.ceil(count / parseInt(limit));
-            return SendSuccess(res, SMessage.SelectAll, { data: user, totalPage })
+            return SendSuccess(res, SMessage.SelectAll, { data: user, totalPage, count })
         } catch (error) {
             return SendError(res, 500, EMessage.ServerInternal, error);
         }
@@ -157,7 +157,7 @@ export default class UserController {
             if (!user) return SendError(res, 404, EMessage.NotFound);
             const count = await prisma.user.count({ where: query });
             const totalPage = Math.ceil(count / parseInt(limit));
-            return SendSuccess(res, SMessage.SelectAll, { data: user, totalPage })
+            return SendSuccess(res, SMessage.SelectAll, { data: user, totalPage , count})
         } catch (error) {
             return SendError(res, 500, EMessage.ServerInternal, error);
         }

@@ -82,7 +82,7 @@ export default class TimeFixController {
       if (!timeFix.length) return SendError(res, 404, EMessage.NotFound);
       const count = await prisma.timeFix.count({ where: query });
       const totalPage = Math.ceil(count / parseInt(limit));
-      return SendSuccess(res, SMessage.SelectAll, { data: timeFix, totalPage });
+      return SendSuccess(res, SMessage.SelectAll, { data: timeFix, totalPage, count });
     } catch (error) {
       console.log(error);
       return SendError(res, 500, EMessage.ServerInternal, error);

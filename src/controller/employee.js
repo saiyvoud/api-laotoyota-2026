@@ -76,7 +76,7 @@ export default class EmployeeController {
             });
             const count = await prisma.employee.count({ where: query });
             const totalPage = Math.ceil(count / parseInt(limit));
-            return SendSuccess(res, SMessage.SelectAll, { data: employee, totalPage })
+            return SendSuccess(res, SMessage.SelectAll, { data: employee, totalPage , count });
             // return SendSuccess(res,SMessage.SelectAll,{employee,count})
         } catch (error) {
             console.log(`employee getAll error: ${error}`);

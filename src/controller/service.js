@@ -52,7 +52,7 @@ export default class ServiceController {
             if (!service) return SendError(res, 404, EMessage.NotFound);
             const count = await prisma.service.count({ where: query });
             const totalPage = Math.ceil(count / parseInt(limit));
-            return SendSuccess(res, SMessage.SelectAll, { data: service, totalPage });
+            return SendSuccess(res, SMessage.SelectAll, { data: service, totalPage, count });
         } catch (error) {
             return SendError(res, 500, EMessage.ServerInternal, error);
         }

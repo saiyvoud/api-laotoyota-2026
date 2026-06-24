@@ -55,7 +55,7 @@ export default class BranchController {
             if (!branch) return SendError(res, 404, EMessage.NotFound);
             const count = await prisma.branch.count({ where: query });
             const totalPage = Math.ceil(count / parseInt(limit));
-            return SendSuccess(res, SMessage.SelectAll, { data: branch, totalPage })
+            return SendSuccess(res, SMessage.SelectAll, { data: branch, totalPage, count });
         } catch (error) {
             return SendError(res, 500, EMessage.ServerInternal, error)
         }

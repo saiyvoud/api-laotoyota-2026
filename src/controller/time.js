@@ -68,7 +68,7 @@ export default class TimeController {
             if (!time) return SendError(res, 404, EMessage.NotFound);
             const count = await prisma.time.count({ where: query });
             const totalPage = Math.ceil(count / parseInt(limit));
-            return SendSuccess(res, SMessage.SelectAll, { data: time, totalPage })
+            return SendSuccess(res, SMessage.SelectAll, { data: time, totalPage, count });
         } catch (error) {
             return SendError(res, 500, EMessage.ServerInternal, error);
         }

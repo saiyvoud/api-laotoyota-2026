@@ -46,7 +46,7 @@ export default class PromotionController {
             if (!promotion) return SendError(res, 404, EMessage.NotFound);
             const count = await prisma.promotion.count({ where: query });
             const totalPage = Math.ceil(count / parseInt(limit));
-            return SendSuccess(res, SMessage.SelectAll, { data: promotion, totalPage })
+            return SendSuccess(res, SMessage.SelectAll, { data: promotion, totalPage, count });
         } catch (error) {
             return SendError(res, 500, EMessage.ServerInternal, error);
         }

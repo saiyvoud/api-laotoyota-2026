@@ -108,7 +108,7 @@ export default class BookingController {
 
             const count = await prisma.booking.count({ where: query });
             const totalPage = Math.ceil(count / parseInt(limit));
-            return SendSuccess(res, SMessage.SelectAll, { data: booking, totalPage });
+            return SendSuccess(res, SMessage.SelectAll, { data: booking, totalPage, count });
         } catch (error) {
             console.error("Error in getAllBooking:", error); // ສໍາຄັນຫຼາຍເພື່ອເບິ່ງ Error ແທ້ໆ
             return SendError(res, 500, EMessage.ServerInternal, error.message);
@@ -166,7 +166,7 @@ export default class BookingController {
             if (!data) return SendError(res, 404, EMessage.NotFound);
             const count = await prisma.booking.count({ where: query });
             const totalPage = Math.ceil(count / parseInt(limit));
-            return SendSuccess(res, SMessage.SelectAll, { data, totalPage });
+            return SendSuccess(res, SMessage.SelectAll, { data, totalPage , count});
         } catch (error) {
             return SendError(res, 500, EMessage.ServerInternal, error)
         }

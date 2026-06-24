@@ -119,7 +119,7 @@ export default class FixController {
             return SendSuccess(res, SMessage.SelectAll, {
                 data: fix,
                 totalPage,
-                totalRecord: count,
+                 count,
             });
 
         } catch (error) {
@@ -236,7 +236,7 @@ export default class FixController {
             return SendSuccess(res, SMessage.SelectAll, {
                 data: fix,
                 totalPage,
-                totalRecord: count,
+                 count,
             });
 
         } catch (error) {
@@ -307,7 +307,7 @@ export default class FixController {
             const totalPage = Math.ceil(count / parseInt(limit));
 
             // 7. ส่งค่ากลับ (ใช้ data: data ให้ตรงกับตัวแปรที่ประกาศไว้)
-            return SendSuccess(res, SMessage.SelectAll, { data: data, totalPage });
+            return SendSuccess(res, SMessage.SelectAll, { data: data, totalPage , count });
 
         } catch (error) {
             console.error("Fetch Error:", error);
@@ -368,7 +368,7 @@ export default class FixController {
             const totalPage = Math.ceil(count / parseInt(limit));
 
             // 7. ส่งค่ากลับ (ใช้ data: data ให้ตรงกับตัวแปรที่ประกาศไว้)
-            return SendSuccess(res, SMessage.SelectAll, { data: data, totalPage });
+            return SendSuccess(res, SMessage.SelectAll, { data: data, totalPage, count });
 
         } catch (error) {
             console.error("Fetch Error:", error);

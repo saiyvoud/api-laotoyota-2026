@@ -71,7 +71,7 @@ export default class ZoneController {
             if (!zone) return SendError(res, 404, EMessage.NotFound);
             const count = await prisma.zone.count({ where: query });
             const totalPage = Math.ceil(count / parseInt(limit));
-            return SendSuccess(res, SMessage.SelectAll, { data: zone, totalPage })
+            return SendSuccess(res, SMessage.SelectAll, { data: zone, totalPage, count });
         } catch (error) {
             return SendError(res, 500, EMessage.ServerInternal, error);
         }

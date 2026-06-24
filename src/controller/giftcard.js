@@ -47,7 +47,7 @@ export default class GiftCardController {
             if (!giftcard) return SendError(res, 404, EMessage.NotFound);
             const count = await prisma.giftCard.count({ where: query });
             const totalPage = Math.ceil(count / parseInt(limit));
-            return SendSuccess(res, SMessage.SelectAll, { data: giftcard, totalPage })
+            return SendSuccess(res, SMessage.SelectAll, { data: giftcard, totalPage, count });
 
         } catch (error) {
             return SendError(res, 500, EMessage.ServerInternal, error);

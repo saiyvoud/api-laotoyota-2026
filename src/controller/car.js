@@ -69,7 +69,7 @@ export default class CarController {
 
             const count = await prisma.car.count({ where: query });
             const totalPage = Math.ceil(count / parseInt(limit));
-            return SendSuccess(res, SMessage.SelectAll, { data: car, totalPage });
+            return SendSuccess(res, SMessage.SelectAll, { data: car, totalPage, count });
 
         } catch (error) {
             return SendError(res, 500, EMessage.ServerInternal, error)
