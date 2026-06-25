@@ -14,13 +14,9 @@ export default class GiftHistoryController {
                 search,
                 startDate,
                 endDate,
+                status,
             } = req.query;
             const query = {};
-            // if (search)
-            //     query['OR'] = getSearchQuery(
-            //         ['name'],
-            //         search
-            //     );
             if (search)
                 query['OR'] = [
                     { user: { username: { contains: search } } },
@@ -42,6 +38,12 @@ export default class GiftHistoryController {
                     query.createdAt.lt = nextDay;
                 }
             }
+
+            // 3. Status Filter
+            if (status) {
+                query['status'] = status;
+            }
+
             const giftHistory = await prisma.giftHistory.findMany({
                 where: query,
                 orderBy: {
@@ -57,7 +59,7 @@ export default class GiftHistoryController {
             if (!giftHistory) return SendError(res, 404, EMessage.NotFound);
             const count = await prisma.giftHistory.count({ where: query });
             const totalPage = Math.ceil(count / limit);
-            return SendSuccess(res, SMessage.SelectAll, { data: giftHistory, totalPage });
+            return SendSuccess(res, SMessage.SelectAll, { data: giftHistory, totalPage , count });
         } catch (error) {
             return SendError(res, 500, EMessage.ServerInternal, error);
         }
@@ -130,19 +132,6 @@ export default class GiftHistoryController {
                 return SendError(res, 400, "Point Not Enough")
             }
 
-
-            // const pointAll = cardData.total_point - pointTotal;
-            // const update = await prisma.card.update({
-            //     data: {
-            //         total_point: parseInt(pointAll)
-            //     },
-            //     where: { card_id: cardId }
-            // })
-            // if (!update) {
-            //     return SendError(res, 400, "Error Update Point")
-            // }
-            //--------
-
             const data = await prisma.giftHistory.create({
                 data: {
                     userId: userData?.user_id,
@@ -177,7 +166,7 @@ export default class GiftHistoryController {
                 return SendError(res, 400, "Point Not Enough")
             }
             const pointAll = cardData.total_point - giftHistoryData.total;
-            
+
             const update = await prisma.card.update({
                 data: {
                     total_point: parseInt(pointAll)
@@ -190,7 +179,7 @@ export default class GiftHistoryController {
             // ตัดคะแนนไปแล้วตอน Insert → แค่เปลี่ยน received = true
             const data = await prisma.giftHistory.update({
                 where: { gifthistory_id },
-                data: { received: true }
+                data: { status: "received" }
             });
             return SendSuccess(res, SMessage.Update, data)
 
@@ -203,7 +192,10 @@ export default class GiftHistoryController {
     static async Cancel(req, res) {
         try {
             const { gifthistory_id } = req.params;
-            const data = await prisma.giftHistory.delete({ where: { gifthistory_id: gifthistory_id } })
+            const data = await prisma.giftHistory.update({
+                where: { gifthistory_id },
+                data: { status: "cancel", }
+            });
             if (!data) return SendError(res, 404, EMessage.NotFound);
             return SendSuccess(res, SMessage.Update, data)
         } catch (error) {
@@ -211,57 +203,6 @@ export default class GiftHistoryController {
             return SendError(res, 500, EMessage.ServerInternal, error);
         }
     }
-    // static async UpdateGifthistory(req, res) {
-    //     try {
-    //         const gifthistory_id = req.params.gifthistory_id;
-    //         // const { giftcardId, amount, } = req.body;
-    //         const { amount } = req.body;
-    //         const validate = await ValidateData({ amount });
-    //         if (validate.length > 0) {
-    //             return SendError(res, 400, EMessage.BadRequest, validate.join(','));
-    //         }
-    //         const gifthistoryData = await FindOneGiftHistory(gifthistory_id); // ສ້າງຢູ່ໃນ service
-    //         // const user = await FindOneUser(gifthistoryData.userId);
-    //         const card = await FindOneCard(gifthistoryData.cardId);
-    //         const giftcardData = await FindOneGiftCard(gifthistoryData.giftcardId); // ສ້າງຢູ່ໃນ service
-    //         // ຕັດສະ stock
-    //         // const pointTotalUpdate = giftcardData.point * parseInt(amount)
-    //         const pointTotalUpdate = giftcardData.gift_Point * parseInt(amount)
-    //         //console.log("pointUpdate ====> ", pointTotalUpdate);
-    //         // const pointTotalBefore = giftcardData.point * gifthistoryData.amount;
-    //         const pointTotalBefore = giftcardData.gift_Point * gifthistoryData.amount;
-    //         //console.log("pointBefore ====> ", pointTotalBefore);
-    //         const points = pointTotalBefore + card.total_point;
-    //         //console.log("points ====> ", points);
-    //         if (points < pointTotalUpdate) {
-    //             return SendError(res, 400, "Point Not Enough")
-    //         }
-    //         const pointAll = points - pointTotalUpdate;
-    //         //console.log("pointAll ====> ", pointAll);
-    //         const update = await prisma.card.update({
-    //             data: {
-    //                 total_point: parseInt(pointAll)
-    //             },
-    //             where: { card_id: gifthistoryData.cardId }
-    //         })
-    //         if (!update) {
-    //             return SendError(res, 400, "Error Update Point")
-    //         }
-    //         const data = await prisma.giftHistory.update({
-    //             data: {
-    //                 giftcardId: gifthistoryData.giftcardId, amount: parseInt(amount)
-    //             },
-    //             where: {
-    //                 gifthistory_id: gifthistory_id
-    //             }
-    //         });
-    //         if (!data) return SendError(res, 404, EMessage.EUpdate);
-    //         return SendSuccess(res, SMessage.Update, data)
-    //     } catch (error) {
-    //         console.log(error);
-    //         return SendError(res, 500, EMessage.ServerInternal, error)
-    //     }
-    // }
 
     static async ReturnPointGifthistory(req, res) {
         try {

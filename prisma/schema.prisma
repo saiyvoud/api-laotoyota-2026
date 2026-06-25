@@ -113,7 +113,7 @@ model GiftHistory {
   userId         String   @db.VarChar(36)
   giftcardId     String   @db.VarChar(36)
   amount         Int
-  status         Boolean  @default(true)
+  status         String  @default("await")
   createBy       String?
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
@@ -121,7 +121,6 @@ model GiftHistory {
   cardId         String   @db.VarChar(36)
   card_number    String
   claimed_date   DateTime @db.DateTime(0)
-  received    Boolean  @default(false)
   gift_Code      String
   card           Card     @relation(fields: [cardId], references: [card_id])
   giftcard       GiftCard @relation(fields: [giftcardId], references: [giftcard_id])
