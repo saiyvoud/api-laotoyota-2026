@@ -121,7 +121,6 @@ export default class GiftHistoryController {
             if (validate.length > 0) {
                 return SendError(res, 400, EMessage.BadRequest, validate.join(','));
             }
-            // const user = await FindOneUser(userId);
             const giftcardData = await FindOneGiftCard(giftcardId);
             const cardData = await FindOneCard(cardId);
             const userData = await FindOneUser(cardData.userId);
@@ -141,6 +140,7 @@ export default class GiftHistoryController {
                     gift_Code: giftcardData.gift_Code,
                     amount: parseInt(amount),
                     total: parseInt(pointTotal),
+                    status: "await",
                     claimed_date: new Date(),
                     createBy: req.employee_id
                 }
