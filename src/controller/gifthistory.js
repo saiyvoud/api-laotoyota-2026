@@ -140,7 +140,6 @@ export default class GiftHistoryController {
                     gift_Code: giftcardData.gift_Code,
                     amount: parseInt(amount),
                     total: parseInt(pointTotal),
-                    status: "await",
                     claimed_date: new Date(),
                     createBy: req.employee_id
                 }
