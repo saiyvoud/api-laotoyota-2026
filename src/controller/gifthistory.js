@@ -131,21 +131,6 @@ export default class GiftHistoryController {
                 return SendError(res, 400, "Point Not Enough")
             }
 
-            console.log("userData:", userData);
-            console.log("cardData:", cardData);
-            console.log("giftcardData:", giftcardData);
-            console.log("payload:", {
-                userId: userData?.user_id,
-                giftcardId,
-                cardId,
-                card_number: cardData?.card_number,
-                gift_Code: giftcardData?.gift_Code,
-                amount: parseInt(amount),
-                total: parseInt(pointTotal),
-                claimed_date: new Date(),
-                createBy: req.employee_id
-            });
-
             const data = await prisma.giftHistory.create({
                 data: {
                     userId: userData?.user_id,
