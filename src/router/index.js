@@ -28,6 +28,7 @@ router.get("/user/selOne/:user_id", auth, UserController.SelectOne);
 router.get("/user/search", auth, UserController.SearchUser);
 router.get("/user/profile", auth, UserController.GetProfile);
 router.get("/user/getAll", auth, UserController.getAllUser);
+router.get("/user/getAllGeneral", auth, UserController.getAllUserGeneral);
 router.get("/user/exportCustomer", auth, UserController.ExportCustomer);
 router.get("/user/exportEmployee", auth, EmployeeController.ExportEmployee);
 router.get("/user/exportAdmin", auth, UserController.ExportAdmin);

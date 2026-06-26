@@ -80,9 +80,7 @@ export default class UserController {
             const user = await prisma.user.findMany({
                 where: query,
                 orderBy: {
-                    createdAt: 'desc',
-                    role: Role.general,
-                },
+                    createdAt: 'desc',                },
                 skip: (parseInt(page) - 1) * parseInt(limit),
                 take: parseInt(limit),
             });
@@ -105,11 +103,6 @@ export default class UserController {
                 status
             } = req.query;
             const query = {};
-            // if (search)
-            //     query['OR'] = getSearchQuery(
-            //         ['phoneNumber', 'username'],
-            //         search
-            //     );
             if (search) {
 
                 query.OR = [
@@ -143,7 +136,7 @@ export default class UserController {
             }
 
             if (status) {
-                query.role = status;
+                query.role = { not: status }; //  ເອົາ record ທີ່ role ບໍ່ເທົ່າກັບ status
             }
 
             const user = await prisma.user.findMany({
@@ -157,7 +150,7 @@ export default class UserController {
             if (!user) return SendError(res, 404, EMessage.NotFound);
             const count = await prisma.user.count({ where: query });
             const totalPage = Math.ceil(count / parseInt(limit));
-            return SendSuccess(res, SMessage.SelectAll, { data: user, totalPage , count})
+            return SendSuccess(res, SMessage.SelectAll, { data: user, totalPage, count })
         } catch (error) {
             return SendError(res, 500, EMessage.ServerInternal, error);
         }
@@ -310,19 +303,22 @@ export default class UserController {
 
     static async RegisterAdmin(req, res) {
         try {
-            const { username, phoneNumber, password, province, district, village, email } = req.body;
-            // console.log(req.body);
+            const { username, phoneNumber, password, province, district, village, email, role } = req.body;
+
+            // ✅ validate role ຕ້ອງເປັນ admin ຫຼື super_admin ເທົ່ານັ້ນ
+            const allowedRoles = ["admin", "super_admin"];
+            if (!role || !allowedRoles.includes(role)) {
+                return SendError(res, 400, EMessage.BadRequest, "Role must be 'admin' or 'super_admin'");
+            }
+
             const validate = await ValidateData({
-                username, phoneNumber,
-                password, province, district, village
+                username, phoneNumber, password, province, district, village
             });
 
             if (validate.length > 0) {
-                return SendError(res, 400, EMessage.BadRequest, validate.join(','))
+                return SendError(res, 400, EMessage.BadRequest, validate.join(','));
             }
-            // const checkPhoneNumber = await CheckPhoneNumber(phoneNumber); // ສ້າງຢູ່ service
-            // if (!checkPhoneNumber) return SendError(res, 404, EMessage.NotFound)
-            // ✅ ถ้า phoneNumber ซ้ำ → skip
+
             const existingPhoneNumber = await prisma.user.findFirst({
                 where: { phoneNumber: String(phoneNumber) },
             });
@@ -330,8 +326,9 @@ export default class UserController {
                 return SendCreate(res, "Phone number already exists", existingPhoneNumber);
             }
 
-            const generatePassword = await EncryptData(password)
+            const generatePassword = await EncryptData(password);
             const randow = "LTS" + `${Math.floor(Math.random() * (100 - 1 + 1)) + 1}`;
+
             const data = await prisma.user.create({
                 data: {
                     username,
@@ -341,17 +338,18 @@ export default class UserController {
                     district,
                     village,
                     customer_number: randow.toString(),
-                    role: Role.admin,
+                    role: role,
                     point: 0,
-                    email: email ?? null
-                }
-            })
+                    email: email ?? null,
+                },
+            });
+
             data.password = undefined;
-            data.role = undefined;
-            return SendCreate(res, SMessage.Register, data)
+            return SendCreate(res, SMessage.Register, data);
+
         } catch (error) {
             console.log(error);
-            return SendError(res, 500, EMessage.ServerInternal, error)
+            return SendError(res, 500, EMessage.ServerInternal, error);
         }
     }
     static async RegisterSuperAdmin(req, res) {
@@ -563,7 +561,7 @@ export default class UserController {
     static async UpdateCustomer(req, res) {
         try {
             const user_id = req.params.customer_id;
-            const { username, phoneNumber, province, district, village, email } = req.body;
+            const { username, phoneNumber, province, district, village, email, role } = req.body;
             // console.log(req.body);
             const validate = await ValidateData({ username, phoneNumber, province, district, village, });
             if (validate.length > 0) {
@@ -581,7 +579,7 @@ export default class UserController {
             }
             const data = await prisma.user.update({
                 data: {
-                    username, phoneNumber, province, district, village, email: email || null,
+                    username, phoneNumber, province, district, village, email: email || null, ...(role && { role }),
                 },
                 where: {
                     user_id: user_id
@@ -609,30 +607,6 @@ export default class UserController {
     }
 
 
-    // static async UpdatePoint(req, res) {
-    //     try {
-    //         const { user_id, point } = req.body;
-    //         // console.log(req.body);
-    //         const validate = await ValidateData({ user_id, point });
-    //         if (validate.length > 0) {
-    //             return SendError(res, 400, EMessage.BadRequest, validate.join(","))
-    //         }
-    //         await FindOneUser(user_id); // ສ້າງຢູ່ Serivce
-    //         const data = await prisma.user.update({
-    //             data: {
-    //                 point: { increment: parseInt(point) }
-    //             },
-    //             where: {
-    //                 user_id: user_id
-    //             }
-    //         });
-    //         if (!data) return SendError(res, 404, EMessage.EUpdate);
-    //         return SendSuccess(res, SMessage.Update)
-    //     } catch (error) {
-    //         return SendError(res, 500, EMessage.ServerInternal, error)
-    //     }
-
-    // }
     static async ExportCustomer(req, res) {
         try {
             const { startDate, endDate } = req.query;
