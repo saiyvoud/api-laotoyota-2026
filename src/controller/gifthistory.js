@@ -162,8 +162,14 @@ export default class GiftHistoryController {
             })
             return SendCreate(res, SMessage.Insert, data);
         } catch (error) {
+            // console.log(error);
+            // return SendError(res, 500, EMessage.ServerInternal, error);
             console.log(error);
-            return SendError(res, 500, EMessage.ServerInternal, error);
+            return res.status(500).json({
+                success: false,
+                message: error.message,        // ✅ ເຫັນ error ຈິງ
+                error: error,
+            });
         }
     }
 
