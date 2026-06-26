@@ -164,10 +164,11 @@ export default class GiftHistoryController {
         } catch (error) {
             // console.log(error);
             // return SendError(res, 500, EMessage.ServerInternal, error);
-            console.log(error);
+            console.log("FULL ERROR:", error.message); // ✅ ເຫັນ message ລະອຽດ
+            console.log("STACK:", error.stack);
             return res.status(500).json({
                 success: false,
-                message: error.message,        // ✅ ເຫັນ error ຈິງ
+                message: error.message, // ✅ ສົ່ງ message ຈິງໄປ
                 error: error,
             });
         }
