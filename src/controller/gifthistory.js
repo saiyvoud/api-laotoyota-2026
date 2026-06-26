@@ -59,7 +59,7 @@ export default class GiftHistoryController {
             if (!giftHistory) return SendError(res, 404, EMessage.NotFound);
             const count = await prisma.giftHistory.count({ where: query });
             const totalPage = Math.ceil(count / limit);
-            return SendSuccess(res, SMessage.SelectAll, { data: giftHistory, totalPage , count });
+            return SendSuccess(res, SMessage.SelectAll, { data: giftHistory, totalPage, count });
         } catch (error) {
             return SendError(res, 500, EMessage.ServerInternal, error);
         }
@@ -130,6 +130,21 @@ export default class GiftHistoryController {
             if (cardData.total_point < pointTotal) {
                 return SendError(res, 400, "Point Not Enough")
             }
+
+            console.log("userData:", userData);
+            console.log("cardData:", cardData);
+            console.log("giftcardData:", giftcardData);
+            console.log("payload:", {
+                userId: userData?.user_id,
+                giftcardId,
+                cardId,
+                card_number: cardData?.card_number,
+                gift_Code: giftcardData?.gift_Code,
+                amount: parseInt(amount),
+                total: parseInt(pointTotal),
+                claimed_date: new Date(),
+                createBy: req.employee_id
+            });
 
             const data = await prisma.giftHistory.create({
                 data: {
