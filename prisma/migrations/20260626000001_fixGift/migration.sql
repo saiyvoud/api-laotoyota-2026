@@ -1,0 +1,2 @@
+ALTER TABLE `GiftHistory` DROP COLUMN `received`;
+ALTER TABLE `GiftHistory` MODIFY COLUMN `status` VARCHAR(191) NOT NULL DEFAULT 'await';
