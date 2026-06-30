@@ -16,6 +16,8 @@ import EmployeeController from '../controller/employee.js';
 import BranchController from '../controller/branch.js';
 import NotificationController from '../controller/notification.js';
 import TimeFixController from '../controller/timefix.js';
+import StoreController from '../controller/store.js';
+import TransactionController from '../controller/transaction.js';
 const router = express.Router();
 //----- User----
 router.post("/user/register", UserController.Register);
@@ -191,4 +193,19 @@ router.delete("/fix/delete/:fix_id", auth, FixController.DeleteFix);
 //----- noti ----
 router.post("/noti/send", auth, NotificationController.sendData);
 router.post("/noti/one", auth, NotificationController.sendDataOneToOne);
+//---- store ----
+router.get("/store/selAll", auth, StoreController.SelectAll);
+router.get("/store/getAll", auth, StoreController.getAllAdmin);
+router.get("/store/selOne/:store_id", auth, StoreController.SelectOne);
+router.post("/store/insert", auth, StoreController.Insert);
+router.put("/store/update/:store_id", auth, StoreController.UpdateStore);
+router.put("/store/updateStatus/:store_id", auth, StoreController.UpdateStatus);
+router.delete("/store/delete/:store_id", auth, StoreController.DeleteStore);
+//---- transaction ----
+router.get("/transaction/selAll", auth, TransactionController.SelectAll);
+router.get("/transaction/getAll", auth, TransactionController.getAllAdmin);
+router.get("/transaction/selOne/:transaction_id", auth, TransactionController.SelectOne);
+router.get("/transaction/selByUser", auth, TransactionController.SelectByUser);
+router.post("/transaction/insert", auth, TransactionController.Insert);
+router.delete("/transaction/delete/:transaction_id", auth, TransactionController.DeleteTransaction);
 export default router;

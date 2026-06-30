@@ -152,6 +152,7 @@ model Card {
   user            User?         @relation(fields: [userId], references: [user_id])
   Fix             Fix[]
   GiftHistory     GiftHistory[]
+  Transaction     Transaction[]
 }
 
 model Car {
@@ -181,6 +182,31 @@ model Setting {
   pointPart  Int  @default(0)
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
+}
+
+model Store {
+  store_id String   @id @default(uuid()) @db.VarChar(36)
+  name   String
+  address String
+  phone   String
+  image   String
+  qrCode  String  @db.Text
+  status   Boolean
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  Transaction Transaction[]
+}
+
+model Transaction {
+  transaction_id String   @id @default(uuid()) @db.VarChar(36)
+  code           String
+  cardId         String
+  card           Card     @relation(fields: [cardId], references: [card_id])
+  storeId        String
+  store          Store    @relation(fields: [storeId], references: [store_id])
+  discount       Int
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
 }
 
 model TimeFix {
