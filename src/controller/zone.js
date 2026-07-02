@@ -131,7 +131,6 @@ export default class ZoneController {
             const zone_id = req.params.zone_id;
 
             const { zoneName } = req.body;
-            // console.log("Update zone data:", { zoneName,timeFix });
             const validate = await ValidateData({ zoneName });
             // await FindOneTime(timeId);
             if (validate.length > 0) {

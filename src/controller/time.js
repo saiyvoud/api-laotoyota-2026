@@ -5,25 +5,7 @@ import prisma from "../config/prima.js";
 import { UploadImageToCloud } from "../config/cloudinary.js";
 import { ExcelBuilder, ReportColumns } from "../service/excelBuilder.js";
 export default class TimeController {
-    // static async SearchTime(req, res) {
-    //     try {
-    //         const search = req.query.search;
 
-    //         const data = await prisma.time.findMany({
-    //             where: {
-    //                 date: {
-    //                     contains: search
-    //                 },
-    //             }
-    //         });
-    //         if (!data) {
-    //             return SendError(res, 404, EMessage.NotFound);
-    //         }
-    //         return SendSuccess(res, SMessage.Search, data);
-    //     } catch (error) {
-    //         return SendError(res, 500, EMessage.ServerInternal, error);
-    //     }
-    // }
     static async GetAllTime(req, res) {
         try {
             const {

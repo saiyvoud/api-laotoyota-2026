@@ -555,121 +555,7 @@ export default class FixController {
             return SendError(res, 500, EMessage.ServerInternal, error)
         }
     }
-    // static async WorkShopFix(req, res) {
-    //     try {
-    //         const {
-    //             detailFix, kmLast, kmNext,
-    //             labour_total, part_total, part_point, labour_point,
-    //             cardId, frameNumber, exchange_rate, payment_type, invoice_number, tax_invoice_code
-    //         } = req.body;
-    //         // console.log(req.body);
-
-    //         // 1. Validate ข้อมูลพื้นฐาน
-    //         const validate = await ValidateData({ kmLast, kmNext, tax_invoice_code });
-    //         if (validate.length > 0) {
-    //             return SendError(res, 400, EMessage.BadRequest, validate.join(','));
-    //         }
-    //         let cardData = null;
-    //         if (cardId) {
-    //             cardData = await FindOneCard(cardId);
-    //         } else if (frameNumber) {
-    //             cardData = await prisma.card.findFirst({
-    //                 where: {
-    //                     car: {
-    //                         frame_number: frameNumber
-    //                     }
-    //                 }
-    //             });
-    //         }
-
-    //         if (!cardData) {
-    //             return SendError(res, 404, EMessage.ESelect);
-    //         }
-
-    //         const pointData = await prisma.setting.findFirst();
-    //         if (!pointData) {
-    //             return SendError(res, 404, EMessage.ESelect);
-    //         }
-    //         console.log("point data :",pointData);
-
-    //         // calculator point
-    //         if(!labour_point || !part_point) {
-    //             const laboutPoint = labour_total * pointData.labour_point ;
-    //             const partPoint = part_total * pointData.part_point;
-    //             labour_point = laboutPoint;
-    //             part_point = partPoint;
-    //         }
-
-
-    //         // เตรียมข้อมูลสำหรับ Insert
-    //         const fixData = {
-    //             detailFix,
-    //             kmLast: parseInt(kmLast),
-    //             kmNext: parseInt(kmNext),
-    //             labour_total: parseInt(labour_total || 0),
-    //             part_total: parseInt(part_total || 0),
-    //             part_point: parseInt(part_point || 0),
-    //             labour_point: parseInt(labour_point || 0),
-    //             totalPrice: parseInt(labour_total || 0) + parseInt(part_total || 0),
-    //             cardId: cardData.card_id,
-    //             exchange_rate: parseInt(exchange_rate || 0),
-    //             payment_type,
-    //             invoice_date: new Date(),
-    //             tax_invoice_code: tax_invoice_code,
-    //             invoice_number: invoice_number,
-    //             fixStatus: FixStatus.success,
-    //             createBy: req.employee,
-    //         };
-
-
-
-    //         // กรณีมีบัตร: ใช้ Transaction เพื่อความปลอดภัย
-    //         const card = await prisma.card.findUnique({ where: { card_id: cardData.card_id } });
-    //         if (!card) return SendError(res, 404, EMessage.ESelect);
-    //         const totalPointToAdd = parseInt(labour_point || 0) + parseInt(part_point || 0);
-    //         const result = await prisma.$transaction(async (tx) => {
-    //             // บันทึกการซ่อม
-    //             const newFix = await tx.fix.create({ data: fixData });
-
-    //             // อัปเดตแต้มในบัตร
-    //             await tx.card.update({
-    //                 where: { card_id: cardData.card_id },
-    //                 data: {
-    //                     total_point: (card?.total_point || 0) + totalPointToAdd
-    //                 }
-    //             });
-
-
-    //             return newFix;
-    //         });
-    //         // 1. หา Employee ก่อน
-    //         const employee = await prisma.employee.findFirst({
-    //             where: { employee_id: result.createBy }
-    //         });
-
-    //         // 2. เช็คว่าเจอพนักงานไหมก่อนจะเข้าถึง branchId
-    //         if (employee) {
-    //             const branchId = employee.branchId;
-    //             const branch = await FindOneBranch(branchId);
-    //             if (branch) {
-    //                 await prisma.fix.update({
-    //                     where: { fix_id: result.fix_id },
-    //                     data: { branchId: branch.branch_id }
-    //                 })
-    //             }
-    //         } else {
-    //             return SendError(res, 404, EMessage.ESelect);
-    //         }
-
-    //         if (!result) return SendError(res, 400, EMessage.EInsert);
-
-    //         return SendSuccess(res, SMessage.Insert, result);
-
-    //     } catch (error) {
-    //         console.error("WorkshopFix Error:", error);
-    //         return SendError(res, 500, EMessage.ServerInternal, error.message);
-    //     }
-    // }
+    
 
     static async WorkShopFix(req, res) {
         try {
@@ -970,7 +856,6 @@ export default class FixController {
             if (!data.length) {
                 return SendError(res, 404, "No data found for this date range");
             }
-            // console.log("Booking data:", data);
             const exportData = data.map(item => ({
                 userName: item.card?.user?.username,
                 phoneNumber: item.card?.user?.phoneNumber,

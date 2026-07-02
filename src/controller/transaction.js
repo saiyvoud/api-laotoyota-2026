@@ -105,7 +105,7 @@ export default class TransactionController {
             if (!store) return SendError(res, 404, EMessage.NotFound);
             if (!store.status) return SendError(res, 400, "ຮ້ານນີ້ຖືກປິດໃຊ້ງານ");
 
-            // ກວດ 1 ຄັ້ງ/ວັນ/ຮ້ານ (ທາງເລືອກ B)
+            // ກວດ 1 ຄັ້ງ/ວັນ/ຮ້ານ
             const todayStart = new Date();
             todayStart.setHours(0, 0, 0, 0);
             const todayEnd = new Date();
@@ -120,11 +120,9 @@ export default class TransactionController {
             });
             if (usedToday) return SendError(res, 400, `ທ່ານໃຊ້ສ່ວນຫຼຸດຮ້ານ "${store.name}" ແລ້ວວັນນີ້ — ສາມາດໃຊ້ໃໝ່ໄດ້ພຸ້ງນີ້`);
 
-            // ດຶງ discount ຈາກ qrCode ທີ່ admin ຕັ້ງໄວ້ — ບໍ່ເຊື່ອຄ່າຈາກ mobile
+            // ດຶງ discount ຈາກ qrCode
             const discount = store.qrCode ? (JSON.parse(store.qrCode)?.discount ?? 0) : 0;
-
             const code = "TXN_" + shortid.generate();
-
             const data = await prisma.transaction.create({
                 data: {
                     code,

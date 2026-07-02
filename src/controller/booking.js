@@ -244,7 +244,6 @@ export default class BookingController {
     static async SelectByBranch(req, res) {
         try {
             const branchId = req.params.branch_id;
-            // console.log("Branch ID in Controller:", branchId);
             const data = await prisma.booking.findMany({
                 where: { branchId: branchId },
                 include: {
@@ -498,7 +497,6 @@ export default class BookingController {
     static async exportBooking(req, res) {
         try {
             const { startDate, endDate } = req.query
-            //  console.log(startDate, endDate);
             const data = await prisma.booking.findMany({
                 where: {
                     createdAt: {
@@ -518,7 +516,6 @@ export default class BookingController {
             if (!data.length) {
                 return SendError(res, 404, "No data found for this date range");
             }
-            // console.log("Booking data:", data);
             const exportData = data.map(item => ({
                 userName: item.user?.username,
                 phoneNumber: item.user?.phoneNumber,

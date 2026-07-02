@@ -21,7 +21,6 @@ export const auth = async (req, res, next) => {
 export const authAdmin = async (req, res, next) => {
     try {
         const admin = req.user;
-        // console.log("req user : ",admin);
         if (!admin) {
             return SendError(res, 401, EMessage.Uaunthorization)
         }

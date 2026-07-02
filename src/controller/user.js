@@ -355,7 +355,6 @@ export default class UserController {
     static async RegisterSuperAdmin(req, res) {
         try {
             const { username, phoneNumber, password, province, district, village, email } = req.body;
-            // console.log(req.body);
             const validate = await ValidateData({
                 username, phoneNumber,
                 password, province, district, village
@@ -562,7 +561,6 @@ export default class UserController {
         try {
             const user_id = req.params.customer_id;
             const { username, phoneNumber, province, district, village, email, role } = req.body;
-            // console.log(req.body);
             const validate = await ValidateData({ username, phoneNumber, province, district, village, });
             if (validate.length > 0) {
                 return SendError(res, 400, EMessage.BadRequest, validate.join(","))
