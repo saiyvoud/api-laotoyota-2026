@@ -5,7 +5,7 @@ import prisma from "../config/prima.js";
 import { UploadImageToCloud } from "../config/cloudinary.js";
 
 export default class StoreController {
-    static async getAllAdmin(req, res) {
+    static async getAllStore(req, res) {
         try {
             const { page = 1, limit = 10, search, startDate, endDate } = req.query;
             const query = {};
@@ -62,9 +62,6 @@ export default class StoreController {
 
     static async Insert(req, res) {
         try {
-            console.log('--- Insert Store Start ---')
-            console.log('body:', req.body)
-            console.log('files:', req.files ? Object.keys(req.files) : 'NO FILES')
             const { name, address, phone, discount = 0, status } = req.body;
             const validate = await ValidateData({ name, address, phone });
             if (validate.length > 0) {
@@ -73,13 +70,9 @@ export default class StoreController {
             if (!req.files || !req.files.image) {
                 return SendError(res, 400, EMessage.BadRequest, "Image is required");
             }
-            console.log('Uploading image...')
             const img_url = await UploadImageToCloud(req.files.image.data, req.files.image.mimetype);
-            console.log('img_url:', img_url)
             if (!img_url) return SendError(res, 404, EMessage.EUpload);
 
-            console.log('Creating store in DB...')
-            console.log('prisma.store:', prisma.store)
             // ສ້າງ store ກ່ອນ ເພື່ອໄດ້ store_id
             const store = await prisma.store.create({
                 data: {

@@ -6,7 +6,7 @@ import shortid from "shortid";
 
 export default class TransactionController {
 
-    static async getAllAdmin(req, res) {
+    static async getAllTransaction(req, res) {
         try {
             const { page = 1, limit = 10, search, startDate, endDate } = req.query;
             const query = {};
