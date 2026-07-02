@@ -2,7 +2,7 @@ module.exports = {
   apps: [
     {
       name: "api-laotoyota-2026",
-      script: "./dist/main.js", // Path to your build output
+      script: "./src/server.js", // Path to your build output
       instances: "max",
       exec_mode: "cluster",
       env: {
