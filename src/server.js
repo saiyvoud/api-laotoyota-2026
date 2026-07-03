@@ -1,5 +1,5 @@
 import express from "express";
-import './config/db_mysql.js';
+// import './config/db_mysql.js';
 import cors from "cors";
 import router from "./router/index.js";
 import fileUpload from "express-fileupload";

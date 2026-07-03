@@ -7,10 +7,11 @@ import mysql from "mysql";
 // });
 
 const connected = mysql.createConnection({
-  host: "54.255.223.5",
+  
+  host: "159.203.181.200",
   port: 3306,
-  user: "mysql",
-  password: "Laotoyota123454321",
+  //user: "root",
+  password: "btlToyoTa123456",
   database: "db_laotoyota"
 });
 
