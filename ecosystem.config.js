@@ -1,4 +1,4 @@
-module.exports = {
+export default {
   apps: [
     {
       name: "api-laotoyota-2026",
@@ -11,7 +11,6 @@ module.exports = {
       env_production: {
         NODE_ENV: "production",
         PORT: 8000,
-        // Add your DB_URL or other secrets here
       },
       // Production Best Practices
       max_memory_restart: "512M", // Restart if app leaks memory
