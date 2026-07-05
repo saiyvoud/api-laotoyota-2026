@@ -16,8 +16,8 @@ module.exports = {
       autorestart: true,
       watch: false,               
       log_date_format: "YYYY-MM-DD HH:mm Z",
-      error_file: "./logs/app-err.log", // Standardized path
-      out_file: "./logs/app-out.log",   // Standardized path
+      error_file: "./logs/app-err.log",
+      out_file: "./logs/app-out.log",
       merge_logs: true
     }
   ]
