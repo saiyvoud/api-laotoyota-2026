@@ -1,3 +1,5 @@
+const { PORT } = require("./src/config/globalKey");
+
 module.exports = {
   apps: [
     {

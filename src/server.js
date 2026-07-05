@@ -13,6 +13,9 @@ app.use(express.urlencoded({ extended: true, limit: "500mb", parameterLimit: 500
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true, limit: "500mb", parameterLimit: 5000 }));
 app.use("/api", router);
+app.get('/', (req, res) => {
+  res.send('API is running successfully!');
+});
 app.listen(8000, () => {
     console.log(`http://localhost:8000`);
 })
