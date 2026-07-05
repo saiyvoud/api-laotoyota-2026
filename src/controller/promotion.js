@@ -5,49 +5,100 @@ import prisma from "../config/prima.js";
 import { UploadImageToCloud } from "../config/cloudinary.js";
 import { ExcelBuilder, ReportColumns } from "../service/excelBuilder.js";
 export default class PromotionController {
-    static async getAllPromotion(req, res) {
+    // static async getAllPromotion(req, res) {
+    //     try {
+    //         const {
+    //             page = 1,
+    //             limit = 10,
+    //             startDate,
+    //             endDate,
+    //             search,
+    //         } = req.query;
+    //         const query = {};
+
+    //         if (search)
+    //             query['OR'] = [
+    //                 { title: { contains: search } },
+    //             ];
+
+    //         if (startDate || endDate) {
+    //             query.createdAt = {};
+
+    //             if (startDate) {
+    //                 query.createdAt.gte = new Date(startDate);
+    //             }
+
+    //             if (endDate) {
+    //                 const nextDay = new Date(endDate);
+    //                 nextDay.setDate(nextDay.getDate() + 1);
+
+    //                 query.createdAt.lt = nextDay;
+    //             }
+    //         }
+    //         const promotion = await prisma.promotion.findMany({
+    //             where: query,
+    //             orderBy: {
+    //                 createdAt: 'desc',
+    //             },
+    //             skip: (parseInt(page) - 1) * parseInt(limit),
+    //             take: parseInt(limit),
+    //         });
+    //         if (!promotion) return SendError(res, 404, EMessage.NotFound);
+    //         const count = await prisma.promotion.count({ where: query });
+    //         const totalPage = Math.ceil(count / parseInt(limit));
+    //         return SendSuccess(res, SMessage.SelectAll, { data: promotion, totalPage, count });
+    //     } catch (error) {
+    //         return SendError(res, 500, EMessage.ServerInternal, error);
+    //     }
+    // }
+    static async getAllStore(req, res) {
         try {
-            const {
-                page = 1,
-                limit = 10,
-                startDate,
-                endDate,
-                search,
-            } = req.query;
+            const { page = 1, limit = 10, search, startDate, endDate } = req.query;
+            const pageInt = parseInt(page);
+            const limitInt = parseInt(limit);
             const query = {};
-        
-            if (search)
+
+            // Search logic
+            if (search) {
                 query['OR'] = [
-                    { title: { contains: search } },
+                    { name: { contains: search, mode: 'insensitive' } }, // Optional: case-insensitive
+                    { address: { contains: search, mode: 'insensitive' } },
+                    { phone: { contains: search, mode: 'insensitive' } },
                 ];
+            }
 
-      if (startDate || endDate) {
-    query.createdAt = {};
+            // Date filter logic
+            if (startDate || endDate) {
+                query.createdAt = {};
+                if (startDate) query.createdAt.gte = new Date(startDate);
+                if (endDate) {
+                    const nextDay = new Date(endDate);
+                    nextDay.setDate(nextDay.getDate() + 1);
+                    query.createdAt.lt = nextDay;
+                }
+            }
 
-    if (startDate) {
-        query.createdAt.gte = new Date(startDate);
-    }
+            // Execute both queries in parallel
+            const [store, count] = await Promise.all([
+                prisma.store.findMany({
+                    where: query,
+                    orderBy: { createdAt: 'desc' },
+                    skip: (pageInt - 1) * limitInt,
+                    take: limitInt,
+                }),
+                prisma.store.count({ where: query }),
+            ]);
 
-    if (endDate) {
-        const nextDay = new Date(endDate);
-        nextDay.setDate(nextDay.getDate() + 1);
+            const totalPage = Math.ceil(count / limitInt);
 
-        query.createdAt.lt = nextDay;
-    }
-}
-            const promotion = await prisma.promotion.findMany({
-                where: query,
-                orderBy: {
-                    createdAt: 'desc',
-                },
-                skip: (parseInt(page) - 1) * parseInt(limit),
-                take: parseInt(limit),
+            return SendSuccess(res, SMessage.SelectAll, {
+                data: store,
+                totalPage,
+                count,
+                currentPage: pageInt
             });
-            if (!promotion) return SendError(res, 404, EMessage.NotFound);
-            const count = await prisma.promotion.count({ where: query });
-            const totalPage = Math.ceil(count / parseInt(limit));
-            return SendSuccess(res, SMessage.SelectAll, { data: promotion, totalPage, count });
         } catch (error) {
+            console.error("error getAllStore : ", error);
             return SendError(res, 500, EMessage.ServerInternal, error);
         }
     }
@@ -149,20 +200,20 @@ export default class PromotionController {
         try {
             const { startDate, endDate } = req.query;
             const query = {};
-      if (startDate || endDate) {
-    query.createdAt = {};
+            if (startDate || endDate) {
+                query.createdAt = {};
 
-    if (startDate) {
-        query.createdAt.gte = new Date(startDate);
-    }
+                if (startDate) {
+                    query.createdAt.gte = new Date(startDate);
+                }
 
-    if (endDate) {
-        const nextDay = new Date(endDate);
-        nextDay.setDate(nextDay.getDate() + 1);
+                if (endDate) {
+                    const nextDay = new Date(endDate);
+                    nextDay.setDate(nextDay.getDate() + 1);
 
-        query.createdAt.lt = nextDay;
-    }
-}
+                    query.createdAt.lt = nextDay;
+                }
+            }
             const data = await prisma.promotion.findMany({ where: query });
             if (!data) return SendError(res, 404, EMessage.NotFound);
             const exportData = data.map(item => ({
