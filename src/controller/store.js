@@ -5,16 +5,59 @@ import prisma from "../config/prima.js";
 import { UploadImageToCloud } from "../config/cloudinary.js";
 
 export default class StoreController {
+    // static async getAllStore(req, res) {
+    //     try {
+    //         const { page = 1, limit = 10, search, startDate, endDate } = req.query;
+    //         const query = {};
+    //         if (search)
+    //             query['OR'] = [
+    //                 { name: { contains: search } },
+    //                 { address: { contains: search } },
+    //                 { phone: { contains: search } },
+    //             ];
+    //         if (startDate || endDate) {
+    //             query.createdAt = {};
+    //             if (startDate) query.createdAt.gte = new Date(startDate);
+    //             if (endDate) {
+    //                 const nextDay = new Date(endDate);
+    //                 nextDay.setDate(nextDay.getDate() + 1);
+    //                 query.createdAt.lt = nextDay;
+    //             }
+    //         }
+    //         const store = await prisma.store.findMany({
+    //             where: query,
+    //             orderBy: { createdAt: 'desc' },
+    //             skip: (parseInt(page) - 1) * parseInt(limit),
+    //             take: parseInt(limit),
+    //         });
+    //         if (!store) return SendError(res, 404, EMessage.NotFound);
+    //         const count = await prisma.store.count({ where: query });
+    //         const totalPage = Math.ceil(count / parseInt(limit));
+    //         return SendSuccess(res, SMessage.SelectAll, { data: store, totalPage, count });
+    //     } catch (error) {
+    //         console.log("error getAllStore : ",error);
+    //         return SendError(res, 500, EMessage.ServerInternal, error);
+    //     }
+    // }
+
+
     static async getAllStore(req, res) {
         try {
             const { page = 1, limit = 10, search, startDate, endDate } = req.query;
+            const pageInt = parseInt(page);
+            const limitInt = parseInt(limit);
             const query = {};
-            if (search)
+
+            // Search logic
+            if (search) {
                 query['OR'] = [
-                    { name: { contains: search } },
-                    { address: { contains: search } },
-                    { phone: { contains: search } },
+                    { name: { contains: search, mode: 'insensitive' } }, // Optional: case-insensitive
+                    { address: { contains: search, mode: 'insensitive' } },
+                    { phone: { contains: search, mode: 'insensitive' } },
                 ];
+            }
+
+            // Date filter logic
             if (startDate || endDate) {
                 query.createdAt = {};
                 if (startDate) query.createdAt.gte = new Date(startDate);
@@ -24,18 +67,28 @@ export default class StoreController {
                     query.createdAt.lt = nextDay;
                 }
             }
-            const store = await prisma.store.findMany({
-                where: query,
-                orderBy: { createdAt: 'desc' },
-                skip: (parseInt(page) - 1) * parseInt(limit),
-                take: parseInt(limit),
+
+            // Execute both queries in parallel
+            const [store, count] = await Promise.all([
+                prisma.store.findMany({
+                    where: query,
+                    orderBy: { createdAt: 'desc' },
+                    skip: (pageInt - 1) * limitInt,
+                    take: limitInt,
+                }),
+                prisma.store.count({ where: query }),
+            ]);
+
+            const totalPage = Math.ceil(count / limitInt);
+
+            return SendSuccess(res, SMessage.SelectAll, {
+                data: store,
+                totalPage,
+                count,
+                currentPage: pageInt
             });
-            if (!store) return SendError(res, 404, EMessage.NotFound);
-            const count = await prisma.store.count({ where: query });
-            const totalPage = Math.ceil(count / parseInt(limit));
-            return SendSuccess(res, SMessage.SelectAll, { data: store, totalPage, count });
         } catch (error) {
-            console.log("error getAllStore : ",error);
+            console.error("error getAllStore : ", error);
             return SendError(res, 500, EMessage.ServerInternal, error);
         }
     }
@@ -63,7 +116,7 @@ export default class StoreController {
 
     static async Insert(req, res) {
         try {
-            const { name, address, phone, discount , status } = req.body;
+            const { name, address, phone, discount, status } = req.body;
             const validate = await ValidateData({ name, address, phone });
             if (validate.length > 0) {
                 return SendError(res, 400, EMessage.BadRequest, validate.join(','));
@@ -81,7 +134,7 @@ export default class StoreController {
                     address,
                     phone,
                     image: img_url,
-                    qrCode: '', 
+                    qrCode: '',
                     status: status === 'true' || status === true,
                 }
             });

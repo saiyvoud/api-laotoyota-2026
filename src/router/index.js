@@ -16,8 +16,8 @@ import EmployeeController from '../controller/employee.js';
 import BranchController from '../controller/branch.js';
 import NotificationController from '../controller/notification.js';
 import TimeFixController from '../controller/timefix.js';
-import StoreController from '../controller/store.js';
 import TransactionController from '../controller/transaction.js';
+import StoreController from '../controller/store.js';
 const router = express.Router();
 //----- User----
 router.post("/user/register", UserController.Register);
