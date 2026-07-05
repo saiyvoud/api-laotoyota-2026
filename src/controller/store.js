@@ -62,7 +62,7 @@ export default class StoreController {
 
     static async Insert(req, res) {
         try {
-            const { name, address, phone, discount = 0, status } = req.body;
+            const { name, address, phone, discount , status } = req.body;
             const validate = await ValidateData({ name, address, phone });
             if (validate.length > 0) {
                 return SendError(res, 400, EMessage.BadRequest, validate.join(','));
@@ -88,7 +88,7 @@ export default class StoreController {
             // auto generate qrCode ຈາກ store_id ທີ່ໄດ້
             const qrCode = JSON.stringify({
                 storeId: store.store_id,
-                discount: parseInt(discount),
+                discount: parseInt(discount ?? 0),
             });
 
             // update qrCode ກັບຄືນ

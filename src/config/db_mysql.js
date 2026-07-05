@@ -1,4 +1,4 @@
-import mysql from "mysql";
+import mysql from "mysql2";
 // const connected = mysql.createConnection({
 //     host: "localhost",
 //     user: "root",
