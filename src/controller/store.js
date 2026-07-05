@@ -35,6 +35,7 @@ export default class StoreController {
             const totalPage = Math.ceil(count / parseInt(limit));
             return SendSuccess(res, SMessage.SelectAll, { data: store, totalPage, count });
         } catch (error) {
+            console.log("error getAllStore : ",error);
             return SendError(res, 500, EMessage.ServerInternal, error);
         }
     }
