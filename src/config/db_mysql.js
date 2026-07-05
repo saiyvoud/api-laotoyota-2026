@@ -8,10 +8,10 @@ import mysql from "mysql2";
 
 const connected = mysql.createConnection({
   
-  host: "159.203.181.200",
+  host: "178.128.61.88",
   port: 3306,
   user: "root",
-  password: "btlToyoTa123456",
+  password: "Laotoyota@2o26_",
   database: "db_laotoyota"
 });
 
