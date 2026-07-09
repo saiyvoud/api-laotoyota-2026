@@ -417,12 +417,13 @@ export default class BookingController {
             const booking_id = req.params.booking_id;
             const employee = req.employee;
             const { bookingStatus } = req.body;
+
             const result = await FindOneBooking(booking_id);
             const checkBookingStatus = Object.values(BookingStatus);
             if (!checkBookingStatus.includes(bookingStatus)) {
                 return SendError(res, 400, EMessage.BadRequest)
             }
-            if (bookingStatus === BookingStatus.success) {
+            if (bookingStatus === BookingStatus.fix) {
                 const insert = await prisma.timeFix.create({
                     data: {
                         timeId: result.timeId,
