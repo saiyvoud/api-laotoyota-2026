@@ -18,6 +18,7 @@ import NotificationController from '../controller/notification.js';
 import TimeFixController from '../controller/timefix.js';
 import TransactionController from '../controller/transaction.js';
 import StoreController from '../controller/store.js';
+import ColorController from '../controller/color.js';
 const router = express.Router();
 //----- User----
 router.post("/user/register", UserController.Register);
@@ -201,6 +202,13 @@ router.post("/store/insert", auth, StoreController.Insert);
 router.put("/store/update/:store_id", auth, StoreController.UpdateStore);
 router.put("/store/updateStatus/:store_id", auth, StoreController.UpdateStatus);
 router.delete("/store/delete/:store_id", auth, StoreController.DeleteStore);
+//---- color ----
+router.get("/color/selAll", auth, ColorController.SelectAll);
+router.get("/color/selOne/:color_id", auth, ColorController.SelectOne);
+router.get("/color/getAll", auth, ColorController.getAllColor);
+router.post("/color/insert", auth, ColorController.Insert);
+router.put("/color/update/:color_id", auth, ColorController.UpdateColor);
+router.delete("/color/delete/:color_id", auth, ColorController.DeleteColor);
 //---- transaction ----
 router.get("/transaction/selAll", auth, TransactionController.SelectAll);
 router.get("/transaction/getAll", auth, TransactionController.getAllTransaction);
