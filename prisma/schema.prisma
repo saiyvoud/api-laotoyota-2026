@@ -176,7 +176,7 @@ model Car {
 
 model Color {
   color_id  String   @id @default(uuid()) @db.VarChar(36)
-  colorName String   @unique
+  colorName String   
   createBy  String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
