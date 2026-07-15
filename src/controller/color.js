@@ -66,7 +66,7 @@ export default class ColorController {
            
             const data = await prisma.color.create({
                 data: {
-                    colorName, createBy: req.user
+                    colorName, 
                 }
             })
             return SendCreate(res, SMessage.Insert, data);
