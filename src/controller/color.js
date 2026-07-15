@@ -63,7 +63,7 @@ export default class ColorController {
             if (validate.length > 0) {
                 return SendError(res, 400, EMessage.BadRequest, validate.join(','));
             }
-
+           
             const data = await prisma.color.create({
                 data: {
                     colorName, createBy: req.user
