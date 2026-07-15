@@ -260,12 +260,12 @@ export default class UserController {
     static async Register(req, res) {
         try {
             const { username, phoneNumber, password, province, district, village, email } = req.body;
-            const finalPassword = password || Math.random().toString(36).slice(-8);
-            const validate = await ValidateData({ username, phoneNumber, password: finalPassword, province, district, village });
+            
+            const validate = await ValidateData({ username, phoneNumber, password: password, province, district, village });
             if (validate.length > 0) {
                 return SendError(res, 400, EMessage.BadRequest, validate.join(','))
             }
-            // const checkPhoneNumber = await CheckPhoneNumber(phoneNumber); // ສ້າງຢູ່ service
+           
 
             // ✅ ถ้า phoneNumber ซ้ำ → skip
             const existingPhoneNumber = await prisma.user.findFirst({
@@ -275,7 +275,7 @@ export default class UserController {
                 return SendCreate(res, "Phone number already exists", existingPhoneNumber);
             }
 
-            const generatePassword = await EncryptData(finalPassword)
+            const generatePassword = await EncryptData(password)
             const randow = "LTS" + `${Math.floor(Math.random() * (1000000 - 1 + 1)) + 1}`;
 
             const data = await prisma.user.create({
