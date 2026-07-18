@@ -7,6 +7,7 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+
 model User {
   user_id         String        @id @default(uuid()) @db.VarChar(36)
   customer_number String        @unique @db.VarChar(10)
