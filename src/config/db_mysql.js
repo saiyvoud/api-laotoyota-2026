@@ -16,11 +16,13 @@ const connected = mysql.createPool({
   database: "db_laotoyota"
 });
 
-connected.connect((err) => {
+// connected.connect((err) => {
+connected.getConnection((err) => {
   if (err) {
     console.error('❌ Failed Connect Database:', err.message);
   } else {
     console.log('✅ Connected Database!');
+    connection.release();
   }
 });
 export default connected;
