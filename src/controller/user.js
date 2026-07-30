@@ -775,17 +775,25 @@ export default class UserController {
             if (status === undefined || status === null) {
                 return SendError(res, 400, EMessage.BadRequest, "status is required");
             }
+
+            // ຮອງຮັບທັງ boolean ແທ້ ແລະ string "true"/"false" (case-insensitive)
+            let userStatusBoolean;
+            if (typeof status === "boolean") {
+                userStatusBoolean = status;
+            } else if (typeof status === "string" && ["true", "false"].includes(status.toLowerCase())) {
+                userStatusBoolean = status.toLowerCase() === "true";
+            } else {
+                return SendError(res, 400, EMessage.BadRequest, "status must be boolean or 'true'/'false' string");
+            }
+
             const user = await FindOneUser(user_id);
             if (!user) {
                 return SendError(res, 404, EMessage.NotFound);
             }
+
             const data = await prisma.user.update({
-                where: {
-                    user_id,
-                },
-                data: {
-                    active: Boolean(status),
-                },
+                where: { user_id },
+                data: { active: userStatusBoolean },
             });
 
             if (!data) {
