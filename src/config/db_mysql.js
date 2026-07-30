@@ -6,7 +6,8 @@ import mysql from "mysql2";
 //     database: "db_laotoyota"
 // });
 
-const connected = mysql.createConnection({
+// const connected = mysql.createConnection({
+const connected = mysql.createPool({
   
   host: "178.128.61.88",
   port: 3306,
