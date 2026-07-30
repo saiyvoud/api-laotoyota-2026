@@ -80,7 +80,8 @@ export default class UserController {
             const user = await prisma.user.findMany({
                 where: query,
                 orderBy: {
-                    createdAt: 'desc',                },
+                    createdAt: 'desc',
+                },
                 skip: (parseInt(page) - 1) * parseInt(limit),
                 take: parseInt(limit),
             });
@@ -200,6 +201,9 @@ export default class UserController {
             if (user.role !== Role.general) {
                 return SendError(res, 400, EMessage.BadRequest);
             }
+            if (!user.active) {
+                return SendError(res, 400, EMessage.BadRequest);
+            }
             const decryptPassword = await DecryptData(user.password);
             if (decryptPassword !== password) {
                 return SendError(res, 404, EMessage.NotMatch);
@@ -241,6 +245,9 @@ export default class UserController {
             if (user.role === Role.general) {
                 return SendError(res, 400, EMessage.BadRequest);
             }
+            if (!user.active) {
+                return SendError(res, 400, EMessage.BadRequest);
+            }
             const decryptPassword = await DecryptData(user.password);
             if (decryptPassword !== password) {
                 return SendError(res, 404, EMessage.NotMatch);
@@ -260,12 +267,12 @@ export default class UserController {
     static async Register(req, res) {
         try {
             const { username, phoneNumber, password, province, district, village, email } = req.body;
-            
+
             const validate = await ValidateData({ username, phoneNumber, password: password, province, district, village });
             if (validate.length > 0) {
                 return SendError(res, 400, EMessage.BadRequest, validate.join(','))
             }
-           
+
 
             // ✅ ถ้า phoneNumber ซ้ำ → skip
             const existingPhoneNumber = await prisma.user.findFirst({
@@ -761,6 +768,37 @@ export default class UserController {
         }
     }
 
+    static async ChangeStatusUser(req, res) {
+        try {
+            const user_id = req.params.user_id;
+            const { status } = req.body;
+            if (status === undefined || status === null) {
+                return SendError(res, 400, EMessage.BadRequest, "status is required");
+            }
+            const user = await FindOneUser(user_id);
+            if (!user) {
+                return SendError(res, 404, EMessage.NotFound);
+            }
+            const data = await prisma.user.update({
+                where: {
+                    user_id,
+                },
+                data: {
+                    active: Boolean(status),
+                },
+            });
+
+            if (!data) {
+                return SendError(res, 404, EMessage.EUpdate);
+            }
+
+            return SendSuccess(res, SMessage.Update);
+
+        } catch (error) {
+            console.log(error);
+            return SendError(res, 500, EMessage.ServerInternal, error);
+        }
+    }
 
 
 }

@@ -44,6 +44,7 @@ router.put("/user/update/:customer_id", auth, UserController.UpdateCustomer);
 // router.put("/user/updatePoint", auth, UserController.UpdatePoint);
 router.put("/user/changeCustomerPassword/:customer_id", auth, UserController.ChangeCustomerPassword);
 router.put("/user/resetCutomerPassword/:customer_id", auth, UserController.ResetCutomerPassword);
+router.put("/user/changeStatusUser/:user_id", auth, UserController.ChangeStatusUser);
 router.delete("/user/delete/:customer_id", auth, UserController.DeleteCustomer);
 router.delete("/user/delete", auth, UserController.DeleteUser);
 //---- Service ----     

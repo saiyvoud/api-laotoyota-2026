@@ -37,6 +37,7 @@ model User {
   pobox           String?
   street          String?
   unit            String?
+  active          Boolean       @default(true)
   booking         Booking[]
   Car             Car[]
   Card            Card[]
