@@ -267,7 +267,7 @@ export default class UserController {
     static async Register(req, res) {
         try {
             const { username, phoneNumber, password, province, district, village, email } = req.body;
-           
+
 
             const validate = await ValidateData({ username, phoneNumber, password, province, district, village });
             if (validate.length > 0) {
@@ -282,7 +282,7 @@ export default class UserController {
                 return SendCreate(res, "Phone number already exists", existingPhoneNumber);
             }
 
-            const generatePassword = await EncryptData(finalPassword) 
+            const generatePassword = await EncryptData(finalPassword)
             const randow = "LTS" + `${Math.floor(Math.random() * (1000000 - 1 + 1)) + 1}`;
 
             const data = await prisma.user.create({
@@ -514,6 +514,21 @@ export default class UserController {
             return SendSuccess(res, SMessage.Update)
         } catch (error) {
             console.log(error);
+            return SendError(res, 500, EMessage.ServerInternal, error)
+        }
+    }
+    static async Delete(req, res) {
+        try {
+            const user_id = req.user; // ມາຈາກ token 
+            await FindOneUser(user_id); // ສ້າງຢູ່ Serivce
+            const data = await prisma.user.update({
+                where: { user_id: user_id }, data: {
+                    active: false
+                }
+            })
+            if (!data) return SendError(res, 404, EMessage.EDelete);
+            return SendSuccess(res, SMessage.Delete)
+        } catch (error) {
             return SendError(res, 500, EMessage.ServerInternal, error)
         }
     }
