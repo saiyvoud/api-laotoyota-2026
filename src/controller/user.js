@@ -267,12 +267,9 @@ export default class UserController {
     static async Register(req, res) {
         try {
             const { username, phoneNumber, password, province, district, village, email } = req.body;
-            let finalPassword = password;
-            if (!finalPassword) {
-                finalPassword = Math.random().toString(36).slice(-8);
-            }
+           
 
-            const validate = await ValidateData({ username, phoneNumber, password: finalPassword, province, district, village });
+            const validate = await ValidateData({ username, phoneNumber, password, province, district, village });
             if (validate.length > 0) {
                 return SendError(res, 400, EMessage.BadRequest, validate.join(','))
             }
