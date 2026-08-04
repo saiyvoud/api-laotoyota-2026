@@ -269,8 +269,8 @@ model Booking {
   code           String?
   bookingStatus  String          @default("await")
   branchId       String          @db.VarChar(36)
-  createdAt      DateTime        @default(now())
-  updatedAt      DateTime        @updatedAt
+  createdAt DateTime @default(dbgenerated("(now() AT TIME ZONE 'Asia/Vientiane')")) @db.Timestamp()
+  updatedAt DateTime @default(dbgenerated("(now() AT TIME ZONE 'Asia/Vientiane')")) @db.Timestamp()
   zoneId         String?         @db.VarChar(36)
   branch         Branch          @relation(fields: [branchId], references: [branch_id])
   car            Car             @relation(fields: [carId], references: [car_id])
