@@ -48,6 +48,7 @@ router.put("/user/resetCutomerPassword/:customer_id", auth, UserController.Reset
 router.put("/user/changeStatusUser/:user_id", auth, UserController.ChangeStatusUser);
 router.delete("/user/delete/:customer_id", auth, UserController.DeleteCustomer);
 router.delete("/user/delete", auth, UserController.DeleteUser);
+router.put("/user/active", auth, UserController.Delete);
 //---- Service ----     
 router.get("/service/selAll", auth, ServiceController.SelectAll);
 router.get("/service/selOne/:service_id", auth, ServiceController.SelectOne);

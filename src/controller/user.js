@@ -565,6 +565,21 @@ export default class UserController {
             return SendError(res, 500, EMessage.ServerInternal, error)
         }
     }
+    static async Delete(req, res) {
+        try {
+            const user_id = req.user; // ມາຈາກ token 
+            await FindOneUser(user_id); // ສ້າງຢູ່ Serivce
+            const data = await prisma.user.update({
+                where: { user_id: user_id }, data: {
+                    active: false
+                }
+            })
+            if (!data) return SendError(res, 404, EMessage.EDelete);
+            return SendSuccess(res, SMessage.Delete)
+        } catch (error) {
+            return SendError(res, 500, EMessage.ServerInternal, error)
+        }
+    }
     static async DeleteUser(req, res) {
         try {
             const user_id = req.user; // ມາຈາກ token 
