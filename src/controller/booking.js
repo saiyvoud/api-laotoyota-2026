@@ -6,6 +6,7 @@ import { FindOneTime, FindOneUser, FindOneService, FindOneCar, FindOneBooking, F
 import NotificationController from "./notification.js";
 import { ExcelBuilder, ReportColumns } from "../service/excelBuilder.js";
 import firebaseAdmin from "../config/firebaseAdmin.js";
+import { formatLaosTime } from "../utils/formatDate.js";
 export default class BookingController {
     static async SearchBooking(req, res) {
         try {
@@ -166,7 +167,7 @@ export default class BookingController {
             if (!data) return SendError(res, 404, EMessage.NotFound);
             const count = await prisma.booking.count({ where: query });
             const totalPage = Math.ceil(count / parseInt(limit));
-            return SendSuccess(res, SMessage.SelectAll, { data, totalPage , count});
+            return SendSuccess(res, SMessage.SelectAll, { data, totalPage, count });
         } catch (error) {
             return SendError(res, 500, EMessage.ServerInternal, error)
         }
@@ -371,7 +372,7 @@ export default class BookingController {
                     }
                 })
             }
-            return SendCreate(res, SMessage.Insert, data);
+            return SendCreate(res, SMessage.Insert, formatLaosTime(data));
         } catch (error) {
             console.log(error);
             return SendError(res, 500, EMessage.ServerInternal, error);
@@ -406,7 +407,7 @@ export default class BookingController {
                 }
             });
             if (!data) return SendError(res, 404, EMessage.EUpdate);
-            return SendSuccess(res, SMessage.Update, data)
+            return SendSuccess(res, SMessage.Update, formatLaosTime(data))
         } catch (error) {
             return SendError(res, 500, EMessage.ServerInternal, error)
         }
@@ -445,7 +446,7 @@ export default class BookingController {
             });
 
             if (!data) return SendError(res, 400, EMessage.EUpdate);
-            return SendSuccess(res, SMessage.Update, data)
+            return SendSuccess(res, SMessage.Update, formatLaosTime(data))
         } catch (error) {
             return SendError(res, 500, EMessage.ServerInternal, error)
         }
