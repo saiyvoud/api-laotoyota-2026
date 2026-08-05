@@ -280,7 +280,7 @@ export default class UserController {
                 return SendCreate(res, "Phone number already exists", existingPhoneNumber);
             }
 
-            const generatePassword = await EncryptData(finalPassword)
+            const generatePassword = await EncryptData(password)
             const randow = "LTS" + `${Math.floor(Math.random() * (1000000 - 1 + 1)) + 1}`;
 
             const data = await prisma.user.create({
