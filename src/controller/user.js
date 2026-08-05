@@ -267,8 +267,6 @@ export default class UserController {
     static async Register(req, res) {
         try {
             const { username, phoneNumber, password, province, district, village, email } = req.body;
-           
-
             const validate = await ValidateData({ username, phoneNumber, password, province, district, village });
             if (validate.length > 0) {
                 return SendError(res, 400, EMessage.BadRequest, validate.join(','))
@@ -282,7 +280,7 @@ export default class UserController {
                 return SendCreate(res, "Phone number already exists", existingPhoneNumber);
             }
 
-            const generatePassword = await EncryptData(finalPassword) 
+            const generatePassword = await EncryptData(finalPassword)
             const randow = "LTS" + `${Math.floor(Math.random() * (1000000 - 1 + 1)) + 1}`;
 
             const data = await prisma.user.create({
@@ -301,6 +299,56 @@ export default class UserController {
             })
             data.password = undefined;
             data.role = undefined;
+            return SendCreate(res, SMessage.Register, data)
+        } catch (error) {
+            console.log(error);
+            return SendError(res, 500, EMessage.ServerInternal, error)
+        }
+    }
+    static async InsertCustomer(req, res) {
+        try {
+            const { username, phoneNumber, password, province, district, village, email } = req.body;
+
+            // ✅ ໃຊ້ຕົວແປໃໝ່ ບໍ່ແກ້ password ໂດຍກົງ
+            let finalPassword = password;
+            if (!finalPassword) {
+                finalPassword = Math.random().toString(36).slice(-8);
+            }
+
+            const validate = await ValidateData({ username, phoneNumber, password: finalPassword, province, district, village });
+            if (validate.length > 0) {
+                return SendError(res, 400, EMessage.BadRequest, validate.join(','))
+            }
+
+            // ✅ ถ้า phoneNumber ซ้ำ → skip
+            const existingPhoneNumber = await prisma.user.findFirst({
+                where: { phoneNumber: String(phoneNumber) },
+            });
+            if (existingPhoneNumber) {
+                return SendCreate(res, "Phone number already exists", existingPhoneNumber);
+            }
+
+            const generatePassword = await EncryptData(finalPassword)
+            const randow = "LTS" + `${Math.floor(Math.random() * (1000000 - 1 + 1)) + 1}`;
+
+            const data = await prisma.user.create({
+                data: {
+                    username,
+                    phoneNumber: String(phoneNumber),
+                    password: generatePassword,
+                    province,
+                    district,
+                    village,
+                    customer_number: randow.toString(),
+                    role: Role.general,
+                    point: 0,
+                    email: email ?? null
+                }
+            })
+
+            data.password = undefined;
+            data.role = undefined;
+
             return SendCreate(res, SMessage.Register, data)
         } catch (error) {
             console.log(error);

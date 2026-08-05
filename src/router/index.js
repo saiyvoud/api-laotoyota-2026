@@ -24,6 +24,7 @@ const router = express.Router();
 router.post("/user/register", UserController.Register);
 router.post("/user/registerAdmin", auth, UserController.RegisterAdmin);
 router.post("/user/registerSuperAdmin", auth, UserController.RegisterSuperAdmin);
+router.post("/user/insertCustomer", auth, UserController.InsertCustomer);
 router.post("/user/login", UserController.Login);
 router.post("/user/loginAdmin", UserController.LoginAdmin);
 router.get("/user/selAll", auth, UserController.SelectAll);
