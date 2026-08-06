@@ -237,16 +237,37 @@ export default class CardController {
         }
     }
 
+    // static async DeleteCard(req, res) {
+    //     try {
+    //         const card_id = req.params.card_id;
+    //         const data = await prisma.card.delete({ where: { card_id: card_id } })
+    //         await prisma.giftHistory.deleteMany({ where: { card_id: id, } });
+    //         await prisma.card.delete({ where: { card_id: id, } });
+    //         if (!data) return SendError(res, 404, EMessage.EDelete);
+    //         return SendSuccess(res, SMessage.Delete, data)
+    //     } catch (error) {
+    //         return SendError(res, 500, EMessage.ServerInternal, error)
+    //     }
+    // }
+
     static async DeleteCard(req, res) {
         try {
-            const card_id = req.params.card_id;
-            const data = await prisma.card.delete({ where: { card_id: card_id } })
-            await prisma.giftHistory.deleteMany({ where: { card_id: id, } });
-            await prisma.card.delete({ where: { card_id: id, } });
-            if (!data) return SendError(res, 404, EMessage.EDelete);
-            return SendSuccess(res, SMessage.Delete, data)
+            const card_id  = req.params.card_id;
+            await prisma.giftHistory.deleteMany({
+                where: {
+                    cardId: card_id,
+                },
+            });
+
+            const data = await prisma.card.delete({
+                where: {
+                    card_id: card_id,
+                },
+            });
+
+            return SendSuccess(res, SMessage.Delete, data);
         } catch (error) {
-            return SendError(res, 500, EMessage.ServerInternal, error)
+            return SendError(res, 500, EMessage.ServerInternal, error);
         }
     }
 
