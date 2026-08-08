@@ -178,9 +178,16 @@ export default class UserController {
                 include: {
                     Card: {
                         include: {
-                            car: true
+                            car: true,
+                            Fix: true,
                         }
-                    }
+                    },
+                    booking: {
+                        include: {
+                            car: true,
+                            Fix: true,
+                        }
+                    },
                 }
             });
             if (!data) return SendError(res, 404, EMessage.NotFound);
